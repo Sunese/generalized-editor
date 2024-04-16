@@ -1,4 +1,6 @@
-# Type-safe generalized syntax-directed editor
+# 👷⚒️ ... Under construction ... 👷⚒️
+
+## Type-safe generalized syntax-directed editor
 
 This project is part of my master's thesis, where one of my main goals is to
 implement a type-safe generalized syntax-directed editor.
