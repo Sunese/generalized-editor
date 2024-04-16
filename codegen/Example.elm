@@ -6,6 +6,51 @@ import Parser exposing (..)
 import Syntax exposing (..)
 
 
+
+-- We want something like this:
+
+
+type S
+    = Let E ( List E, S )
+    | Hole_s
+
+
+type E
+    = Plus E E
+    | Num
+    | Var String
+    | Hole_e
+
+
+type alias Substitutable a =
+    { substitute : a -> a -> a }
+
+
+substituteS : Substitutable S
+substituteS =
+    { substitute = \_ replacement -> replacement }
+
+
+substituteE : Substitutable E
+substituteE =
+    { substitute = \_ replacement -> replacement }
+
+
+substitute : Substitutable a -> a -> a -> a
+substitute substitutable expression replacement =
+    substitutable.substitute expression replacement
+
+
+example : S
+example =
+    Let (Plus Num Num) ( [ Num ], Hole_s )
+
+
+example_sub_ : S -> S -> S
+example_sub_ =
+    substitute substituteS
+
+
 exampleFiles : List Elm.File
 exampleFiles =
     [ Elm.file [ "Ops" ] <| getTypeDecls exampleAddOperators
