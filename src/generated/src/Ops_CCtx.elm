@@ -25,3 +25,31 @@ type Cctx
 
 type alias Bind a b =
     ( List a, b )
+
+
+example : Cctx
+example =
+    Let_cctx0 CctxHole ( [ Var ], Let (Plus Num Num) ( [ Var ], Hole_s ) )
+
+
+type Pth t
+    = Child (Pth t) t
+    | Epsilon
+
+
+type alias MyPath =
+    Pth Int
+
+
+{-| An empty path.
+-}
+empty : Pth t
+empty =
+    Epsilon
+
+
+{-| Extends a path with a child.
+-}
+extend : Pth t -> t -> Pth t
+extend =
+    Child

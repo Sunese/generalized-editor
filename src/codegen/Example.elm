@@ -5,6 +5,8 @@ import Elm.Annotation exposing (..)
 import Parser exposing (..)
 import Syntax exposing (..)
 
+type alias C =
+  WellFormedSyntax
 
 exampleFiles : List Elm.File
 exampleFiles =
