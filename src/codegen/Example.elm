@@ -23,7 +23,8 @@ import Syntax exposing (..)
 exampleFiles : List Elm.File
 exampleFiles =
     [ Elm.file [ "Main" ] <|
-        createBaseSyntaxSorts exampleSyntax
+        createBaseSyntaxSorts
+            (addCursorHoleOps <| exampleSyntax)
             ++ createCursorlessSyntaxSorts exampleSyntax
             ++ (fromCLessToCCtxSyntaxSorts <| createCursorlessSyntax exampleSyntax)
             ++ (fromCLessToWellFormed <| createCursorlessSyntax exampleSyntax)
@@ -94,87 +95,57 @@ exampleAddOperators =
 
 {-| Well-formed sorts and operators
 -}
-type S_WellFormed
-    = Let_WellFormed E_WellFormed (Bind E_WellFormed S_WellFormed)
-    | Exp_WellFormed E_WellFormed
-    | Hole_s_WellFormed
+type Wellformed
+    = Root_s_CLess S_CLess
+    | Root_e_CLess E_CLess
+    | Let_CLess_cursor1 E_CLess (Bind E_CLess S_CLess)
+    | Let_CLess_cursor2 E_CLess (Bind E_CLess S_CLess)
+    | Exp_CLess_cursor1 E_CLess
+    | Plus_CLess_cursor1 E_CLess E_CLess
+    | Plus_CLess_cursor2 E_CLess E_CLess
 
 
-type E_WellFormed
-    = Plus_WellFormed E_WellFormed E_WellFormed
-    | Num_WellFormed
-    | Var_WellFormed
-    | Hole_e_WellFormed
-
-
-type WellF
-    = RootCursor_s_WellFormed S_WellFormed
-    | RootCursor_e_WellFormed E_WellFormed
-    | Let_cursor_arg_1_WellFormed E_WellFormed (Bind E_WellFormed S_WellFormed)
-    | Let_cursor_arg_2_WellFormed E_WellFormed (Bind E_WellFormed S_WellFormed)
-    | Exp_cursor_arg_1_WellFormed E_WellFormed
-    | Plus_cursor_arg_1_WellFormed E_WellFormed E_WellFormed
-    | Plus_cursor_arg_2_WellFormed E_WellFormed E_WellFormed
-
-
-type alias WellFormed a =
-    { getPathToCursor : a -> List Int
-    }
+type WellFormedSyntax
+    = S_CLess_WellFormed S_CLess
+    | E_CLess_WellFormed E_CLess
+    | Wellformed_WellFormed Wellformed
 
 
 {-| Cursor context / CCtx / C sorts and operators
 -}
-type S_CCtx
-    = Let_CCtx E_CCtx (Bind E_CCtx S_CCtx)
-    | Exp_CCtx E_CCtx
-    | Hole_s_CCtx
-
-
-type E_CCtx
-    = Plus_CCtx E_CCtx E_CCtx
-    | Num_CCtx
-    | Var_CCtx
-    | Hole_e_CCtx
-
-
 type Cctx
-    = Let_cctx1 Cctx (Bind E S)
-    | Let_cctx2 E (Bind E Cctx)
-    | Exp_cctx1 Cctx
-    | Plus_cctx1 Cctx E
-    | Plus_cctx2 E Cctx
-    | CctxHole
+    = Hole
+    | Let_CLess_cctx1 Cctx (Bind E_CLess S_CLess)
+    | Let_CLess_cctx2 E_CLess (Bind E_CLess Cctx)
+    | Exp_CLess_cctx1 Cctx
+    | Plus_CLess_cctx1 Cctx E_CLess
+    | Plus_CLess_cctx2 E_CLess Cctx
 
 
-type alias CursorContext a =
-    { toWellFormed : a -> WellF
-    }
+type CctxSyntax
+    = S_CLess_CCtx S_CLess
+    | E_CLess_CCtx E_CLess
+    | Cctx_CCtx Cctx
 
 
 {-| Cursorless sorts and operators
 -}
-type S_Cless
-    = Let_Cless E_Cless (Bind E_Cless S_Cless)
-    | Exp_Cless E_Cless
-    | Hole_s_Cless
+type S_CLess
+    = Let_CLess E_CLess (Bind E_CLess S_CLess)
+    | Exp_CLess E_CLess
+    | Hole_s_CLess
 
 
-type E_Cless
-    = Plus_Cless E_Cless E_Cless
-    | Num_Cless
-    | Var_Cless
-    | Hole_e_Clessi
+type E_CLess
+    = Plus_CLess E_CLess E_CLess
+    | Num_CLess
+    | Var_CLess
+    | Hole_e_CLess
 
 
-type alias CursorLess a =
-    { toWellFormed : a -> List Int -> Maybe ( CursorContext a, WellFormed a )
-    }
-
-
-
--- cursorless_S : CursorLess S
--- cursorless_S =
---     { toWellFormed = \_ -> RootCursor_s_WellFormed Hole_s_WellFormed }
+type CursorlessSyntax
+    = S_CLess S_CLess
+    | E_CLess E_CLess
 
 
 {-| "Normal"/initial/clean sorts and operators
@@ -194,68 +165,56 @@ type E
     | Cursor_e E
 
 
-type alias BaseSyntax a =
-    { toCursorLess : a -> CursorLess a
-    }
-
-
-
--- toCursorLess_S : S -> CursorLess S
--- toCursorLess_S s =
---     case s of
---         Let e1_ ( _, s_ ) ->
---             { toWellFormed = \_ -> Let_cursor_arg_1_WellFormed e1_ ( e1_, s_ ) }
---         Exp e_ ->
---             { toWellFormed = \_ -> Exp_cursor_arg_1_WellFormed e_ }
---         Hole_s ->
---             { toWellFormed = \_ -> RootCursor_s_WellFormed Hole_s_WellFormed }
---         Cursor_s s_ ->
---             { toWellFormed = \_ -> RootCursor_s_WellFormed Hole_s_WellFormed }
--- baseSyntax_E : BaseSyntax E
--- baseSyntax_E =
---     { toCursorLess = cursorless_E }
+type BaseSyntax
+    = S S
+    | E E
 
 
 type alias Bind a b =
     ( List a, b )
 
 
+getCursorPath : List Int -> BaseSyntax -> List Int
+getCursorPath path ast =
+    case ast of
+        S s ->
+            case s of
+                Let e1_ ( _, s_ ) ->
+                    getCursorPath (path ++ [ 1 ]) (E e1_)
+                        ++ getCursorPath (path ++ [ 2 ]) (S s_)
 
--- getCursorPath : List Int -> Ast -> List Int
--- getCursorPath path ast =
---     case ast of
---         S s ->
---             case s of
---                 Let e1_ ( _, s_ ) ->
---                     getCursorPath (path ++ [ 1 ]) (E e1_)
---                         ++ getCursorPath (path ++ [ 2 ]) (S s_)
---                 Exp e_ ->
---                     getCursorPath (path ++ [ 1 ]) (E e_)
---                 Hole_s ->
---                     []
---                 Cursor_s _ ->
---                     path
---         E e ->
---             case e of
---                 Plus e1 e2 ->
---                     getCursorPath (path ++ [ 1 ]) (E e1)
---                         ++ getCursorPath (path ++ [ 2 ]) (E e2)
---                 Num ->
---                     []
---                 Var ->
---                     []
---                 Hole_e ->
---                     []
---                 Cursor_e e_ ->
---                     path
+                Exp e_ ->
+                    getCursorPath (path ++ [ 1 ]) (E e_)
 
+                Hole_s ->
+                    []
 
-emptyWellFormed : ( Cctx, WellF )
-emptyWellFormed =
-    ( CctxHole, RootCursor_s_WellFormed Hole_s_WellFormed )
+                Cursor_s _ ->
+                    path
+
+        E e ->
+            case e of
+                Plus e1 e2 ->
+                    getCursorPath (path ++ [ 1 ]) (E e1)
+                        ++ getCursorPath (path ++ [ 2 ]) (E e2)
+
+                Num ->
+                    []
+
+                Var ->
+                    []
+
+                Hole_e ->
+                    []
+
+                Cursor_e e_ ->
+                    path
 
 
 
+-- emptyWellFormed : ( Cctx, WellF )
+-- emptyWellFormed =
+--     ( CctxHole, RootCursor_s_WellFormed Hole_s_WellFormed )
 -- toWellFormed : List Int -> S_Cless -> ( Cctx, Maybe WellF )
 -- toWellFormed path stmt =
 --     case ( path, stmt ) of
