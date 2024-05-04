@@ -37,17 +37,33 @@ type CursorlessSyntax
 
 type Cctx
     = Hole
-    | Let_CLess1 Cctx (Bind E_CLess S_CLess)
-    | Let_CLess2 E_CLess (Bind E_CLess Cctx)
-    | Exp_CLess1 Cctx
-    | Plus_CLess1 Cctx E_CLess
-    | Plus_CLess2 E_CLess Cctx
+    | Let_CLess_cctx1 Cctx (Bind E_CLess S_CLess)
+    | Let_CLess_cctx2 E_CLess (Bind E_CLess Cctx)
+    | Exp_CLess_cctx1 Cctx
+    | Plus_CLess_cctx1 Cctx E_CLess
+    | Plus_CLess_cctx2 E_CLess Cctx
 
 
 type CctxSyntax
     = S_CLess_CCtx S_CLess
     | E_CLess_CCtx E_CLess
     | Cctx_CCtx Cctx
+
+
+type Wellformed
+    = Root_s_CLess S_CLess
+    | Root_e_CLess E_CLess
+    | Let_CLess_cursor1 E_CLess (Bind E_CLess S_CLess)
+    | Let_CLess_cursor2 E_CLess (Bind E_CLess S_CLess)
+    | Exp_CLess_cursor1 E_CLess
+    | Plus_CLess_cursor1 E_CLess E_CLess
+    | Plus_CLess_cursor2 E_CLess E_CLess
+
+
+type WellFormedSyntax
+    = S_CLess_WellFormed S_CLess
+    | E_CLess_WellFormed E_CLess
+    | Wellformed_WellFormed Wellformed
 
 
 type alias Bind a b =

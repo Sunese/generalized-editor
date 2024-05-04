@@ -26,6 +26,7 @@ exampleFiles =
         createBaseSyntaxSorts exampleSyntax
             ++ createCursorlessSyntaxSorts exampleSyntax
             ++ (fromCLessToCCtxSyntaxSorts <| createCursorlessSyntax exampleSyntax)
+            ++ (fromCLessToWellFormed <| createCursorlessSyntax exampleSyntax)
             ++ [ createBindType ]
     ]
 

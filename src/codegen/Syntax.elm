@@ -91,7 +91,7 @@ addCursorSortAndOps syntax =
                 (\syncat ->
                     { term = "TODO"
                     , arity = [ ( [], syncat.exp ) ]
-                    , name = "rootCursor_" ++ syncat.exp
+                    , name = "root_" ++ syncat.exp
                     , synCat = "wellformed"
                     }
                 )
@@ -104,7 +104,7 @@ addCursorSortAndOps syntax =
                         (\i _ ->
                             { term = "TODO"
                             , arity = op.arity
-                            , name = op.name ++ "_cursor_arg_" ++ String.fromInt (i + 1)
+                            , name = op.name ++ "_cursor" ++ String.fromInt (i + 1)
                             , synCat = "wellformed"
                             }
                         )
@@ -211,7 +211,7 @@ toCCtxOps ops =
                                     ( mbybound, arg )
                             )
                             op.arity
-                    , name = op.name ++ String.fromInt (i + 1)
+                    , name = op.name ++ "_cctx" ++ String.fromInt (i + 1)
                     , synCat = "cctx"
                     }
                 )
@@ -379,19 +379,26 @@ fromCLessToCCtxSyntaxSorts syntax =
     let
         cctxSyntax =
             addCCtxOps <| addCCtxOp <| addCCtxSort syntax
-
-        cctxSynCat =
-            cctxSyntax.synCats
-                |> List.map .exp
-                |> List.filter (\syncat -> syncat == "cctx")
-                |> List.head
-                |> Maybe.withDefault ""
     in
-    [ getCustomType cctxSynCat cctxSyntax
+    [ getCustomType "cctx" cctxSyntax
     , Elm.customType "CctxSyntax" <|
         List.map
             (\syncat -> Elm.variantWith (syncat ++ "_CCtx") [ Elm.Annotation.named [] syncat ])
             (getSyntacticCategories cctxSyntax)
+    ]
+
+
+fromCLessToWellFormed : Syntax -> List Elm.Declaration
+fromCLessToWellFormed syntax =
+    let
+        wellFormedSyntax =
+            addCursorSortAndOps syntax
+    in
+    [ getCustomType "wellformed" wellFormedSyntax
+    , Elm.customType "WellFormedSyntax" <|
+        List.map
+            (\syncat -> Elm.variantWith (syncat ++ "_WellFormed") [ Elm.Annotation.named [] syncat ])
+            (getSyntacticCategories wellFormedSyntax)
     ]
 
 
