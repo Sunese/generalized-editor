@@ -208,17 +208,11 @@ addCCtxOp syntax =
                 ++ [ { ops =
                         [ { term = "\"[TODO-cursorCtxOp]\""
                           , arity = []
-                          , name = "cctxHole"
+                          , name = "hole"
                           , synCat = "cctx"
                           }
                         ]
                      , synCat = "cctx"
-                     }
-                   ]
-        , synCats =
-            syntax.synCats
-                ++ [ { exp = "cctx"
-                     , set = "CursorCtx"
                      }
                    ]
     }
@@ -263,7 +257,7 @@ toCCtxOps ops =
                                     ( mbybound, arg )
                             )
                             op.arity
-                    , name = op.name ++ "_cctx" ++ String.fromInt (i + 1)
+                    , name = op.name ++ String.fromInt (i + 1)
                     , synCat = "cctx"
                     }
                 )
@@ -426,25 +420,25 @@ getSyntacticCategories syntax =
     List.map .exp syntax.synCats
 
 
-createCctxSyntaxSorts : Syntax -> List Elm.Declaration
-createCctxSyntaxSorts syntax =
-    let
-        cctxSyntax =
-            addPostfixToSyntax "_CCtx" <| addCCtxOps <| addCCtxOp <| addCCtxSort <| addHoleOps syntax
 
-        cctxSynCat =
-            cctxSyntax.synCats
-                |> List.map .exp
-                |> List.filter (\syncat -> syncat == "cctx_CCtx")
-                |> List.head
-                |> Maybe.withDefault ""
-    in
-    [ getCustomType cctxSynCat cctxSyntax
-    , Elm.customType "CctxSyntax" <|
-        List.map
-            (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
-            (getSyntacticCategories cctxSyntax)
-    ]
+-- createCctxSyntaxSorts : Syntax -> List Elm.Declaration
+-- createCctxSyntaxSorts syntax =
+--     let
+--         cctxSyntax =
+--             addCCtxOps <| addCCtxOp <| addCCtxSort <| addHoleOps syntax
+--         cctxSynCat =
+--             cctxSyntax.synCats
+--                 |> List.map .exp
+--                 |> List.filter (\syncat -> syncat == "cctx")
+--                 |> List.head
+--                 |> Maybe.withDefault ""
+--     in
+--     [ getCustomType cctxSynCat cctxSyntax
+--     , Elm.customType "CctxSyntax" <|
+--         List.map
+--             (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+--             (getSyntacticCategories cctxSyntax)
+--     ]
 
 
 fromCLessToCCtxSyntaxSorts : Syntax -> List Elm.Declaration
@@ -463,16 +457,19 @@ fromCLessToCCtxSyntaxSorts syntax =
     [ getCustomType cctxSynCat cctxSyntax
     , Elm.customType "CctxSyntax" <|
         List.map
-            (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+            (\syncat -> Elm.variantWith (syncat ++ "_CCtx") [ Elm.Annotation.named [] syncat ])
             (getSyntacticCategories cctxSyntax)
     ]
 
 
-createCursorlessSyntax : Syntax -> List Elm.Declaration
+createCursorlessSyntax : Syntax -> Syntax
 createCursorlessSyntax syntax =
+    -- i.e. do the same as createCursorlessSyntaxSorts but just return a new syntax,
+    -- not a list of Elm.Declarations
     addPostfixToSyntax "_CLess" <| addHoleOps syntax
 
 
+createCursorlessSyntaxSorts : Syntax -> List Elm.Declaration
 createCursorlessSyntaxSorts syntax =
     -- i.e. do the same as createBaseSyntaxSorts but add
     -- a hole operator for each syntactic category
@@ -501,6 +498,16 @@ createCursorlessSyntaxSorts syntax =
            ]
 
 
+createBindType : Elm.Declaration
+createBindType =
+    Elm.alias "Bind" <|
+        Elm.Annotation.tuple
+            (Elm.Annotation.list <|
+                Elm.Annotation.var "a"
+            )
+            (Elm.Annotation.var "b")
+
+
 createBaseSyntaxSorts : Syntax -> List Elm.Declaration
 createBaseSyntaxSorts syntax =
     -- i.e. take all syncat rules and create a custom type for each
@@ -523,14 +530,6 @@ createBaseSyntaxSorts syntax =
                 List.map
                     (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
                     uniqueSynCats
-           ]
-        -- also add the Bind type
-        ++ [ Elm.alias "Bind" <|
-                Elm.Annotation.tuple
-                    (Elm.Annotation.list <|
-                        Elm.Annotation.var "a"
-                    )
-                    (Elm.Annotation.var "b")
            ]
 
 

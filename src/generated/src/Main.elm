@@ -1,6 +1,22 @@
 module Main exposing (..)
 
 
+type S
+    = Let E (Bind E S)
+    | Exp E
+
+
+type E
+    = Plus E E
+    | Num
+    | Var
+
+
+type BaseSyntax
+    = S S
+    | E E
+
+
 type S_CLess
     = Let_CLess E_CLess (Bind E_CLess S_CLess)
     | Exp_CLess E_CLess
@@ -19,37 +35,20 @@ type CursorlessSyntax
     | E_CLess E_CLess
 
 
-type S
-    = Let E (Bind E S)
-    | Exp E
+type Cctx
+    = Hole
+    | Let_CLess1 Cctx (Bind E_CLess S_CLess)
+    | Let_CLess2 E_CLess (Bind E_CLess Cctx)
+    | Exp_CLess1 Cctx
+    | Plus_CLess1 Cctx E_CLess
+    | Plus_CLess2 E_CLess Cctx
 
 
-type E
-    = Plus E E
-    | Num
-    | Var
-
-
-type BaseSyntax
-    = S S
-    | E E
+type CctxSyntax
+    = S_CLess_CCtx S_CLess
+    | E_CLess_CCtx E_CLess
+    | Cctx_CCtx Cctx
 
 
 type alias Bind a b =
     ( List a, b )
-
-
-type Cctx_CCtx
-    = CctxHole_CCtx
-    | Let_cctx1_CCtx Cctx_CCtx (Bind E_CCtx S_CCtx)
-    | Let_cctx2_CCtx E_CCtx (Bind E_CCtx Cctx_CCtx)
-    | Exp_cctx1_CCtx Cctx_CCtx
-    | Plus_cctx1_CCtx Cctx_CCtx E_CCtx
-    | Plus_cctx2_CCtx E_CCtx Cctx_CCtx
-
-
-type CctxSyntax
-    = S_CCtx S_CCtx
-    | E_CCtx E_CCtx
-    | Cctx_CCtx Cctx_CCtx
-    | Cctx_CCtx Cctx_CCtx

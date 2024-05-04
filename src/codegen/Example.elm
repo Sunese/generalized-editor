@@ -23,9 +23,10 @@ import Syntax exposing (..)
 exampleFiles : List Elm.File
 exampleFiles =
     [ Elm.file [ "Main" ] <|
-        createCursorlessSyntaxSorts exampleSyntax
-            ++ createBaseSyntaxSorts exampleSyntax
-            ++ fromCLessToCCtxSyntaxSorts <| createCursorlessSyntaxSorts exampleSyntax
+        createBaseSyntaxSorts exampleSyntax
+            ++ createCursorlessSyntaxSorts exampleSyntax
+            ++ (fromCLessToCCtxSyntaxSorts <| createCursorlessSyntax exampleSyntax)
+            ++ [ createBindType ]
     ]
 
 
