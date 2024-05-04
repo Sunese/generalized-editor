@@ -131,7 +131,7 @@ addCursorSortAndOps syntax =
                         (\i _ ->
                             { term = "TODO"
                             , arity = op.arity
-                            , name = op.name ++ "_cursor_arg_" ++ String.fromInt i
+                            , name = op.name ++ "_cursor_arg_" ++ String.fromInt (i + 1)
                             , synCat = "wellformed"
                             }
                         )
@@ -179,6 +179,25 @@ addCCtxSort syntax =
                      }
                    ]
     }
+
+
+createCCtxSort : Syntax -> CCtxSyntax
+createCCtxSort syntax =
+    { synCats =
+        syntax.synCats
+            ++ [ { exp = "cctx"
+                 , set = "CursorCtx"
+                 }
+               ]
+    , synCatOps = []
+    }
+
+
+
+-- toWellFormedAndCCtxFun : Syntax -> Elm.Declaration
+-- toWellFormedAndCCtxFun syntax =
+--     Elm.declaration "getWellFormedAndCCtx" <|
+--         Elm.fn
 
 
 addCCtxOp : CCtxSyntax -> CCtxSyntax
@@ -244,7 +263,7 @@ toCCtxOps ops =
                                     ( mbybound, arg )
                             )
                             op.arity
-                    , name = op.name ++ "_cctx" ++ String.fromInt i
+                    , name = op.name ++ "_cctx" ++ String.fromInt (i + 1)
                     , synCat = "cctx"
                     }
                 )
@@ -254,9 +273,79 @@ toCCtxOps ops =
         |> List.concat
 
 
+addPostfixToSyntax : String -> Syntax -> Syntax
+addPostfixToSyntax postfix syntax =
+    -- add postfix to:
+    -- 1. All synCat.exp and synCat.set
+    -- 2. All synCatOp.synCat and all synCatOp.name, synCatOp.synCat, synCatOp.arity
+    { syntax
+        | synCats =
+            List.map
+                (\syncat ->
+                    { exp = syncat.exp ++ postfix
+                    , set = syncat.set ++ postfix
+                    }
+                )
+                syntax.synCats
+        , synCatOps =
+            List.map
+                (\synCatOp ->
+                    { synCatOp
+                        | synCat = synCatOp.synCat ++ postfix
+                        , ops =
+                            List.map
+                                (\op ->
+                                    { op
+                                        | name = op.name ++ postfix
+                                        , synCat = op.synCat ++ postfix
+                                        , arity =
+                                            List.map
+                                                (\( boundvars, param ) ->
+                                                    ( List.map (\x -> x ++ postfix) boundvars, param ++ postfix )
+                                                )
+                                                op.arity
+                                    }
+                                )
+                                synCatOp.ops
+                    }
+                )
+                syntax.synCatOps
+    }
+
+
 toCLessSyntax : Syntax -> CLessSyntax
 toCLessSyntax syntax =
-    addHoleOps syntax
+    -- Add hole operators and
+    -- postfix all operators and sorts with "_CLess"
+    let
+        syntaxWithHole =
+            addHoleOps syntax
+    in
+    { syntaxWithHole
+        | synCatOps =
+            List.map
+                (\synCatRule ->
+                    { synCatRule
+                        | ops =
+                            List.map
+                                (\op ->
+                                    { op
+                                        | name = op.name ++ "_CLess"
+                                    }
+                                )
+                                synCatRule.ops
+                    }
+                )
+                syntax.synCatOps
+        , synCats =
+            List.map
+                (\syncat ->
+                    { exp = syncat.exp ++ "_CLess"
+                    , set = syncat.set ++ "_CLess"
+                    }
+                )
+                syntax.synCats
+    }
 
 
 addCursorOps : Syntax -> Syntax
@@ -337,8 +426,85 @@ getSyntacticCategories syntax =
     List.map .exp syntax.synCats
 
 
-getTypeDecls : Syntax -> List Elm.Declaration
-getTypeDecls syntax =
+createCctxSyntaxSorts : Syntax -> List Elm.Declaration
+createCctxSyntaxSorts syntax =
+    let
+        cctxSyntax =
+            addPostfixToSyntax "_CCtx" <| addCCtxOps <| addCCtxOp <| addCCtxSort <| addHoleOps syntax
+
+        cctxSynCat =
+            cctxSyntax.synCats
+                |> List.map .exp
+                |> List.filter (\syncat -> syncat == "cctx_CCtx")
+                |> List.head
+                |> Maybe.withDefault ""
+    in
+    [ getCustomType cctxSynCat cctxSyntax
+    , Elm.customType "CctxSyntax" <|
+        List.map
+            (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+            (getSyntacticCategories cctxSyntax)
+    ]
+
+
+fromCLessToCCtxSyntaxSorts : Syntax -> List Elm.Declaration
+fromCLessToCCtxSyntaxSorts syntax =
+    let
+        cctxSyntax =
+            addCCtxOps <| addCCtxOp <| addCCtxSort syntax
+
+        cctxSynCat =
+            cctxSyntax.synCats
+                |> List.map .exp
+                |> List.filter (\syncat -> syncat == "cctx")
+                |> List.head
+                |> Maybe.withDefault ""
+    in
+    [ getCustomType cctxSynCat cctxSyntax
+    , Elm.customType "CctxSyntax" <|
+        List.map
+            (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+            (getSyntacticCategories cctxSyntax)
+    ]
+
+
+createCursorlessSyntax : Syntax -> List Elm.Declaration
+createCursorlessSyntax syntax =
+    addPostfixToSyntax "_CLess" <| addHoleOps syntax
+
+
+createCursorlessSyntaxSorts syntax =
+    -- i.e. do the same as createBaseSyntaxSorts but add
+    -- a hole operator for each syntactic category
+    -- and create a custom type called CursorlessSyntax that is a union of all of them
+    let
+        cursorlessSyntax =
+            addPostfixToSyntax "_CLess" <| addHoleOps syntax
+
+        uniqueSynCats =
+            List.map (\syncat -> syncat.exp) cursorlessSyntax.synCats
+                |> List.foldl
+                    (\syncat acc ->
+                        if List.member syncat acc then
+                            acc
+
+                        else
+                            acc ++ [ syncat ]
+                    )
+                    []
+    in
+    List.map (\synCat -> getCustomType synCat cursorlessSyntax) uniqueSynCats
+        ++ [ Elm.customType "CursorlessSyntax" <|
+                List.map
+                    (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+                    uniqueSynCats
+           ]
+
+
+createBaseSyntaxSorts : Syntax -> List Elm.Declaration
+createBaseSyntaxSorts syntax =
+    -- i.e. take all syncat rules and create a custom type for each
+    -- and then create a custom type called BaseSyntax that is a union of all of them
     let
         uniqueSynCats =
             List.map (\syncat -> syncat.exp) syntax.synCats
@@ -353,7 +519,12 @@ getTypeDecls syntax =
                     []
     in
     List.map (\synCat -> getCustomType synCat syntax) uniqueSynCats
-        -- TODO: this limits the list of bound vars to all be of same type
+        ++ [ Elm.customType "BaseSyntax" <|
+                List.map
+                    (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+                    uniqueSynCats
+           ]
+        -- also add the Bind type
         ++ [ Elm.alias "Bind" <|
                 Elm.Annotation.tuple
                     (Elm.Annotation.list <|
