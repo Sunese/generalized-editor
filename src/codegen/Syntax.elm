@@ -6,24 +6,6 @@ import Parser exposing (..)
 import RawSyntaxP exposing (..)
 
 
-
--- ✅    1. raw arity to arity with binders
---        (skipped for now, this is only relevant for pretty-printing)
--- ✅    2. check that terms are well-formed, i.e. that everything outside
---       quotations are syntactic categories
--- ✅    3. generate a codegen declaration for each operator and its arguments
---          Given a list of syntactic categories and a list of derivations,
---          generate custom types this way:
---          for each syntactic category, create an Elm.customType
---          then, for each operator within that syntactic category,
---          add an Elm.variantWith to the list of variants to the custom type
--- ✅    4. for every sort/syntactic category, add a hole_s operator with arity ()s
---          and a cursor_s operator with arity (s)s
--- ✅    5. create the sorts and family of cursorless operators
--- ✅    6. create the sorts and family of operators for cursor contexts
--- ✅    7. ditto, but for well-formed trees
-
-
 type alias Arity =
     -- an arity is a list of pairs of (List String, String)
     -- the first element of the pair is the list of variables to be bound (if any)
@@ -87,15 +69,6 @@ type alias WellFormedSynCatOps =
     SynCatOps
 
 
-
--- toWellFormedSyntax : CLessSyntax -> WellFormedSyntax
--- toWellFormedSyntax cursorlessSyn =
---     { cursorlessSyn
---         | synCatOps =
---             toWellFormedSynCatOps cursorlessSyn.synCatOps
---     }
-
-
 {-| def. 14, step 1 + 2 + 3, for every operator of cursorless sort and 1 <= i <= n,
 add operator encapsulating the i'th subtree of the abt
 -}
@@ -157,18 +130,6 @@ addCursorSortAndOps syntax =
     }
 
 
-
--- toWellFormedSynCatOps : List SynCatOps -> List WellFormedSynCatOps
--- toWellFormedSynCatOps synCatOps =
--- toWellFormedOp : List Operator -> List Operator
--- toWellFormedOp ops =
---     List.indexedMap
---         (\i op ->
---             { op | name = op.name ++ "_wf" ++ String.fromInt i }
---         )
---         ops
-
-
 addCCtxSort : Syntax -> CCtxSyntax
 addCCtxSort syntax =
     { syntax
@@ -191,13 +152,6 @@ createCCtxSort syntax =
                ]
     , synCatOps = []
     }
-
-
-
--- toWellFormedAndCCtxFun : Syntax -> Elm.Declaration
--- toWellFormedAndCCtxFun syntax =
---     Elm.declaration "getWellFormedAndCCtx" <|
---         Elm.fn
 
 
 addCCtxOp : CCtxSyntax -> CCtxSyntax
@@ -418,27 +372,6 @@ createCursorOperator synCatRules =
 getSyntacticCategories : Syntax -> List String
 getSyntacticCategories syntax =
     List.map .exp syntax.synCats
-
-
-
--- createCctxSyntaxSorts : Syntax -> List Elm.Declaration
--- createCctxSyntaxSorts syntax =
---     let
---         cctxSyntax =
---             addCCtxOps <| addCCtxOp <| addCCtxSort <| addHoleOps syntax
---         cctxSynCat =
---             cctxSyntax.synCats
---                 |> List.map .exp
---                 |> List.filter (\syncat -> syncat == "cctx")
---                 |> List.head
---                 |> Maybe.withDefault ""
---     in
---     [ getCustomType cctxSynCat cctxSyntax
---     , Elm.customType "CctxSyntax" <|
---         List.map
---             (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
---             (getSyntacticCategories cctxSyntax)
---     ]
 
 
 fromCLessToCCtxSyntaxSorts : Syntax -> List Elm.Declaration
