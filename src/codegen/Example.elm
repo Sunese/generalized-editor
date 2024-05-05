@@ -28,7 +28,7 @@ exampleFiles =
             ++ createCursorlessSyntaxSorts exampleSyntax
             ++ (fromCLessToCCtxSyntaxSorts <| createCursorlessSyntax exampleSyntax)
             ++ (fromCLessToWellFormed <| createCursorlessSyntax exampleSyntax)
-            ++ [ createBindType ]
+            ++ [ createBindType, createToCLessFun exampleSyntax ]
     ]
 
 
@@ -174,51 +174,20 @@ type alias Bind a b =
     ( List a, b )
 
 
-getCursorPath : List Int -> BaseSyntax -> List Int
-getCursorPath path ast =
-    case ast of
-        S s ->
-            case s of
-                Let e1_ ( _, s_ ) ->
-                    getCursorPath (path ++ [ 1 ]) (E e1_)
-                        ++ getCursorPath (path ++ [ 2 ]) (S s_)
 
-                Exp e_ ->
-                    getCursorPath (path ++ [ 1 ]) (E e_)
-
-                Hole_s ->
-                    []
-
-                Cursor_s _ ->
-                    path
-
-        E e ->
-            case e of
-                Plus e1 e2 ->
-                    getCursorPath (path ++ [ 1 ]) (E e1)
-                        ++ getCursorPath (path ++ [ 2 ]) (E e2)
-
-                Num ->
-                    []
-
-                Var ->
-                    []
-
-                Hole_e ->
-                    []
-
-                Cursor_e e_ ->
-                    path
-
-
-
--- emptyWellFormed : ( Cctx, WellF )
--- emptyWellFormed =
---     ( CctxHole, RootCursor_s_WellFormed Hole_s_WellFormed )
--- toWellFormed : List Int -> S_Cless -> ( Cctx, Maybe WellF )
--- toWellFormed path stmt =
---     case ( path, stmt ) of
+-- toWellFormed : List Int -> BaseSyntax -> Maybe ( CctxSyntax, WellFormedSyntax )
+-- toWellFormed pos syntax =
+--     case ( pos, syntax ) of
 --         ( [], _ ) ->
---             ( CctxHole, Maybe.map RootCursor_s_WellFormed (Tuple.second (toWellFormed path stmt)) )
---         ( _, _ ) ->
+--             case syntax of
+--                 S s ->
+--                     Just ( Cctx_CCtx Hole, Root_s_CLess s )
+-- toCursorLessOp : BaseSyntax -> Maybe CursorlessSyntax
+-- toCursorLessOp syntax =
+--     case syntax of
+--         S s ->
+--             Just (S_CLess s)
+--         E e ->
+--             Just (E_CLess e)
+--         _ ->
 --             Nothing

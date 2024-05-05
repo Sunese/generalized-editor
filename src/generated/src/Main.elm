@@ -72,3 +72,31 @@ type WellFormedSyntax
 
 type alias Bind a b =
     ( List a, b )
+
+
+toCLess baseSyntax =
+    case baseSyntax of
+        S s ->
+            case s of
+                Let arg1 arg2 ->
+                    Let_CLess arg1 arg2 
+
+                Exp arg1 ->
+                    Exp_CLess arg1 
+
+                otherwise ->
+                    Debugtodo
+
+        E e ->
+            case e of
+                Plus arg1 arg2 ->
+                    Plus_CLess arg1 arg2 
+
+                Num ->
+                    Num_CLess 
+
+                Var ->
+                    Var_CLess 
+
+                otherwise ->
+                    Debugtodo

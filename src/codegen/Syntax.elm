@@ -2,6 +2,7 @@ module Syntax exposing (..)
 
 import Elm
 import Elm.Annotation exposing (..)
+import Elm.Case exposing (..)
 import Parser exposing (..)
 import RawSyntaxP exposing (..)
 
@@ -407,6 +408,46 @@ createCursorlessSyntax syntax =
     -- i.e. do the same as createCursorlessSyntaxSorts but just return a new syntax,
     -- not a list of Elm.Declarations
     addPostfixToSyntax "_CLess" <| addHoleOps syntax
+
+
+createToCLessFun : Syntax -> Elm.Declaration
+createToCLessFun syntax =
+    Elm.declaration "toCLess" <|
+        Elm.fn ( "baseSyntax", Just <| Elm.Annotation.maybe (Elm.Annotation.named [] "BaseSyntax") )
+            (\arg ->
+                Elm.Case.custom arg (Elm.Annotation.named [] "BaseSyntax") <|
+                    List.map
+                        (\syncat ->
+                            Elm.Case.branch1 syncat ( syncat, Elm.Annotation.named [] syncat ) <|
+                                \val ->
+                                    Elm.Case.custom val (Elm.Annotation.named [] syncat) <|
+                                        List.map
+                                            (\op ->
+                                                Elm.Case.branchWith
+                                                    op.name
+                                                    (List.length op.arity)
+                                                    (\args ->
+                                                        Elm.value
+                                                            { importFrom = []
+                                                            , name = firstCharToUpper op.name ++ "_CLess" ++ " " ++ List.foldr (\x y -> x ++ " " ++ y) "" (List.map Elm.toString args)
+                                                            , annotation = Just <| Elm.Annotation.named [] op.name
+                                                            }
+                                                    )
+                                            )
+                                            (List.concatMap .ops <| List.filter (\synCatRule -> synCatRule.synCat == syncat) syntax.synCatOps)
+                                            ++ [ Elm.Case.otherwise (\_ -> Elm.val "TODO") ]
+                        )
+                        (getSyntacticCategories syntax)
+            )
+
+
+firstCharToUpper : String -> String
+firstCharToUpper s =
+    (String.toUpper <| String.left 1 s) ++ String.dropLeft 1 s
+
+
+
+-- List.map (\synCat -> )
 
 
 createCursorlessSyntaxSorts : Syntax -> List Elm.Declaration
