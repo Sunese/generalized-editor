@@ -429,6 +429,9 @@ createToCLessFun syntax =
                                                     (\args ->
                                                         Elm.value
                                                             { importFrom = []
+
+                                                            -- TODO: fix under, we should call recursively on each argument, ensuring that a basesyntax arg itself
+                                                            -- is converted to a cursorless syntax
                                                             , name = firstCharToUpper op.name ++ "_CLess" ++ " " ++ List.foldr (\x y -> x ++ " " ++ y) "" (List.map Elm.toString args)
                                                             , annotation = Just <| Elm.Annotation.named [] op.name
                                                             }
@@ -436,6 +439,7 @@ createToCLessFun syntax =
                                             )
                                             (List.concatMap .ops <| List.filter (\synCatRule -> synCatRule.synCat == syncat) syntax.synCatOps)
                                             ++ [ Elm.Case.otherwise (\_ -> Elm.val "TODO") ]
+                         -- TODO: fix above, maybe just call Debug.Todo for now?
                         )
                         (getSyntacticCategories syntax)
             )
