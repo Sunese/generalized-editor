@@ -3,6 +3,8 @@ module Syntax exposing (..)
 import Elm
 import Elm.Annotation exposing (..)
 import Elm.Case exposing (..)
+import Elm.Case.Branch as Branch
+import Gen.Dict exposing (remove)
 import Parser exposing (..)
 import RawSyntaxP exposing (..)
 
@@ -413,7 +415,8 @@ createCursorlessSyntax syntax =
 createToCLessFun : Syntax -> Elm.Declaration
 createToCLessFun syntax =
     Elm.declaration "toCLess" <|
-        Elm.fn ( "baseSyntax", Just <| Elm.Annotation.maybe (Elm.Annotation.named [] "BaseSyntax") )
+        -- Elm.fn ( "baseSyntax", Just <| Elm.Annotation.maybe (Elm.Annotation.named [] "BaseSyntax") )
+        Elm.fn ( "baseSyntax", Just <| Elm.Annotation.named [] "CursorlessSyntax" )
             (\arg ->
                 Elm.Case.custom arg (Elm.Annotation.named [] "BaseSyntax") <|
                     List.map
@@ -423,26 +426,79 @@ createToCLessFun syntax =
                                     Elm.Case.custom val (Elm.Annotation.named [] syncat) <|
                                         List.map
                                             (\op ->
-                                                Elm.Case.branchWith
-                                                    op.name
-                                                    (List.length op.arity)
-                                                    (\args ->
-                                                        Elm.value
-                                                            { importFrom = []
+                                                case op.arity of
+                                                    [] ->
+                                                        Branch.variant0 op.name <|
+                                                            toCLessReturnExpression op
 
-                                                            -- TODO: fix under, we should call recursively on each argument, ensuring that a basesyntax arg itself
-                                                            -- is converted to a cursorless syntax
-                                                            , name = firstCharToUpper op.name ++ "_CLess" ++ " " ++ List.foldr (\x y -> x ++ " " ++ y) "" (List.map Elm.toString args)
-                                                            , annotation = Just <| Elm.Annotation.named [] op.name
-                                                            }
-                                                    )
+                                                    [ ( [], oparg ) ] ->
+                                                        Branch.variant1 op.name (Branch.var "arg1") <|
+                                                            \_ -> toCLessReturnExpression op
+
+                                                    [ ( boundVars, oparg ) ] ->
+                                                        Branch.variant1 op.name (Branch.tuple (Branch.var "boundVars") (Branch.var "arg1")) <|
+                                                            \_ -> toCLessReturnExpression op
+
+                                                    _ ->
+                                                        Branch.var "TODO"
+                                             -- Branch.variant1 op.name (Branch.var "arg1") <|
+                                             --     \_ -> toCLessReturnExpression op
                                             )
                                             (List.concatMap .ops <| List.filter (\synCatRule -> synCatRule.synCat == syncat) syntax.synCatOps)
-                                            ++ [ Elm.Case.otherwise (\_ -> Elm.val "TODO") ]
+                         -- ++ [ Elm.Case.otherwise (\_ -> Elm.val "TODO") ]
                          -- TODO: fix above, maybe just call Debug.Todo for now?
                         )
                         (getSyntacticCategories syntax)
             )
+
+
+toCLessReturnExpression : Operator -> Elm.Expression
+toCLessReturnExpression op =
+    if String.contains "cursor" op.name then
+        Elm.value
+            { importFrom = [ "Debug" ]
+            , name = "todo \"Cursor operator cannot be mapped to cursorless operator\""
+            , annotation = Nothing
+            }
+        -- else if op.arity == [] then
+        --     Elm.value
+        --         { importFrom = []
+        --         , name = firstCharToUpper op.name ++ "_CLess"
+        --         , annotation = Just <| Elm.Annotation.named [] op.name
+        --         }
+
+    else
+        let
+            prefix =
+                firstCharToUpper op.synCat ++ "_CLess <| " ++ firstCharToUpper op.name ++ "_CLess" ++ " "
+
+            returnString =
+                List.indexedMap
+                    (\i ( boundVars, arg ) ->
+                        case boundVars of
+                            [] ->
+                                "( toCLess (" ++ firstCharToUpper arg ++ " " ++ "arg" ++ String.fromInt (i + 1) ++ " )" ++ " )"
+
+                            _ ->
+                                "HIRE ME"
+                    )
+                    op.arity
+                    |> String.join " "
+        in
+        Elm.value
+            { importFrom = []
+            , name = prefix ++ returnString
+            , annotation = Just <| Elm.Annotation.named [] op.name
+            }
+
+
+removeCursorOps : List Operator -> List Operator
+removeCursorOps ops =
+    List.filter
+        (\op ->
+            not <| String.contains "cursor" op.name
+        )
+        ops
 
 
 firstCharToUpper : String -> String

@@ -78,25 +78,31 @@ toCLess baseSyntax =
     case baseSyntax of
         S s ->
             case s of
-                Let arg1 arg2 ->
-                    Let_CLess arg1 arg2 
+                tODO ->
+                    tODO
 
                 Exp arg1 ->
-                    Exp_CLess arg1 
+                    S_CLess <| Exp_CLess ( toCLess (E arg1 ) )
 
-                otherwise ->
-                    Debugtodo
+                Hole_s ->
+                    S_CLess <| Hole_s_CLess 
+
+                Cursor_s arg1 ->
+                    Debug.todo "Cursor operator cannot be mapped to cursorless operator"
 
         E e ->
             case e of
-                Plus arg1 arg2 ->
-                    Plus_CLess arg1 arg2 
+                tODO ->
+                    tODO
 
                 Num ->
-                    Num_CLess 
+                    E_CLess <| Num_CLess 
 
                 Var ->
-                    Var_CLess 
+                    E_CLess <| Var_CLess 
 
-                otherwise ->
-                    Debugtodo
+                Hole_e ->
+                    E_CLess <| Hole_e_CLess 
+
+                Cursor_e arg1 ->
+                    Debug.todo "Cursor operator cannot be mapped to cursorless operator"

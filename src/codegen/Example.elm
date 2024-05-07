@@ -28,7 +28,7 @@ exampleFiles =
             ++ createCursorlessSyntaxSorts exampleSyntax
             ++ (fromCLessToCCtxSyntaxSorts <| createCursorlessSyntax exampleSyntax)
             ++ (fromCLessToWellFormed <| createCursorlessSyntax exampleSyntax)
-            ++ [ createBindType, createToCLessFun exampleSyntax ]
+            ++ [ createBindType, createToCLessFun <| addCursorHoleOps <| exampleSyntax ]
     ]
 
 
