@@ -11,7 +11,7 @@ import Syntax exposing (..)
 
 main : Program {} () ()
 main =
-    Generate.run
+    Generate.run <|
         exampleFiles
 
 

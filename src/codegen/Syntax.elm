@@ -1,10 +1,13 @@
 module Syntax exposing (..)
 
 import Elm
-import Elm.Annotation exposing (..)
+import Elm.Annotation as Type exposing (..)
 import Elm.Case exposing (..)
 import Elm.Case.Branch as Branch
+import Gen.Convertable
+import Gen.Decomposable exposing (..)
 import Gen.Dict exposing (remove)
+import Gen.Substitutable exposing (..)
 import Parser exposing (..)
 import RawSyntaxP exposing (..)
 
@@ -165,7 +168,7 @@ addCCtxOp syntax =
                 ++ [ { ops =
                         [ { term = "\"[TODO-cursorCtxOp]\""
                           , arity = []
-                          , name = "hole"
+                          , name = "Cctx_hole"
                           , synCat = "cctx"
                           }
                         ]
@@ -384,10 +387,6 @@ fromCLessToCCtxSyntaxSorts syntax =
             addCCtxOps <| addCCtxOp <| addCCtxSort syntax
     in
     [ getCustomType "cctx" cctxSyntax
-    , Elm.customType "CctxSyntax" <|
-        List.map
-            (\syncat -> Elm.variantWith (syncat ++ "_CCtx") [ Elm.Annotation.named [] syncat ])
-            (getSyntacticCategories cctxSyntax)
     ]
 
 
@@ -398,10 +397,6 @@ fromCLessToWellFormed syntax =
             addCursorSortAndOps syntax
     in
     [ getCustomType "wellformed" wellFormedSyntax
-    , Elm.customType "WellFormedSyntax" <|
-        List.map
-            (\syncat -> Elm.variantWith (syncat ++ "_WellFormed") [ Elm.Annotation.named [] syncat ])
-            (getSyntacticCategories wellFormedSyntax)
     ]
 
 
@@ -412,44 +407,214 @@ createCursorlessSyntax syntax =
     addPostfixToSyntax "_CLess" <| addHoleOps syntax
 
 
-createToCLessFun : Syntax -> Elm.Declaration
-createToCLessFun syntax =
-    Elm.declaration "toCLess" <|
-        -- Elm.fn ( "baseSyntax", Just <| Elm.Annotation.maybe (Elm.Annotation.named [] "BaseSyntax") )
-        Elm.fn ( "baseSyntax", Just <| Elm.Annotation.named [] "CursorlessSyntax" )
+createDecomposeFun : Syntax -> Elm.Declaration
+createDecomposeFun syntax =
+    let
+        startSymbol =
+            syntax.synCats
+                |> List.head
+                |> Maybe.withDefault { exp = "error", set = "error" }
+                |> .exp
+    in
+    Elm.declaration "decompose" <|
+        Elm.fn ( "ast", Just <| Type.named [] startSymbol )
             (\arg ->
-                Elm.Case.custom arg (Elm.Annotation.named [] "BaseSyntax") <|
-                    List.map
-                        (\syncat ->
-                            Elm.Case.branch1 syncat ( syncat, Elm.Annotation.named [] syncat ) <|
-                                \val ->
-                                    Elm.Case.custom val (Elm.Annotation.named [] syncat) <|
-                                        List.map
-                                            (\op ->
-                                                case op.arity of
-                                                    [] ->
-                                                        Branch.variant0 op.name <|
-                                                            toCLessReturnExpression op
-
-                                                    [ ( [], oparg ) ] ->
-                                                        Branch.variant1 op.name (Branch.var "arg1") <|
-                                                            \_ -> toCLessReturnExpression op
-
-                                                    [ ( boundVars, oparg ) ] ->
-                                                        Branch.variant1 op.name (Branch.tuple (Branch.var "boundVars") (Branch.var "arg1")) <|
-                                                            \_ -> toCLessReturnExpression op
-
-                                                    _ ->
-                                                        Branch.var "TODO"
-                                             -- Branch.variant1 op.name (Branch.var "arg1") <|
-                                             --     \_ -> toCLessReturnExpression op
-                                            )
-                                            (List.concatMap .ops <| List.filter (\synCatRule -> synCatRule.synCat == syncat) syntax.synCatOps)
-                         -- ++ [ Elm.Case.otherwise (\_ -> Elm.val "TODO") ]
-                         -- TODO: fix above, maybe just call Debug.Todo for now?
-                        )
-                        (getSyntacticCategories syntax)
+                Elm.Case.custom arg (Type.named [] startSymbol) <|
+                    createBranches syntax
             )
+
+
+createBranches : Syntax -> List Elm.Case.Branch
+createBranches syntax =
+    let
+        startSymbolOps =
+            syntax.synCatOps
+                |> List.head
+                |> Maybe.withDefault { ops = [], synCat = "error" }
+    in
+    List.map
+        (\op ->
+            Elm.Case.branchWith op.name (List.length op.arity) <|
+                \_ ->
+                    Elm.maybe <|
+                        Just <|
+                            Elm.tuple
+                                (getCctxExp op |> Elm.withType (Type.namedWith [] "Cctx" []))
+                                (getWellFormedExp op |> Elm.withType (Type.namedWith [] "Wellformed" []))
+        )
+        startSymbolOps.ops
+
+
+getCctxExp : Operator -> Elm.Expression
+getCctxExp op =
+    -- if the operator's name contains "cursor", return Cctx.Hole
+    if String.contains "cursor" op.name then
+        Elm.val "Hole"
+
+    else
+        Elm.val "Hole"
+
+
+getWellFormedExp : Operator -> Elm.Expression
+getWellFormedExp op =
+    -- if the operator's name contains "cursor", return root_*op.syncat*_CLess *toCLess op*
+    -- Elm.val <| "Root_s_CLess " ++ toCLessOp op
+    Elm.val <| "Root_s_CLess Hole_s_CLess"
+
+
+decomposableInstance : Syntax -> Elm.Declaration
+decomposableInstance syntax =
+    let
+        startSymbol =
+            syntax.synCats
+                |> List.head
+                |> Maybe.withDefault { exp = "error", set = "error" }
+                |> .exp
+    in
+    Elm.declaration ("decomposable_" ++ startSymbol) <|
+        Elm.withType
+            (Type.namedWith [ "Decomposable" ]
+                "Decomposable"
+                [ Type.named [] startSymbol
+                , Type.named [] "Cctx"
+                , Type.named [] "Wellformed"
+                ]
+            )
+        <|
+            Elm.function []
+                (\_ ->
+                    Elm.record
+                        [ ( "decompose", Elm.val <| "decompose" )
+                        ]
+                )
+
+
+convertableInstances : Syntax -> List Elm.Declaration
+convertableInstances syntax =
+    List.map
+        (\synCatOp ->
+            Elm.declaration ("convertable_" ++ synCatOp.synCat) <|
+                Elm.withType
+                    (Type.namedWith [ "Convertable" ]
+                        "Convertable"
+                        [ Type.named [] synCatOp.synCat
+                        , Type.named [] (synCatOp.synCat ++ "_CLess")
+                        ]
+                    )
+                <|
+                    Elm.function []
+                        (\_ ->
+                            Elm.record
+                                [ ( "toCLess"
+                                  , Elm.fn ( synCatOp.synCat, Nothing )
+                                        (\arg ->
+                                            Elm.Case.custom arg (Type.named [] synCatOp.synCat) <|
+                                                createToCLessBranches2 synCatOp
+                                        )
+                                  )
+                                ]
+                        )
+        )
+        syntax.synCatOps
+
+
+createToCLessBranches2 : SynCatOps -> List Elm.Case.Branch
+createToCLessBranches2 synCatOp =
+    List.map
+        (\op ->
+            Elm.Case.branchWith op.name (List.length op.arity) <|
+                \_ ->
+                    createToCLessExp op
+        )
+        synCatOp.ops
+
+
+createToCLessExp : Operator -> Elm.Expression
+createToCLessExp op =
+    let
+        clessOpName =
+            firstCharToUpper op.name ++ "_CLess"
+    in
+    if String.contains "cursor" op.name then
+        Elm.nothing
+
+    else
+        case op.arity of
+            [] ->
+                Elm.maybe <|
+                    Just <|
+                        Elm.val <|
+                            clessOpName
+
+            _ ->
+                Elm.maybe <|
+                    Just <|
+                        Elm.apply (Elm.val <| clessOpName) <|
+                            List.indexedMap
+                                (\i ( boundVars, arg ) ->
+                                    case boundVars of
+                                        [] ->
+                                            Elm.apply
+                                                (Elm.get "toCLess"
+                                                    (Elm.value
+                                                        { importFrom = []
+                                                        , name = "convertable_" ++ arg
+                                                        , annotation =
+                                                            Just <|
+                                                                Type.namedWith []
+                                                                    "Convertable"
+                                                                    [ Type.named [] op.synCat
+                                                                    , Type.named [] <| op.synCat ++ "_CLess"
+                                                                    ]
+                                                        }
+                                                    )
+                                                )
+                                                [ Elm.val <| "arg" ++ String.fromInt (i + 1) ]
+
+                                        _ ->
+                                            Elm.val <| "IMPLEMENTME"
+                                )
+                                op.arity
+
+
+toCLessOp : Operator -> String
+toCLessOp op =
+    -- TODO: create call to toCLess fun
+    firstCharToUpper op.name ++ "_CLess"
+
+
+createToCursorLessFun : Syntax -> Elm.Declaration
+createToCursorLessFun syntax =
+    let
+        startSymbol =
+            syntax.synCats
+                |> List.head
+                |> Maybe.withDefault { exp = "error", set = "error" }
+                |> .exp
+    in
+    Elm.declaration "toCLess" <|
+        Elm.fn ( "ast", Just <| Type.named [] startSymbol )
+            (\arg ->
+                Elm.Case.custom arg (Type.named [] startSymbol) <|
+                    createToCLessBranches syntax
+            )
+
+
+createToCLessBranches : Syntax -> List Elm.Case.Branch
+createToCLessBranches syntax =
+    let
+        startSymbolOps =
+            syntax.synCatOps
+                |> List.head
+                |> Maybe.withDefault { ops = [], synCat = "error" }
+    in
+    List.map
+        (\op ->
+            Elm.Case.branchWith op.name (List.length op.arity) <|
+                \_ ->
+                    toCLessReturnExpression op
+        )
+        startSymbolOps.ops
 
 
 toCLessReturnExpression : Operator -> Elm.Expression
@@ -460,36 +625,32 @@ toCLessReturnExpression op =
             , name = "todo \"Cursor operator cannot be mapped to cursorless operator\""
             , annotation = Nothing
             }
-        -- else if op.arity == [] then
-        --     Elm.value
-        --         { importFrom = []
-        --         , name = firstCharToUpper op.name ++ "_CLess"
-        --         , annotation = Just <| Elm.Annotation.named [] op.name
-        --         }
 
     else
-        let
-            prefix =
-                firstCharToUpper op.synCat ++ "_CLess <| " ++ firstCharToUpper op.name ++ "_CLess" ++ " "
+        Elm.withType (Type.maybe <| Type.named [] "S_CLess") <| Elm.maybe <| Just <| Elm.val <| "Hole_s_CLess"
 
-            returnString =
-                List.indexedMap
-                    (\i ( boundVars, arg ) ->
-                        case boundVars of
-                            [] ->
-                                "( toCLess (" ++ firstCharToUpper arg ++ " " ++ "arg" ++ String.fromInt (i + 1) ++ " )" ++ " )"
 
-                            _ ->
-                                "HIRE ME"
-                    )
-                    op.arity
-                    |> String.join " "
-        in
-        Elm.value
-            { importFrom = []
-            , name = prefix ++ returnString
-            , annotation = Just <| Elm.Annotation.named [] op.name
-            }
+
+-- let
+--     prefix =
+--         firstCharToUpper op.name ++ "_CLess" ++ " "
+--     returnString =
+--         List.indexedMap
+--             (\i ( boundVars, arg ) ->
+--                 case boundVars of
+--                     [] ->
+--                         "( toCLess (" ++ " " ++ "arg" ++ String.fromInt (i + 1) ++ " )" ++ " )"
+--                     _ ->
+--                         "HIRE ME"
+--             )
+--             op.arity
+--             |> String.join " "
+-- in
+-- Elm.value
+--     { importFrom = []
+--     , name = prefix ++ returnString
+--     , annotation = Just <| Type.named [] op.name
+--     }
 
 
 removeCursorOps : List Operator -> List Operator
@@ -532,9 +693,9 @@ createCursorlessSyntaxSorts syntax =
                     []
     in
     List.map (\synCat -> getCustomType synCat cursorlessSyntax) uniqueSynCats
-        ++ [ Elm.customType "CursorlessSyntax" <|
+        ++ [ Elm.customType "CursorLess" <|
                 List.map
-                    (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+                    (\syncat -> Elm.variantWith syncat [ Type.named [] syncat ])
                     uniqueSynCats
            ]
 
@@ -542,11 +703,11 @@ createCursorlessSyntaxSorts syntax =
 createBindType : Elm.Declaration
 createBindType =
     Elm.alias "Bind" <|
-        Elm.Annotation.tuple
-            (Elm.Annotation.list <|
-                Elm.Annotation.var "a"
+        Type.tuple
+            (Type.list <|
+                Type.var "a"
             )
-            (Elm.Annotation.var "b")
+            (Type.var "b")
 
 
 createBaseSyntaxSorts : Syntax -> List Elm.Declaration
@@ -567,9 +728,9 @@ createBaseSyntaxSorts syntax =
                     []
     in
     List.map (\synCat -> getCustomType synCat syntax) uniqueSynCats
-        ++ [ Elm.customType "BaseSyntax" <|
+        ++ [ Elm.customType "Base" <|
                 List.map
-                    (\syncat -> Elm.variantWith syncat [ Elm.Annotation.named [] syncat ])
+                    (\syncat -> Elm.variantWith syncat [ Type.named [] syncat ])
                     uniqueSynCats
            ]
 
@@ -578,7 +739,7 @@ getCustomType : String -> Syntax -> Elm.Declaration
 getCustomType synCat syntax =
     -- e.g. for synCat = Statement, getCustomType returns
     -- Elm.customType "Statement" [ Elm.variantWith "Assignment" <--- operator
-    --                                  [Elm.Annotation.named [] "Id"] <--- arity (args)
+    --                                  [Type.named [] "Id"] <--- arity (args)
     --                             , Elm.variantWith "While" [] <--- operator without args
     --                             ]
     let
@@ -604,14 +765,14 @@ getNamedAnnotations arity =
         (\( boundvars, param ) ->
             case boundvars of
                 [] ->
-                    Elm.Annotation.named [] param
+                    Type.named [] param
 
                 _ ->
                     -- Due to the limitation of the list of bound variables being of the same type,
                     -- we extract only the first element of the list
-                    Elm.Annotation.namedWith [] "Bind" <|
-                        [ Elm.Annotation.named [] <| Maybe.withDefault "" <| List.head boundvars
-                        , Elm.Annotation.named [] param
+                    Type.namedWith [] "Bind" <|
+                        [ Type.named [] <| Maybe.withDefault "" <| List.head boundvars
+                        , Type.named [] param
                         ]
         )
         arity

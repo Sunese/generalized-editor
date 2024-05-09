@@ -1,7 +1,10 @@
 module Example exposing (..)
 
 import Elm
-import Elm.Annotation exposing (..)
+import Elm.Annotation as Type exposing (..)
+import Functions exposing (..)
+import Gen.Decomposable
+import Gen.Substitutable
 import Parser exposing (..)
 import Syntax exposing (..)
 
@@ -18,6 +21,34 @@ import Syntax exposing (..)
 --                 addHoleOps <|
 --                     exampleSyntax
 --     ]
+-- typeClassExample : List Elm.File
+-- typeClassExample =
+--     [ Elm.file [ "TypeClass" ] <|
+--         [ Elm.declaration "myFun" <|
+--             Elm.fn
+--                 ( "myArg"
+--                 , Just
+--                     (Type.namedWith
+--                         Gen.Substitutable.moduleName_
+--                         "Substitutable"
+--                         [ Type.var "a" ]
+--                     )
+--                 )
+--                 (\arg -> arg)
+--         , Elm.declaration "myFun2" <|
+--             Elm.fn
+--                 ( "myArg"
+--                 , Just
+--                     (Type.namedWith
+--                         Gen.Decomposable.moduleName_
+--                         "Decomposable"
+--                         [ Type.named [] "E", Type.named [] "S", Type.named [] "S" ]
+--                     )
+--                 )
+--                 (\arg -> Elm.val "\"Hello")
+--         ]
+--             ++ createBaseSyntaxSorts exampleSyntax
+--     ]
 
 
 exampleFiles : List Elm.File
@@ -28,7 +59,13 @@ exampleFiles =
             ++ createCursorlessSyntaxSorts exampleSyntax
             ++ (fromCLessToCCtxSyntaxSorts <| createCursorlessSyntax exampleSyntax)
             ++ (fromCLessToWellFormed <| createCursorlessSyntax exampleSyntax)
-            ++ [ createBindType, createToCLessFun <| addCursorHoleOps <| exampleSyntax ]
+            ++ [ createBindType ]
+            ++ [ createGetCursorPath <| addCursorHoleOps <| exampleSyntax ]
+
+    -- ++ [createDecomposeFun <| addCursorHoleOps <| exampleSyntax]
+    -- ++ [ createToCursorLessFun <| addCursorHoleOps <| exampleSyntax ]
+    -- ++ [ decomposableInstance <| addCursorHoleOps <| exampleSyntax ]
+    -- ++ convertableInstances (addCursorHoleOps exampleSyntax)
     ]
 
 

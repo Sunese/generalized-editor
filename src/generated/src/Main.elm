@@ -16,7 +16,7 @@ type E
     | Cursor_e E
 
 
-type BaseSyntax
+type Base
     = S S
     | E E
 
@@ -34,24 +34,18 @@ type E_CLess
     | Hole_e_CLess
 
 
-type CursorlessSyntax
+type CursorLess
     = S_CLess S_CLess
     | E_CLess E_CLess
 
 
 type Cctx
-    = Hole
+    = Cctx_hole
     | Let_CLess_cctx1 Cctx (Bind E_CLess S_CLess)
     | Let_CLess_cctx2 E_CLess (Bind E_CLess Cctx)
     | Exp_CLess_cctx1 Cctx
     | Plus_CLess_cctx1 Cctx E_CLess
     | Plus_CLess_cctx2 E_CLess Cctx
-
-
-type CctxSyntax
-    = S_CLess_CCtx S_CLess
-    | E_CLess_CCtx E_CLess
-    | Cctx_CCtx Cctx
 
 
 type Wellformed
@@ -64,45 +58,52 @@ type Wellformed
     | Plus_CLess_cursor2 E_CLess E_CLess
 
 
-type WellFormedSyntax
-    = S_CLess_WellFormed S_CLess
-    | E_CLess_WellFormed E_CLess
-    | Wellformed_WellFormed Wellformed
-
-
 type alias Bind a b =
     ( List a, b )
 
 
-toCLess baseSyntax =
-    case baseSyntax of
+getCursorPath : List Int -> Base -> List Int
+getCursorPath path base =
+    case base of
         S s ->
             case s of
-                tODO ->
-                    tODO
+                Let arg1 ( boundVars2, arg2 ) ->
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+                        ++ getCursorPath
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
+                            (S arg2)
 
                 Exp arg1 ->
-                    S_CLess <| Exp_CLess ( toCLess (E arg1 ) )
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
 
                 Hole_s ->
-                    S_CLess <| Hole_s_CLess 
+                    []
 
-                Cursor_s arg1 ->
-                    Debug.todo "Cursor operator cannot be mapped to cursorless operator"
+                Cursor_s _ ->
+                    path
 
         E e ->
             case e of
-                tODO ->
-                    tODO
+                Plus arg1 arg2 ->
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+                        ++ getCursorPath
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
+                            (E arg2)
 
                 Num ->
-                    E_CLess <| Num_CLess 
+                    []
 
                 Var ->
-                    E_CLess <| Var_CLess 
+                    []
 
                 Hole_e ->
-                    E_CLess <| Hole_e_CLess 
+                    []
 
-                Cursor_e arg1 ->
-                    Debug.todo "Cursor operator cannot be mapped to cursorless operator"
+                Cursor_e _ ->
+                    path
