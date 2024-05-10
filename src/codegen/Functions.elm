@@ -298,68 +298,6 @@ getBranchFromOp op =
                 Debug.todo "More than 5 arguments not supported"
 
 
-
--- case op.arity of
---     [] ->
---         Branch.variant0 op.name <| Elm.list []
---     [ ( boundVars, arg ) ] ->
---         case getPatternFromArg (List.head op.arity) of
---             Just pattern ->
---                 Branch.variant1
---                     op.name
---                     pattern
---                     (\exp -> Elm.int 420)
---             Nothing ->
---                 Branch.variant1
---                     op.name
---                     (Branch.var "arg")
---                     (\exp -> Elm.int 420)
---     [ ( boundVars1, arg1 ), ( boundVars2, arg2 ) ] ->
---         Branch.variant0 op.name <| Elm.list []
---     _ ->
---         Branch.variant0 op.name <| Elm.list []
--- getBranchFromOp : Operator -> Branch.Branch
--- getBranchFromOp op =
---     branchWith op.name
---         (List.length op.arity)
---         (\exps ->
---             Elm.Let.letIn
---                 (\_ ->
---                     Elm.int 420
---                 )
---                 |> Elm.Let.tuple "boundVars" "arg" (Elm.val "arg")
---                 |> Elm.Let.toExpression
---         )
-
-
-isBinder : ( List String, String ) -> Bool
-isBinder =
-    Tuple.first >> List.isEmpty >> not
-
-
-
--- case op.arity of
---     [] ->
---         Branch.variant0 op.name <| Elm.list []
---     [(boundVars1, arg1)] ->
---         case getPatternFromArg (List.head op.arity) of
---             Just pattern ->
---                 Branch.variant1
---                     op.name
---                     pattern
---                     (\exp -> Elm.int 420)
---             Nothing ->
---                 Branch.variant1
---                     op.name
---                     (Branch.var "arg")
---                     (\exp -> Elm.int 420)
---     [(boundVars1, arg1), (boundVars2, arg2)] ->
---         Branch.variant0 op.name <| Elm.list []
---      [(boundVars1, arg1), (boundVars2, arg2), (boundVars3, arg3)] ->
---     _ ->
---         Branch.variant0 op.name <| Elm.list []
-
-
 getPatternFromArg : Int -> ( List String, String ) -> Maybe (Branch.Pattern Elm.Expression)
 getPatternFromArg i arg =
     case arg of
@@ -368,11 +306,3 @@ getPatternFromArg i arg =
 
         ( boundVars, arg_ ) ->
             Just <| Branch.var <| "(boundVars" ++ String.fromInt i ++ ", arg" ++ String.fromInt i ++ ")"
-
-
-
--- Just <| Branch.tuple (Branch.var ("boundVars" ++ String.fromInt i)) (Branch.var ("arg" ++ String.fromInt i))
--- getBinderTuple : Arity -> Maybe (Branch.Pattern Elm.Expression)
--- getBinderTuple arity =
---     if List.
--- Branch.variant2 op.name (Branch.var op.name) <| \_ -> Elm.int 420
