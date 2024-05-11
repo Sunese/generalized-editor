@@ -4,8 +4,7 @@ module Decomposable exposing (..)
 -}
 
 
-type alias Decomposable baseSyntax cursorLess cctx wellformed =
-    { decompose : cursorLess -> List Int -> Maybe ( cctx, wellformed )
+type alias Decomposable baseSyntax cctx wellformed =
+    { decompose : baseSyntax -> List Int -> Maybe ( cctx, wellformed )
     , getCursorPath : baseSyntax -> List Int
-    , toCLess : baseSyntax -> cursorLess
     }

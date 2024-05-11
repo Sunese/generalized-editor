@@ -1,17 +1,15 @@
-module Gen.Decomposable exposing (moduleName_, annotation_, make_)
+module Gen.Decomposable exposing (annotation_, make_, moduleName_)
 
-{-|
-
+{-| 
 @docs moduleName_, annotation_, make_
-
 -}
+
 
 import Elm
 import Elm.Annotation as Type
 
 
-{-| The name of this module.
--}
+{-| The name of this module. -}
 moduleName_ : List String
 moduleName_ =
     [ "Decomposable" ]
@@ -19,27 +17,19 @@ moduleName_ =
 
 annotation_ :
     { decomposable :
-        Type.Annotation
-        -> Type.Annotation
-        -> Type.Annotation
-        -> Type.Annotation
-        -> Type.Annotation
+        Type.Annotation -> Type.Annotation -> Type.Annotation -> Type.Annotation
     }
 annotation_ =
     { decomposable =
-        \decomposableArg0 decomposableArg1 decomposableArg2 decomposableArg3 ->
+        \decomposableArg0 decomposableArg1 decomposableArg2 ->
             Type.alias
                 moduleName_
                 "Decomposable"
-                [ decomposableArg0
-                , decomposableArg1
-                , decomposableArg2
-                , decomposableArg3
-                ]
+                [ decomposableArg0, decomposableArg1, decomposableArg2 ]
                 (Type.record
                     [ ( "decompose"
                       , Type.function
-                            [ Type.var "cursorLess", Type.list Type.int ]
+                            [ Type.var "baseSyntax", Type.list Type.int ]
                             (Type.maybe
                                 (Type.tuple
                                     (Type.var "cctx")
@@ -52,11 +42,6 @@ annotation_ =
                             [ Type.var "baseSyntax" ]
                             (Type.list Type.int)
                       )
-                    , ( "toCLess"
-                      , Type.function
-                            [ Type.var "baseSyntax" ]
-                            (Type.var "cursorLess")
-                      )
                     ]
                 )
     }
@@ -64,10 +49,7 @@ annotation_ =
 
 make_ :
     { decomposable :
-        { decompose : Elm.Expression
-        , getCursorPath : Elm.Expression
-        , toCLess : Elm.Expression
-        }
+        { decompose : Elm.Expression, getCursorPath : Elm.Expression }
         -> Elm.Expression
     }
 make_ =
@@ -78,14 +60,13 @@ make_ =
                     [ "Decomposable" ]
                     "Decomposable"
                     [ Type.var "baseSyntax"
-                    , Type.var "cursorLess"
                     , Type.var "cctx"
                     , Type.var "wellformed"
                     ]
                     (Type.record
                         [ ( "decompose"
                           , Type.function
-                                [ Type.var "cursorLess", Type.list Type.int ]
+                                [ Type.var "baseSyntax", Type.list Type.int ]
                                 (Type.maybe
                                     (Type.tuple
                                         (Type.var "cctx")
@@ -98,18 +79,12 @@ make_ =
                                 [ Type.var "baseSyntax" ]
                                 (Type.list Type.int)
                           )
-                        , ( "toCLess"
-                          , Type.function
-                                [ Type.var "baseSyntax" ]
-                                (Type.var "cursorLess")
-                          )
                         ]
                     )
                 )
                 (Elm.record
                     [ Tuple.pair "decompose" decomposable_args.decompose
                     , Tuple.pair "getCursorPath" decomposable_args.getCursorPath
-                    , Tuple.pair "toCLess" decomposable_args.toCLess
                     ]
                 )
     }

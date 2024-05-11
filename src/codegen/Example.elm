@@ -2,9 +2,9 @@ module Example exposing (..)
 
 import Elm
 import Elm.Annotation as Type exposing (..)
-import Functions exposing (..)
 import Gen.Decomposable
 import Gen.Substitutable
+import GetCursorPath exposing (..)
 import Parser exposing (..)
 import Syntax exposing (..)
 

@@ -1,17 +1,15 @@
-module Gen.Substitutable exposing (moduleName_, annotation_, make_)
+module Gen.Substitutable exposing (annotation_, make_, moduleName_)
 
-{-|
-
+{-| 
 @docs moduleName_, annotation_, make_
-
 -}
+
 
 import Elm
 import Elm.Annotation as Type
 
 
-{-| The name of this module.
--}
+{-| The name of this module. -}
 moduleName_ : List String
 moduleName_ =
     [ "Substitutable" ]

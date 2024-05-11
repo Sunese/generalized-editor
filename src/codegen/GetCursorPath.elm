@@ -1,4 +1,4 @@
-module Functions exposing (..)
+module GetCursorPath exposing (..)
 
 import Array
 import Elm
