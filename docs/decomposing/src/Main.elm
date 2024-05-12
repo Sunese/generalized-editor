@@ -67,6 +67,16 @@ type alias Bind a b =
     ( List a, b )
 
 
+toCLess : Base -> CursorLess
+toCLess base =
+    case base of
+        S s ->
+            S_CLess (toCLessS s)
+
+        E e ->
+            E_CLess (toCLessE e)
+
+
 toCLessS : S -> S_CLess
 toCLessS s =
     case s of
@@ -80,7 +90,7 @@ toCLessS s =
             Hole_s_CLess
 
         Cursor_s arg1 ->
-            Debug.todo ""
+            Debug.todo "Not wellformed"
 
 
 toCLessE : E -> E_CLess
@@ -96,10 +106,10 @@ toCLessE e =
             Var_CLess
 
         Hole_e ->
-            Debug.todo ""
+            Hole_e_CLess
 
         Cursor_e arg1 ->
-            Debug.todo ""
+            Debug.todo "Not wellformed"
 
 
 toCCtx : Base -> List Int -> Cctx
@@ -120,14 +130,60 @@ toCCtx base path =
                                         -- NOTE: these could be cursors
                                         ( List.map toCLessE boundVars2, toCLessS arg2 )
 
+                                2 ->
+                                    Let_CLess_cctx2
+                                        (toCLessE arg1)
+                                        ( List.map toCLessE boundVars2, toCCtx (S arg2) rest )
+
                                 _ ->
-                                    Debug.todo ""
+                                    Debug.todo "Invalid path"
 
-                        _ ->
-                            Debug.todo ""
+                        Exp arg1 ->
+                            case i of
+                                1 ->
+                                    Exp_CLess_cctx1 (toCCtx (E arg1) rest)
 
-                _ ->
-                    Debug.todo ""
+                                _ ->
+                                    Debug.todo "Invalid path"
+
+                        Hole_s ->
+                            -- If we hit a hole and the path is not empty,
+                            -- then we are not wellformed
+                            Debug.todo "Invalid path"
+
+                        Cursor_s _ ->
+                            Cctx_hole
+
+                E e ->
+                    case e of
+                        Plus arg1 arg2 ->
+                            case i of
+                                1 ->
+                                    Plus_CLess_cctx1 (toCCtx (E arg1) rest) (toCLessE arg2)
+
+                                2 ->
+                                    Plus_CLess_cctx2 (toCLessE arg1) (toCCtx (E arg2) rest)
+
+                                _ ->
+                                    Debug.todo "Invalid path"
+
+                        Num ->
+                            -- If we hit a number and the path is not empty,
+                            -- then we are not wellformed
+                            Debug.todo "Invalid path"
+
+                        Var ->
+                            -- If we hit a variable and the path is not empty,
+                            -- then we are not wellformed
+                            Debug.todo "Invalid path"
+
+                        Hole_e ->
+                            -- If we hit a hole and the path is not empty,
+                            -- then we are not wellformed
+                            Debug.todo "Invalid path"
+
+                        Cursor_e _ ->
+                            Cctx_hole
 
 
 decompose : Base -> List Int -> Maybe ( Cctx, Wellformed )
@@ -138,11 +194,55 @@ decompose base path =
                 [] ->
                     Just ( toCCtx (S s) path, Root_s_CLess (toCLessS s) )
 
-                1 :: rest ->
-                    Debug.todo ""
-
-                _ ->
-                    Nothing
+                i :: rest ->
+                    Debug.todo "Not implemented"
 
         _ ->
-            Debug.todo ""
+            Debug.todo "Not implemented"
+
+
+getCursorPath : List Int -> Base -> List Int
+getCursorPath path base =
+    case base of
+        S s ->
+            case s of
+                Let arg1 ( boundVars2, arg2 ) ->
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+                        ++ getCursorPath
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
+                            (S arg2)
+
+                Exp arg1 ->
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+
+                Hole_s ->
+                    []
+
+                Cursor_s _ ->
+                    path
+
+        E e ->
+            case e of
+                Plus arg1 arg2 ->
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+                        ++ getCursorPath
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
+                            (E arg2)
+
+                Num ->
+                    []
+
+                Var ->
+                    []
+
+                Hole_e ->
+                    []
+
+                Cursor_e _ ->
+                    path
