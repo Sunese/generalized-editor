@@ -7,6 +7,8 @@ import Gen.Substitutable
 import GetCursorPath exposing (..)
 import Parser exposing (..)
 import Syntax exposing (..)
+import ToCCtx exposing (..)
+import ToCLess exposing (..)
 
 
 
@@ -61,6 +63,8 @@ exampleFiles =
             ++ (fromCLessToWellFormed <| createCursorlessSyntax exampleSyntax)
             ++ [ createBindType ]
             ++ [ createGetCursorPath <| addCursorHoleOps <| exampleSyntax ]
+            ++ createToCLessFuns (addCursorHoleOps exampleSyntax)
+            ++ [createToCCtxFun (addCursorHoleOps exampleSyntax)]
 
     -- ++ [createDecomposeFun <| addCursorHoleOps <| exampleSyntax]
     -- ++ [ createToCursorLessFun <| addCursorHoleOps <| exampleSyntax ]

@@ -107,3 +107,60 @@ getCursorPath path base =
 
                 Cursor_e _ ->
                     path
+
+
+toCLess_s : S -> S_CLess
+toCLess_s s =
+    case s of
+        Let arg1 ( boundVars2, arg2 ) ->
+            Let_CLess
+                (toCLess_e arg1)
+                ( List.map toCLess_e boundVars2, toCLess_s arg2 )
+
+        Exp arg1 ->
+            Exp_CLess (toCLess_e arg1)
+
+        Hole_s ->
+            Hole_s_CLess
+
+        Cursor_s cursor ->
+            Debug.todo "Not wellformed"
+
+
+toCLess_e : E -> E_CLess
+toCLess_e e =
+    case e of
+        Plus arg1 arg2 ->
+            Plus_CLess (toCLess_e arg1) (toCLess_e arg2)
+
+        Num ->
+            Num_CLess
+
+        Var ->
+            Var_CLess
+
+        Hole_e ->
+            Hole_e_CLess
+
+        Cursor_e cursor ->
+            Debug.todo "Not wellformed"
+
+
+toCLess : Base -> CursorLess
+toCLess base =
+    case base of
+        S arg1 ->
+            S_CLess (toCLess_s arg1)
+
+        E arg1 ->
+            E_CLess (toCLess_e arg1)
+
+
+toCCtx : Base -> CursorLess
+toCCtx base =
+    case base of
+        S arg1 ->
+            S_CLess (toCLess_s arg1)
+
+        E arg1 ->
+            E_CLess (toCLess_e arg1)

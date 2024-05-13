@@ -71,20 +71,20 @@ toCLess : Base -> CursorLess
 toCLess base =
     case base of
         S s ->
-            S_CLess (toCLessS s)
+            S_CLess (toCLess_s s)
 
         E e ->
-            E_CLess (toCLessE e)
+            E_CLess (toCLess_e e)
 
 
-toCLessS : S -> S_CLess
-toCLessS s =
+toCLess_s : S -> S_CLess
+toCLess_s s =
     case s of
         Let arg1 ( boundVars2, arg2 ) ->
-            Let_CLess (toCLessE arg1) ( List.map toCLessE boundVars2, toCLessS arg2 )
+            Let_CLess (toCLess_e arg1) ( List.map toCLess_e boundVars2, toCLess_s arg2 )
 
         Exp arg1 ->
-            Exp_CLess (toCLessE arg1)
+            Exp_CLess (toCLess_e arg1)
 
         Hole_s ->
             Hole_s_CLess
@@ -93,11 +93,11 @@ toCLessS s =
             Debug.todo "Not wellformed"
 
 
-toCLessE : E -> E_CLess
-toCLessE e =
+toCLess_e : E -> E_CLess
+toCLess_e e =
     case e of
         Plus arg1 arg2 ->
-            Plus_CLess (toCLessE arg1) (toCLessE arg2)
+            Plus_CLess (toCLess_e arg1) (toCLess_e arg2)
 
         Num ->
             Num_CLess
@@ -112,78 +112,93 @@ toCLessE e =
             Debug.todo "Not wellformed"
 
 
-toCCtx : Base -> List Int -> Cctx
-toCCtx base path =
+toCCtx_s : S -> List Int -> Cctx
+toCCtx_s s path =
     case path of
         [] ->
             Cctx_hole
 
         i :: rest ->
-            case base of
-                S s ->
-                    case s of
-                        Let arg1 ( boundVars2, arg2 ) ->
-                            case i of
-                                1 ->
-                                    Let_CLess_cctx1
-                                        (toCCtx (E arg1) rest)
-                                        -- NOTE: these could be cursors
-                                        ( List.map toCLessE boundVars2, toCLessS arg2 )
+            case s of
+                Let arg1 ( boundVars2, arg2 ) ->
+                    case i of
+                        1 ->
+                            Let_CLess_cctx1
+                                (toCCtx_e arg1 rest)
+                                -- NOTE: these could be cursors
+                                ( List.map toCLess_e boundVars2, toCLess_s arg2 )
 
-                                2 ->
-                                    Let_CLess_cctx2
-                                        (toCLessE arg1)
-                                        ( List.map toCLessE boundVars2, toCCtx (S arg2) rest )
+                        2 ->
+                            Let_CLess_cctx2
+                                (toCLess_e arg1)
+                                ( List.map toCLess_e boundVars2, toCCtx_s arg2 rest )
 
-                                _ ->
-                                    Debug.todo "Invalid path"
-
-                        Exp arg1 ->
-                            case i of
-                                1 ->
-                                    Exp_CLess_cctx1 (toCCtx (E arg1) rest)
-
-                                _ ->
-                                    Debug.todo "Invalid path"
-
-                        Hole_s ->
-                            -- If we hit a hole and the path is not empty,
-                            -- then we are not wellformed
+                        _ ->
                             Debug.todo "Invalid path"
 
-                        Cursor_s _ ->
-                            Cctx_hole
+                Exp arg1 ->
+                    case i of
+                        1 ->
+                            Exp_CLess_cctx1 (toCCtx_e arg1 rest)
 
-                E e ->
-                    case e of
-                        Plus arg1 arg2 ->
-                            case i of
-                                1 ->
-                                    Plus_CLess_cctx1 (toCCtx (E arg1) rest) (toCLessE arg2)
-
-                                2 ->
-                                    Plus_CLess_cctx2 (toCLessE arg1) (toCCtx (E arg2) rest)
-
-                                _ ->
-                                    Debug.todo "Invalid path"
-
-                        Num ->
-                            -- If we hit a number and the path is not empty,
-                            -- then we are not wellformed
+                        _ ->
                             Debug.todo "Invalid path"
 
-                        Var ->
-                            -- If we hit a variable and the path is not empty,
-                            -- then we are not wellformed
+                Hole_s ->
+                    -- If we hit a hole and the path is not empty,
+                    -- then we are not wellformed
+                    Debug.todo "Invalid path"
+
+                Cursor_s _ ->
+                    Cctx_hole
+
+
+toCCtx_e : E -> List Int -> Cctx
+toCCtx_e e path =
+    case path of
+        [] ->
+            Cctx_hole
+
+        i :: rest ->
+            case e of
+                Plus arg1 arg2 ->
+                    case i of
+                        1 ->
+                            Plus_CLess_cctx1 (toCCtx_e arg1 rest) (toCLess_e arg2)
+
+                        2 ->
+                            Plus_CLess_cctx2 (toCLess_e arg1) (toCCtx_e arg2 rest)
+
+                        _ ->
                             Debug.todo "Invalid path"
 
-                        Hole_e ->
-                            -- If we hit a hole and the path is not empty,
-                            -- then we are not wellformed
-                            Debug.todo "Invalid path"
+                Num ->
+                    -- If we hit a number and the path is not empty,
+                    -- then we are not wellformed
+                    Debug.todo "Invalid path"
 
-                        Cursor_e _ ->
-                            Cctx_hole
+                Var ->
+                    -- If we hit a variable and the path is not empty,
+                    -- then we are not wellformed
+                    Debug.todo "Invalid path"
+
+                Hole_e ->
+                    -- If we hit a hole and the path is not empty,
+                    -- then we are not wellformed
+                    Debug.todo "Invalid path"
+
+                Cursor_e _ ->
+                    Cctx_hole
+
+
+toCCtx : Base -> List Int -> Cctx
+toCCtx base path =
+    case base of
+        S s ->
+            toCCtx_s s path
+
+        E e ->
+            toCCtx_e e path
 
 
 decompose : Base -> List Int -> Maybe ( Cctx, Wellformed )
@@ -192,7 +207,7 @@ decompose base path =
         S s ->
             case path of
                 [] ->
-                    Just ( toCCtx (S s) path, Root_s_CLess (toCLessS s) )
+                    Just ( toCCtx (S s) path, Root_s_CLess (toCLess_s s) )
 
                 i :: rest ->
                     Debug.todo "Not implemented"
