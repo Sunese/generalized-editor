@@ -1,5 +1,6 @@
 module Example exposing (..)
 
+import DecomposeFun exposing (..)
 import Elm
 import Elm.Annotation as Type exposing (..)
 import Gen.Decomposable
@@ -64,7 +65,8 @@ exampleFiles =
             ++ [ createBindType ]
             ++ [ createGetCursorPath <| addCursorHoleOps <| exampleSyntax ]
             ++ createToCLessFuns (addCursorHoleOps exampleSyntax)
-            ++ [createToCCtxFun (addCursorHoleOps exampleSyntax)]
+            ++ createToCCtxFuns (addCursorHoleOps exampleSyntax)
+            ++ createDecomposeFuns (addCursorHoleOps exampleSyntax)
 
     -- ++ [createDecomposeFun <| addCursorHoleOps <| exampleSyntax]
     -- ++ [ createToCursorLessFun <| addCursorHoleOps <| exampleSyntax ]

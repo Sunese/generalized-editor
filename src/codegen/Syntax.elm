@@ -78,14 +78,74 @@ type alias WellFormedSynCatOps =
 {-| def. 14, step 1 + 2 + 3, for every operator of cursorless sort and 1 <= i <= n,
 add operator encapsulating the i'th subtree of the abt
 -}
+
+
+
+-- addCursorSortAndOps : CLessSyntax -> WellFormedSyntax
+-- addCursorSortAndOps syntax =
+--     -- NOTE: this is making me consider creating a new model specific for
+--     -- wellformed syntax (or just their operators), to have a way to
+--     -- specify what subtree is encapsulated.
+--     -- With the current setup, one has to figure it out from the operator's name,
+--     -- e.g. "assignment_cursor_arg_0" is the cursor operator for the first argument
+--     -- Nothing is stopping us from having a better/different model
+--     let
+--         ops =
+--             syntax.synCatOps
+--                 |> List.map .ops
+--                 |> List.concat
+--         rootCursorOps =
+--             List.map
+--                 (\syncat ->
+--                     { term = "TODO"
+--                     , arity = [ ( [], syncat.exp ) ]
+--                     , name = "root_" ++ syncat.exp
+--                     , synCat = "wellformed"
+--                     }
+--                 )
+--                 syntax.synCats
+--         newOps =
+--             List.map
+--                 (\op ->
+--                     List.indexedMap
+--                         (\i _ ->
+--                             { term = "TODO"
+--                             , arity = op.arity
+--                             , name = op.name ++ "_cursor" ++ String.fromInt (i + 1)
+--                             , synCat = "wellformed"
+--                             }
+--                         )
+--                         op.arity
+--                 )
+--                 ops
+--                 |> List.concat
+--                 |> List.append rootCursorOps
+--     in
+--     { syntax
+--         | synCatOps =
+--             syntax.synCatOps
+--                 ++ [ { ops = newOps
+--                      , synCat = "wellformed"
+--                      }
+--                    ]
+--         , synCats =
+--             syntax.synCats
+--                 ++ [ { exp = "wellformed"
+--                      , set = "WellFormed"
+--                      }
+--                    ]
+--     }
+--  in this version we do the same, but we only add root cursor operators,
+-- as to my suspicion where we only want a decomposition into cursor context +
+-- wellformed subtree, but where the input tree is always fully walked
+-- until a cursor is found, and the rest of the tree will be checked for wellformedness,
+-- but where the cursor of course only can be at the root of the tree,
+-- since we stopped the cursor context decomposition at the cursor,
+-- and we continue from there
+
+
 addCursorSortAndOps : CLessSyntax -> WellFormedSyntax
 addCursorSortAndOps syntax =
-    -- NOTE: this is making me consider creating a new model specific for
-    -- wellformed syntax (or just their operators), to have a way to
-    -- specify what subtree is encapsulated.
-    -- With the current setup, one has to figure it out from the operator's name,
-    -- e.g. "assignment_cursor_arg_0" is the cursor operator for the first argument
-    -- Nothing is stopping us from having a better/different model
     let
         ops =
             syntax.synCatOps
@@ -102,28 +162,11 @@ addCursorSortAndOps syntax =
                     }
                 )
                 syntax.synCats
-
-        newOps =
-            List.map
-                (\op ->
-                    List.indexedMap
-                        (\i _ ->
-                            { term = "TODO"
-                            , arity = op.arity
-                            , name = op.name ++ "_cursor" ++ String.fromInt (i + 1)
-                            , synCat = "wellformed"
-                            }
-                        )
-                        op.arity
-                )
-                ops
-                |> List.concat
-                |> List.append rootCursorOps
     in
     { syntax
         | synCatOps =
             syntax.synCatOps
-                ++ [ { ops = newOps
+                ++ [ { ops = rootCursorOps
                      , synCat = "wellformed"
                      }
                    ]

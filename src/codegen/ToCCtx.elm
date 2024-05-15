@@ -26,28 +26,78 @@ import Syntax exposing (..)
 -}
 
 
-createToCCtxFun : Syntax -> Elm.Declaration
-createToCCtxFun syntax =
-    Elm.declaration "toCCtx" <|
-        Elm.withType (Type.function [ Type.named [] "Base" ] (Type.named [] "CursorLess")) <|
-            Elm.fn
-                ( "base", Nothing )
-                (\base ->
-                    Elm.Case.custom base
-                        (Type.named [] "Base")
-                        (List.map
-                            (\synCatOp ->
-                                Elm.Case.branchWith
-                                    synCatOp.synCat
-                                    1
-                                    (\exps ->
-                                        Elm.apply (Elm.val <| firstCharToUpper <| synCatOp.synCat ++ "_CLess")
-                                            [ Elm.apply (Elm.val <| "toCLess_" ++ synCatOp.synCat) exps ]
+createToCCtxFuns : Syntax -> List Elm.Declaration
+createToCCtxFuns syntax =
+    List.map createToCCtxFun syntax.synCatOps
+        ++ [ Elm.declaration "toCCtx" <|
+                Elm.withType
+                    (Type.function
+                        [ Type.named [] "Base", Type.list Type.int ]
+                        (Type.tuple (Type.named [] "Cctx") (Type.named [] "Base"))
+                    )
+                <|
+                    Elm.fn2
+                        ( "base", Nothing )
+                        ( "path", Nothing )
+                        (\base path ->
+                            Elm.Case.custom base
+                                (Type.named [] "Base")
+                                (List.map
+                                    (\synCatOp ->
+                                        Elm.Case.branchWith
+                                            synCatOp.synCat
+                                            1
+                                            (\exps ->
+                                                Elm.apply (Elm.val <| "toCCtx_" ++ synCatOp.synCat) (exps ++ [ path ])
+                                            )
                                     )
-                            )
-                            syntax.synCatOps
+                                    syntax.synCatOps
+                                )
                         )
+           ]
+
+
+createToCCtxFun : SynCatOps -> Elm.Declaration
+createToCCtxFun synCatOp =
+    Elm.declaration ("toCCtx_" ++ synCatOp.synCat) <|
+        Elm.withType
+            (Type.function
+                [ Type.named [] synCatOp.synCat
+                , Type.list Type.int
+                ]
+                (Type.tuple (Type.named [] "Cctx") (Type.named [] "Base"))
+            )
+        <|
+            Elm.fn2
+                ( synCatOp.synCat, Nothing )
+                ( "path", Nothing )
+                (\op path ->
+                    custom path
+                        (Type.list Type.int)
+                        [ Branch.variant0 "[]"
+                            (Elm.tuple
+                                (Elm.val "Cctx_hole")
+                                (Elm.apply (Elm.val <| firstCharToUpper synCatOp.synCat) [ op ])
+                            )
+                        , Branch.listWithRemaining
+                            { patterns =
+                                [ Branch.var "i" ]
+                            , remaining = Branch.var "rest"
+                            , gather = \_ _ -> Elm.val ""
+                            , startWith = Elm.val ""
+                            , finally =
+                                \i rest ->
+                                    custom op
+                                        (Type.named [] synCatOp.synCat)
+                                        (getBranchListSynCatOp synCatOp)
+                            }
+                        ]
                 )
+
+
+
+-- pathBranches : List Branch.Branch
+-- pathBranches =
 
 
 getBranchListSynCatOp : SynCatOps -> List Branch.Branch
@@ -60,13 +110,13 @@ getBranchFromOp op =
     let
         patterns =
             List.indexedMap
-                (\i ( boundVars, arg ) ->
-                    case getPatternFromArg (i + 1) ( boundVars, arg ) of
+                (\i_ ( boundVars, arg ) ->
+                    case getPatternFromArg (i_ + 1) ( boundVars, arg ) of
                         Just pattern ->
                             pattern
 
                         Nothing ->
-                            Branch.var ("arg" ++ String.fromInt (i + 1))
+                            Branch.var ("arg" ++ String.fromInt (i_ + 1))
                 )
                 op.arity
 
@@ -78,8 +128,8 @@ getBranchFromOp op =
     in
     if String.contains "cursor" op.name then
         Branch.variant1 op.name
-            (Branch.var "cursor")
-            (\cursor ->
+            (Branch.ignore "_")
+            (\_ ->
                 Elm.apply
                     (Elm.value
                         { importFrom = [ "Debug" ]
@@ -87,46 +137,136 @@ getBranchFromOp op =
                         , annotation = Nothing
                         }
                     )
-                    [ Elm.string "Not wellformed" ]
+                    [ Elm.string "Invalid path: we hit a cursor but path list is non-empty" ]
             )
 
     else
         case List.length op.arity of
             0 ->
-                Branch.variant0 op.name (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                Branch.variant0 op.name
+                    (Elm.apply
+                        (Elm.value
+                            { importFrom = [ "Debug" ]
+                            , name = "todo"
+                            , annotation = Nothing
+                            }
+                        )
+                        [ Elm.string "Invalid path: we hit a 0-arity operator but path list is non-empty" ]
+                    )
 
             1 ->
+                let
+                    arg1 =
+                        Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray)
+                in
                 Branch.variant1
                     op.name
                     (Maybe.withDefault (Branch.var "ERROR") <| Array.get 0 patternsArray)
                     (\arg ->
-                        let
-                            argSort =
-                                Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray) |> Tuple.second
-                        in
-                        Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
-                            [ Elm.apply (Elm.val <| "toCLess" ++ "_" ++ argSort) [ arg ]
+                        custom
+                            (Elm.val "i")
+                            Type.int
+                            [ Branch.int 1
+                                (Elm.Let.letIn
+                                    (\( cctxChild, restTree ) ->
+                                        Elm.tuple
+                                            (Elm.apply
+                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                [ argToCctxTransformation_ 1 arg1
+                                                ]
+                                            )
+                                            restTree
+                                    )
+                                    |> Elm.Let.tuple
+                                        "cctxChild"
+                                        "restTree"
+                                        (Elm.apply
+                                            (Elm.val <| "toCCtx" ++ "_" ++ Tuple.second arg1)
+                                            [ Elm.val "arg1", Elm.val "rest" ]
+                                        )
+                                    |> Elm.Let.toExpression
+                                )
+                            , Branch.ignore
+                                (Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Debug" ]
+                                        , name = "todo"
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.string "Invalid path" ]
+                                )
                             ]
                     )
 
             2 ->
+                let
+                    arg1 =
+                        Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray)
+
+                    arg2 =
+                        Maybe.withDefault ( [], "ERROR" ) (Array.get 1 argsArray)
+                in
                 Branch.variant2
                     op.name
                     (Maybe.withDefault (Branch.var "ERROR") <| Array.get 0 patternsArray)
                     (Maybe.withDefault (Branch.var "ERROR") <| Array.get 1 patternsArray)
                     (\arg1Exp arg2Exp ->
-                        let
-                            arg1 =
-                                Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray)
-
-                            arg2 =
-                                Maybe.withDefault ( [], "ERROR" ) (Array.get 1 argsArray)
-                        in
-                        Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
-                            [ argToCLessTransformation 1 arg1
-                            , argToCLessTransformation 2 arg2
+                        custom
+                            (Elm.val "i")
+                            Type.int
+                            [ Branch.int 1 <|
+                                (Elm.Let.letIn
+                                    (\( cctxChild, restTree ) ->
+                                        Elm.tuple
+                                            (Elm.apply
+                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                [ argToCctxTransformation_ 1 arg1
+                                                , argToCLessTransformation 2 arg2
+                                                ]
+                                            )
+                                            restTree
+                                    )
+                                    |> Elm.Let.tuple
+                                        "cctxChild"
+                                        "restTree"
+                                        (Elm.apply
+                                            (Elm.val <| "toCCtx" ++ "_" ++ Tuple.second arg2)
+                                            [ Elm.val "arg2", Elm.val "rest" ]
+                                        )
+                                    |> Elm.Let.toExpression
+                                )
+                            , Branch.int 2 <|
+                                (Elm.Let.letIn
+                                    (\( cctxChild, restTree ) ->
+                                        Elm.tuple
+                                            (Elm.apply
+                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx2")
+                                                [ argToCLessTransformation 1 arg1
+                                                , argToCctxTransformation_ 2 arg2
+                                                ]
+                                            )
+                                            restTree
+                                    )
+                                    |> Elm.Let.tuple
+                                        "cctxChild"
+                                        "restTree"
+                                        (Elm.apply
+                                            (Elm.val <| "toCCtx" ++ "_" ++ Tuple.second arg2)
+                                            [ Elm.val "arg2", Elm.val "rest" ]
+                                        )
+                                    |> Elm.Let.toExpression
+                                )
+                            , Branch.ignore
+                                (Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Debug" ]
+                                        , name = "todo"
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.string "Invalid path" ]
+                                )
                             ]
                     )
 
@@ -189,6 +329,59 @@ getPatternFromArg i arg =
 
         ( boundVars, arg_ ) ->
             Just <| Branch.var <| "(boundVars" ++ String.fromInt i ++ ", arg" ++ String.fromInt i ++ ")"
+
+
+{-| The same but this one will always assume that there is a "cctxChild" to be used
+-}
+argToCctxTransformation_ : Int -> ( List String, String ) -> Elm.Expression
+argToCctxTransformation_ i ( boundVars, argSort ) =
+    if isBinder ( boundVars, argSort ) then
+        Elm.tuple
+            (Elm.apply
+                (Elm.value
+                    { importFrom = [ "List" ]
+                    , name = "map"
+                    , annotation = Nothing
+                    }
+                )
+                [ Elm.val <| "toCLess" ++ "_" ++ getBoundVarsSort boundVars
+                , Elm.val <| "boundVars" ++ String.fromInt i
+                ]
+            )
+            (Elm.val "cctxChild")
+
+    else
+        Elm.val "cctxChild"
+
+
+argToCctxTransformation : Int -> ( List String, String ) -> Elm.Expression
+argToCctxTransformation i ( boundVars, argSort ) =
+    if isBinder ( boundVars, argSort ) then
+        Elm.tuple
+            (Elm.apply
+                (Elm.value
+                    { importFrom = [ "List" ]
+                    , name = "map"
+                    , annotation = Nothing
+                    }
+                )
+                [ Elm.val <| "toCLess" ++ "_" ++ getBoundVarsSort boundVars
+                , Elm.val <| "boundVars" ++ String.fromInt i
+                ]
+            )
+            (Elm.apply
+                (Elm.val <| "toCCtx" ++ "_" ++ argSort)
+                [ Elm.val <| "arg" ++ String.fromInt i
+                , Elm.val <| "rest"
+                ]
+            )
+
+    else
+        Elm.apply
+            (Elm.val <| "toCCtx" ++ "_" ++ argSort)
+            [ Elm.val <| "arg" ++ String.fromInt i
+            , Elm.val <| "rest"
+            ]
 
 
 argToCLessTransformation : Int -> ( List String, String ) -> Elm.Expression
