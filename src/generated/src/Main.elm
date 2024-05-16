@@ -62,12 +62,14 @@ getCursorPath path base =
     case base of
         S s ->
             case s of
-                Let arg1 (boundVars2, arg2) ->
-                    getCursorPath (path ++ [ 1 ]) (E arg1) ++ getCursorPath
-                                                                      (path ++ [ 2
-                                                                               ]
-                                                                      )
-                                                                      (S arg2)
+                Let arg1 ( boundVars2, arg2 ) ->
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+                        ++ getCursorPath
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
+                            (S arg2)
 
                 Exp arg1 ->
                     getCursorPath (path ++ [ 1 ]) (E arg1)
@@ -81,11 +83,13 @@ getCursorPath path base =
         E e ->
             case e of
                 Plus arg1 arg2 ->
-                    getCursorPath (path ++ [ 1 ]) (E arg1) ++ getCursorPath
-                                                                      (path ++ [ 2
-                                                                               ]
-                                                                      )
-                                                                      (E arg2)
+                    getCursorPath (path ++ [ 1 ]) (E arg1)
+                        ++ getCursorPath
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
+                            (E arg2)
 
                 Num ->
                     []
@@ -103,7 +107,7 @@ getCursorPath path base =
 toCLess_s : S -> S_CLess
 toCLess_s s =
     case s of
-        Let arg1 (boundVars2, arg2) ->
+        Let arg1 ( boundVars2, arg2 ) ->
             Let_CLess
                 (toCLess_e arg1)
                 ( List.map toCLess_e boundVars2, toCLess_s arg2 )
@@ -155,7 +159,7 @@ toCCtx_s s path =
 
         i :: rest ->
             case s of
-                Let arg1 (boundVars2, arg2) ->
+                Let arg1 ( boundVars2, arg2 ) ->
                     case i of
                         1 ->
                             let
@@ -282,7 +286,7 @@ consumeCursor base =
                     S underCursor
 
                 _ ->
-                    Debug.todo "Expected cursor at root"
+                    S arg1
 
         E arg1 ->
             case arg1 of
@@ -290,7 +294,7 @@ consumeCursor base =
                     E underCursor
 
                 _ ->
-                    Debug.todo "Expected cursor at root"
+                    E arg1
 
 
 decompose : Base -> ( Cctx, Wellformed )
@@ -300,3 +304,41 @@ decompose base =
             toCCtx base (getCursorPath [] base)
     in
     ( cctx, toWellformed rest )
+
+
+example1 : Base
+example1 =
+    S
+        (Let
+            (Plus Num Num)
+            ( [ Num, Num ], Exp Num )
+        )
+
+
+example2 : Base
+example2 =
+    S
+        (Let
+            (Plus Num Num)
+            ( [ Num, Num ], Cursor_s (Exp Num) )
+        )
+
+
+example3 : Base
+example3 =
+    -- with a deeper cursor
+    S
+        (Let
+            (Plus Num Num)
+            ( [ Num, Num ], Let (Cursor_e Num) ( [ Num ], Exp Num ) )
+        )
+
+
+example4 : Base
+example4 =
+    -- with multiple cursors
+    S
+        (Let
+            (Plus Num Num)
+            ( [ Num, Num ], Let (Cursor_e Num) ( [ Num ], Cursor_s (Exp Num) ) )
+        )

@@ -104,13 +104,8 @@ createConsumeCursorFun syntax =
                                                 )
                                             , Branch.ignore
                                                 (Elm.apply
-                                                    (Elm.value
-                                                        { importFrom = [ "Debug" ]
-                                                        , name = "todo"
-                                                        , annotation = Nothing
-                                                        }
-                                                    )
-                                                    [ Elm.string "Expected cursor at root" ]
+                                                    (Elm.val <| firstCharToUpper synCatOp.synCat)
+                                                    exps
                                                 )
                                             ]
                                     )
