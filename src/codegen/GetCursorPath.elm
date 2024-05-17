@@ -29,23 +29,26 @@ import Syntax exposing (..)
 createGetCursorPath : Syntax -> Elm.Declaration
 createGetCursorPath syntax =
     Elm.declaration "getCursorPath" <|
-        Elm.withType (Type.function [ Type.list Type.int, Type.named [] "Base" ] (Type.list Type.int)) <|
-            Elm.fn2
+        Elm.withType
+            (Type.function
+                [ Type.list Type.int
+                , Type.named [] "Base"
+                ]
+                (Type.list Type.int)
+            )
+            (Elm.fn2
                 ( "path", Nothing )
                 ( "base", Nothing )
-                (\path base ->
+                (\_ base ->
                     Elm.Case.custom base
                         (Type.named [] "Base")
-                        (getBranchList
-                            syntax
-                            path
-                        )
+                        (getBranchList syntax)
                 )
+            )
 
 
-getBranchList : Syntax -> Elm.Expression -> List Branch.Branch
-getBranchList syntax path =
-    -- [ Branch.variant0 "Empty" <| Elm.int 0 ]
+getBranchList : Syntax -> List Branch.Branch
+getBranchList syntax =
     List.map
         (\synCatOp ->
             Branch.variant1 synCatOp.synCat (Branch.var synCatOp.synCat) <|
