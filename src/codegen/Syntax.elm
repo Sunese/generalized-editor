@@ -423,6 +423,11 @@ getSyntacticCategories syntax =
     List.map .exp syntax.synCats
 
 
+fromCLessToCCtxSyntax : Syntax -> CCtxSyntax
+fromCLessToCCtxSyntax syntax =
+    addCCtxOps <| addCCtxOp <| addCCtxSort syntax
+
+
 fromCLessToCCtxSyntaxSorts : Syntax -> List Elm.Declaration
 fromCLessToCCtxSyntaxSorts syntax =
     let
@@ -433,8 +438,13 @@ fromCLessToCCtxSyntaxSorts syntax =
     ]
 
 
-fromCLessToWellFormed : Syntax -> List Elm.Declaration
-fromCLessToWellFormed syntax =
+fromCLessToWellFormedSyntax : Syntax -> WellFormedSyntax
+fromCLessToWellFormedSyntax syntax =
+    addCursorSortAndOps <| addHoleOps syntax
+
+
+fromCLessToWellFormedSorts : Syntax -> List Elm.Declaration
+fromCLessToWellFormedSorts syntax =
     let
         wellFormedSyntax =
             addCursorSortAndOps syntax
@@ -710,10 +720,6 @@ firstCharToUpper s =
     (String.toUpper <| String.left 1 s) ++ String.dropLeft 1 s
 
 
-
--- List.map (\synCat -> )
-
-
 createCursorlessSyntaxSorts : Syntax -> List Elm.Declaration
 createCursorlessSyntaxSorts syntax =
     -- i.e. do the same as createBaseSyntaxSorts but add
@@ -754,8 +760,13 @@ createBindType =
 
 
 createBaseSyntaxSorts : Syntax -> List Elm.Declaration
+
+
+
+-- i.e. take all syncat rules and create a custom type for each
+
+
 createBaseSyntaxSorts syntax =
-    -- i.e. take all syncat rules and create a custom type for each
     -- and then create a custom type called BaseSyntax that is a union of all of them
     let
         uniqueSynCats =

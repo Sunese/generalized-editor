@@ -173,29 +173,72 @@ getBranchFromOp op =
                     )
 
             4 ->
-                Branch.variant0 op.name <|
-                    Elm.apply
-                        (Elm.value
-                            { importFrom = [ "Debug" ]
-                            , name = "todo"
-                            , annotation = Nothing
-                            }
-                        )
-                        [ Elm.string "" ]
+                Branch.variant4
+                    op.name
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 0 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 1 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 2 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 3 patternsArray)
+                    (\arg1Exp arg2Exp arg3Exp arg4Exp ->
+                        let
+                            arg1 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray)
+
+                            arg2 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 1 argsArray)
+
+                            arg3 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 2 argsArray)
+
+                            arg4 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 3 argsArray)
+                        in
+                        Elm.apply
+                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            [ argToCLessTransformation 1 arg1
+                            , argToCLessTransformation 2 arg2
+                            , argToCLessTransformation 3 arg3
+                            , argToCLessTransformation 4 arg4
+                            ]
+                    )
 
             5 ->
-                Branch.variant0 op.name <|
-                    Elm.apply
-                        (Elm.value
-                            { importFrom = [ "Debug" ]
-                            , name = "todo"
-                            , annotation = Nothing
-                            }
-                        )
-                        [ Elm.string "" ]
+                Branch.variant5
+                    op.name
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 0 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 1 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 2 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 3 patternsArray)
+                    (Maybe.withDefault (Branch.var "ERROR") <| Array.get 4 patternsArray)
+                    (\arg1Exp arg2Exp arg3Exp arg4Exp arg5Exp ->
+                        let
+                            arg1 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray)
+
+                            arg2 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 1 argsArray)
+
+                            arg3 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 2 argsArray)
+
+                            arg4 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 3 argsArray)
+
+                            arg5 =
+                                Maybe.withDefault ( [], "ERROR" ) (Array.get 4 argsArray)
+                        in
+                        Elm.apply
+                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            [ argToCLessTransformation 1 arg1
+                            , argToCLessTransformation 2 arg2
+                            , argToCLessTransformation 3 arg3
+                            , argToCLessTransformation 4 arg4
+                            , argToCLessTransformation 5 arg5
+                            ]
+                    )
 
             _ ->
-                Debug.todo "More than 5 args not supported"
+                Debug.todo "Ops with more than 5 args not supported"
 
 
 getPatternFromArg : Int -> ( List String, String ) -> Maybe (Branch.Pattern Elm.Expression)

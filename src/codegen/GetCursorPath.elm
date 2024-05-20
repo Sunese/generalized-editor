@@ -132,7 +132,7 @@ getBranchFromOp op =
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ arg1 ]
+                                , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
                                 ]
                             )
                             (Elm.apply
@@ -165,20 +165,20 @@ getBranchFromOp op =
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ arg1 ]
+                                    , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
                                     ]
                                 )
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ arg2 ]
+                                    , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
                                     ]
                                 )
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 3 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ arg3 ]
+                                , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ Elm.val "arg3" ]
                                 ]
                             )
                     )
@@ -209,27 +209,27 @@ getBranchFromOp op =
                                     (Elm.apply
                                         (Elm.val "getCursorPath")
                                         [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                        , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ arg1 ]
+                                        , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
                                         ]
                                     )
                                     (Elm.apply
                                         (Elm.val "getCursorPath")
                                         [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                        , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ arg2 ]
+                                        , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
                                         ]
                                     )
                                 )
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 3 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ arg3 ]
+                                    , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ Elm.val "arg3" ]
                                     ]
                                 )
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 4 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort4)) [ arg4 ]
+                                , Elm.apply (Elm.val (firstCharToUpper argSort4)) [ Elm.val "arg4" ]
                                 ]
                             )
                     )
@@ -265,34 +265,34 @@ getBranchFromOp op =
                                         (Elm.apply
                                             (Elm.val "getCursorPath")
                                             [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                            , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ arg1 ]
+                                            , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
                                             ]
                                         )
                                         (Elm.apply
                                             (Elm.val "getCursorPath")
                                             [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                            , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ arg2 ]
+                                            , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
                                             ]
                                         )
                                     )
                                     (Elm.apply
                                         (Elm.val "getCursorPath")
                                         [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 3 ])
-                                        , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ arg3 ]
+                                        , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ Elm.val "arg3" ]
                                         ]
                                     )
                                 )
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 4 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort4)) [ arg4 ]
+                                    , Elm.apply (Elm.val (firstCharToUpper argSort4)) [ Elm.val "arg4" ]
                                     ]
                                 )
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 5 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort5)) [ arg5 ]
+                                , Elm.apply (Elm.val (firstCharToUpper argSort5)) [ Elm.val "arg5" ]
                                 ]
                             )
                     )

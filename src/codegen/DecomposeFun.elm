@@ -22,7 +22,15 @@ createDecomposeFuns syntax =
     [ createToWellFormedFun syntax
     , createConsumeCursorFun syntax
     , Elm.declaration "decompose" <|
-        Elm.withType (Type.function [ Type.named [] "Base" ] (Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))) <|
+        Elm.withType
+            (Type.function
+                [ Type.named [] "Base" ]
+                (Type.tuple
+                    (Type.named [] "Cctx")
+                    (Type.named [] "Wellformed")
+                )
+            )
+        <|
             Elm.fn
                 ( "base", Nothing )
                 (\base ->
@@ -68,7 +76,8 @@ createToWellFormedFun syntax =
                                 branchWith synCatOp.synCat
                                     1
                                     (\exps ->
-                                        Elm.apply (Elm.val <| "Root_" ++ synCatOp.synCat ++ "_CLess")
+                                        Elm.apply
+                                            (Elm.val <| "Root_" ++ synCatOp.synCat ++ "_CLess")
                                             [ Elm.apply (Elm.val <| "toCLess_" ++ synCatOp.synCat) exps ]
                                     )
                             )
