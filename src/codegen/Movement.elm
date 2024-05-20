@@ -27,8 +27,8 @@ createChildFun extendedSyntax clessSyntax cctxSyntax wellformedSyntax =
             )
         <|
             Elm.fn2
-                ( "i", Nothing )
-                ( "decomposed", Nothing )
+                ( "i", Just Type.int )
+                ( "decomposed", Just <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed") )
                 (\i decomposed ->
                     Elm.Let.letIn
                         (\( cctx, wellformed ) ->
@@ -504,7 +504,7 @@ cctxRecurseBranch cctxOp =
     in
     case List.length cctxOp.arity of
         0 ->
-            Branch.var "ERROR"
+            Debug.todo "no cctx op has 0 arity"
 
         1 ->
             Branch.variant1
@@ -553,10 +553,248 @@ cctxRecurseBranch cctxOp =
                         )
 
                 _ ->
-                    Branch.var "ERROR"
+                    Debug.todo "op has arity 2 but cctx_i is not 1 or 2"
+
+        3 ->
+            let
+                cctx_i =
+                    -- get last char in op name indicating which cctx to replace
+                    Maybe.withDefault 1 <| String.toInt <| String.right 1 cctxOp.name
+            in
+            case cctx_i of
+                1 ->
+                    Branch.variant3
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (\arg1 arg2 arg3 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ getRecursionExp 0 recursionExpArray
+                                , arg2
+                                , arg3
+                                ]
+                        )
+
+                2 ->
+                    Branch.variant3
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (\arg1 arg2 arg3 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , getRecursionExp 1 recursionExpArray
+                                , arg3
+                                ]
+                        )
+
+                3 ->
+                    Branch.variant3
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (\arg1 arg2 arg3 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , arg2
+                                , getRecursionExp 2 recursionExpArray
+                                ]
+                        )
+
+                _ ->
+                    Debug.todo "op has arity 3 but cctx_i is not 1, 2 or 3"
+
+        4 ->
+            let
+                cctx_i =
+                    -- get last char in op name indicating which cctx to replace
+                    Maybe.withDefault 1 <| String.toInt <| String.right 1 cctxOp.name
+            in
+            case cctx_i of
+                1 ->
+                    Branch.variant4
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (\arg1 arg2 arg3 arg4 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ getRecursionExp 0 recursionExpArray
+                                , arg2
+                                , arg3
+                                , arg4
+                                ]
+                        )
+
+                2 ->
+                    Branch.variant4
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (\arg1 arg2 arg3 arg4 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , getRecursionExp 1 recursionExpArray
+                                , arg3
+                                , arg4
+                                ]
+                        )
+
+                3 ->
+                    Branch.variant4
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (\arg1 arg2 arg3 arg4 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , arg2
+                                , getRecursionExp 2 recursionExpArray
+                                , arg4
+                                ]
+                        )
+
+                4 ->
+                    Branch.variant4
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (\arg1 arg2 arg3 arg4 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , arg2
+                                , arg3
+                                , getRecursionExp 3 recursionExpArray
+                                ]
+                        )
+
+                _ ->
+                    Debug.todo "op has arity 4 but cctx_i is not 1, 2, 3 or 4"
+
+        5 ->
+            let
+                cctx_i =
+                    -- get last char in op name indicating which cctx to replace
+                    Maybe.withDefault 1 <| String.toInt <| String.right 1 cctxOp.name
+            in
+            case cctx_i of
+                1 ->
+                    Branch.variant5
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (getBranchPattern 4 patternsArray)
+                        (\arg1 arg2 arg3 arg4 arg5 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ getRecursionExp 0 recursionExpArray
+                                , arg2
+                                , arg3
+                                , arg4
+                                , arg5
+                                ]
+                        )
+
+                2 ->
+                    Branch.variant5
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (getBranchPattern 4 patternsArray)
+                        (\arg1 arg2 arg3 arg4 arg5 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , getRecursionExp 1 recursionExpArray
+                                , arg3
+                                , arg4
+                                , arg5
+                                ]
+                        )
+
+                3 ->
+                    Branch.variant5
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (getBranchPattern 4 patternsArray)
+                        (\arg1 arg2 arg3 arg4 arg5 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , arg2
+                                , getRecursionExp 2 recursionExpArray
+                                , arg4
+                                , arg5
+                                ]
+                        )
+
+                4 ->
+                    Branch.variant5
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (getBranchPattern 4 patternsArray)
+                        (\arg1 arg2 arg3 arg4 arg5 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , arg2
+                                , arg3
+                                , getRecursionExp 3 recursionExpArray
+                                , arg5
+                                ]
+                        )
+
+                5 ->
+                    Branch.variant5
+                        cctxOp.name
+                        (getBranchPattern 0 patternsArray)
+                        (getBranchPattern 1 patternsArray)
+                        (getBranchPattern 2 patternsArray)
+                        (getBranchPattern 3 patternsArray)
+                        (getBranchPattern 4 patternsArray)
+                        (\arg1 arg2 arg3 arg4 arg5 ->
+                            Elm.apply
+                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                [ arg1
+                                , arg2
+                                , arg3
+                                , arg4
+                                , getRecursionExp 4 recursionExpArray
+                                ]
+                        )
+
+                _ ->
+                    Debug.todo "op has arity 5 but cctx_i is not 1, 2, 3, 4 or 5"
 
         _ ->
-            Branch.var "ERROR"
+            Debug.todo "Ops with arity > 5 not supported"
 
 
 getCursorLessOps : CLessSyntax -> List Operator

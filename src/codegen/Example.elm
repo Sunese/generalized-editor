@@ -73,13 +73,13 @@ exampleFiles =
                     (createCursorlessSyntax exampleSyntax)
                     (fromCLessToCCtxSyntax <| createCursorlessSyntax exampleSyntax)
                ]
+            ++ [ createChildFun
+                    (addCursorHoleOps <| exampleSyntax)
+                    (createCursorlessSyntax exampleSyntax)
+                    (fromCLessToCCtxSyntax <| createCursorlessSyntax exampleSyntax)
+                    (fromCLessToWellFormedSyntax <| createCursorlessSyntax exampleSyntax)
+               ]
 
-    -- ++ [ createChildFun
-    --         (addCursorHoleOps <| exampleSyntax)
-    --         (createCursorlessSyntax exampleSyntax)
-    --         (fromCLessToCCtxSyntax <| createCursorlessSyntax exampleSyntax)
-    --         (fromCLessToWellFormedSyntax <| createCursorlessSyntax exampleSyntax)
-    --    ]
     -- ++ [createDecomposeFun <| addCursorHoleOps <| exampleSyntax]
     -- ++ [ createToCursorLessFun <| addCursorHoleOps <| exampleSyntax ]
     -- ++ [ decomposableInstance <| addCursorHoleOps <| exampleSyntax ]
