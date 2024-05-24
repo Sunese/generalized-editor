@@ -287,15 +287,16 @@ getCursorPath path base =
         Vd vd ->
             case vd of
                 Vardecl arg1 arg2 ( boundVars3, arg3 ) ->
-                    (getCursorPath (path ++ [ 1 ]) (T arg1)
+                    (getCursorPath
+                        (path ++ [ 1 ])
+                        (T arg1)
                         ++ getCursorPath
-                            (path
-                                ++ [ 2
-                                   ]
-                            )
+                            (path ++ [ 2 ])
                             (E arg2)
                     )
-                        ++ getCursorPath (path ++ [ 3 ]) (Bi arg3)
+                        ++ getCursorPath
+                            (path ++ [ 3 ])
+                            (Bi arg3)
 
                 Hole_vd ->
                     []
