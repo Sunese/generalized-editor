@@ -440,7 +440,7 @@ fromCLessToCCtxSyntaxSorts syntax =
 
 fromCLessToWellFormedSyntax : Syntax -> WellFormedSyntax
 fromCLessToWellFormedSyntax syntax =
-    addCursorSortAndOps <| addHoleOps syntax
+    addCursorSortAndOps syntax
 
 
 fromCLessToWellFormedSorts : Syntax -> List Elm.Declaration

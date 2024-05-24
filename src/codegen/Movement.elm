@@ -23,7 +23,7 @@ createChildFun extendedSyntax clessSyntax cctxSyntax wellformedSyntax =
                 [ Type.int
                 , Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed")
                 ]
-                (Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))
+                (Type.maybe <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))
             )
         <|
             Elm.fn2
@@ -37,10 +37,7 @@ createChildFun extendedSyntax clessSyntax cctxSyntax wellformedSyntax =
                                 (Type.named [] "Wellformed")
                                 (wellformedCases
                                     clessSyntax
-                                    (List.filter
-                                        (\x -> x.synCat == "wellformed")
-                                        wellformedSyntax.synCatOps
-                                    )
+                                    (List.filter (\x -> x.synCat == "wellformed") wellformedSyntax.synCatOps)
                                 )
                         )
                         |> Elm.Let.tuple "cctx" "wellformed" (Elm.val "decomposed")
@@ -80,16 +77,13 @@ wellformedCases clessSyntax wellformedsynCatOps =
                 clessName =
                     -- firstCharToUpper <| String.dropLeft 5 op.name
                     String.dropLeft 5 op.name
-
-                patterns =
-                    Array.fromList <| List.indexedMap getPattern_ op.arity
             in
             Branch.variant1
                 op.name
                 (Branch.var "underCursor")
                 (\underCursor ->
                     Elm.Case.custom underCursor
-                        (Type.named [] clessName)
+                        (Type.named [] (firstCharToUpper clessName))
                         (List.map
                             (getUnderCursorBranch underCursor)
                             (List.filter (\x -> x.synCat == clessName) allCLessOps)
@@ -121,21 +115,15 @@ getUnderCursorBranch underCursor op =
     in
     case List.length op.arity of
         0 ->
-            Branch.variant0 op.name
-                (Elm.apply
-                    (Elm.value
-                        { importFrom = [ "Debug" ]
-                        , name = "todo"
-                        , annotation = Nothing
-                        }
-                    )
-                    [ Elm.string "No children at op under cursor, cannot go deeper" ]
-                )
+            Branch.variant0 op.name <| Elm.nothing
 
         1 ->
             let
                 arg1Sort =
                     Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray) |> Tuple.second
+
+                -- x =
+                --     Debug.todo arg1Sort
             in
             Branch.variant1
                 op.name
@@ -144,25 +132,33 @@ getUnderCursorBranch underCursor op =
                     Elm.Case.custom
                         (Elm.val "i")
                         Type.int
+                    <|
                         [ Branch.int 1 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.withType
+                                        (Type.named [] "Wellformed")
+                                     <|
+                                        Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ]
+                                    )
+
+                        -- (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                        -- (Elm.apply
+                        --     (Elm.val <| "Root_" ++ arg1Sort)
+                        --     [ Elm.val "arg1" ]
+                        -- )
                         , Branch.ignore <|
-                            Elm.apply
-                                (Elm.value
-                                    { importFrom = [ "Debug" ]
-                                    , name = "todo"
-                                    , annotation = Nothing
-                                    }
-                                )
-                                [ Elm.string "Invalid child index" ]
+                            -- setting it like this instead of
+                            -- Elm.ignore prevents the codegen
+                            -- from hanging
+                            Elm.nothing
                         ]
                 )
 
@@ -183,34 +179,28 @@ getUnderCursorBranch underCursor op =
                         (Elm.val "i")
                         Type.int
                         [ Branch.int 1 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
-                        , Branch.ignore <|
-                            Elm.apply
-                                (Elm.value
-                                    { importFrom = [ "Debug" ]
-                                    , name = "todo"
-                                    , annotation = Nothing
-                                    }
-                                )
-                                [ Elm.string "Invalid child index" ]
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                        , Branch.ignore <| Elm.nothing
                         ]
                 )
 
@@ -235,44 +225,39 @@ getUnderCursorBranch underCursor op =
                         (Elm.val "i")
                         Type.int
                         [ Branch.int 1 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.int 3 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
-                        , Branch.ignore <|
-                            Elm.apply
-                                (Elm.value
-                                    { importFrom = [ "Debug" ]
-                                    , name = "todo"
-                                    , annotation = Nothing
-                                    }
-                                )
-                                [ Elm.string "Invalid child index" ]
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                        , Branch.ignore <| Elm.nothing
                         ]
                 )
 
@@ -301,54 +286,50 @@ getUnderCursorBranch underCursor op =
                         (Elm.val "i")
                         Type.int
                         [ Branch.int 1 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.int 3 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
                         , Branch.int 4 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
-                        , Branch.ignore <|
-                            Elm.apply
-                                (Elm.value
-                                    { importFrom = [ "Debug" ]
-                                    , name = "todo"
-                                    , annotation = Nothing
-                                    }
-                                )
-                                [ Elm.string "Invalid child index" ]
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
+                        , Branch.ignore <| Elm.nothing
                         ]
                 )
 
@@ -381,77 +362,66 @@ getUnderCursorBranch underCursor op =
                         (Elm.val "i")
                         Type.int
                         [ Branch.int 1 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.int 3 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
                         , Branch.int 4 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
                         , Branch.int 5 <|
-                            Elm.tuple
-                                (Elm.apply
-                                    (Elm.val "replaceCctxHole")
-                                    [ Elm.val "i"
-                                    , Elm.val "cctx"
-                                    , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                    ]
-                                )
-                                (Elm.apply (Elm.val <| "Root_" ++ arg5Sort) [ Elm.val "arg5" ])
-                        , Branch.ignore <|
-                            Elm.apply
-                                (Elm.value
-                                    { importFrom = [ "Debug" ]
-                                    , name = "todo"
-                                    , annotation = Nothing
-                                    }
-                                )
-                                [ Elm.string "Invalid child index" ]
+                            Elm.just <|
+                                Elm.tuple
+                                    (Elm.apply
+                                        (Elm.val "replaceCctxHole")
+                                        [ Elm.val "i"
+                                        , Elm.val "cctx"
+                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                        ]
+                                    )
+                                    (Elm.apply (Elm.val <| "Root_" ++ arg5Sort) [ Elm.val "arg5" ])
+                        , Branch.ignore <| Elm.nothing
                         ]
                 )
 
         _ ->
-            Branch.ignore <|
-                Elm.apply
-                    (Elm.value
-                        { importFrom = [ "Debug" ]
-                        , name = "todo"
-                        , annotation = Nothing
-                        }
-                    )
-                    [ Elm.string "Operators of more than 5 args not supported" ]
+            Debug.todo "ops with more than 5 args not supported"
 
 
 cctxCases :
