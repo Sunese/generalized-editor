@@ -513,22 +513,14 @@ moveCCtxHoleUp cctx path =
                     moveCCtxHoleUp cctx_ rest
                         |> Maybe.map
                             (\( newCctx, removedCctx ) ->
-                                ( Let_CLess_cctx1 newCctx ( boundVars2, arg2 )
-                                , removedCctx
-                                )
+                                ( Let_CLess_cctx1 newCctx ( boundVars2, arg2 ), removedCctx )
                             )
 
-                -- Just ( newCctx, removedCctx ) ->
-                --     Just ( Let_CLess_cctx1 newCctx ( boundVars2, arg2 ), removedCctx )
-                -- Nothing ->
-                --     Nothing
                 Let_CLess_cctx2 arg1 ( boundVars2, cctx_ ) ->
                     moveCCtxHoleUp cctx_ rest
                         |> Maybe.map
                             (\( newCctx, removedCctx ) ->
-                                ( Let_CLess_cctx2 arg1 ( boundVars2, newCctx )
-                                , removedCctx
-                                )
+                                ( Let_CLess_cctx2 arg1 ( boundVars2, newCctx ), removedCctx )
                             )
 
                 Exp_CLess_cctx1 cctx_ ->
@@ -559,7 +551,7 @@ moveCCtxHoleUp cctx path =
             Nothing
 
 
-addParent : Cctx -> Wellformed -> Wellformed
+addParent : Cctx -> Wellformed -> Maybe Wellformed
 addParent cctx wellformed =
     -- add the cctx as the parent of the wellformed tree,
     -- wrapped in a Root_s_CLess or Root_e_CLess
@@ -567,47 +559,51 @@ addParent cctx wellformed =
     -- under the cursor
     case cctx of
         Cctx_hole ->
-            Debug.todo "No parent"
+            Nothing
 
         Let_CLess_cctx1 _ ( boundVars2, arg2 ) ->
+            -- we want to make sure that the cctx1 is compatible
+            -- with the wellformed tree under the cursor
             case wellformed of
+                -- make sure that the cctx1 '_' corresponds to
+                -- Root_x_CLess where x is the sort of "_"
                 Root_e_CLess underCursor ->
-                    Root_s_CLess (Let_CLess underCursor ( boundVars2, arg2 ))
+                    Just <| Root_s_CLess (Let_CLess underCursor ( boundVars2, arg2 ))
 
                 _ ->
-                    Debug.todo "Not wellformed"
+                    Nothing
 
         Let_CLess_cctx2 arg1 ( boundVars2, _ ) ->
             case wellformed of
                 Root_s_CLess underCursor ->
-                    Root_s_CLess (Let_CLess arg1 ( boundVars2, underCursor ))
+                    Just <| Root_s_CLess (Let_CLess arg1 ( boundVars2, underCursor ))
 
                 _ ->
-                    Debug.todo "Not wellformed"
+                    Nothing
 
         Exp_CLess_cctx1 _ ->
             case wellformed of
                 Root_e_CLess underCursor ->
-                    Root_s_CLess (Exp_CLess underCursor)
+                    Just <| Root_s_CLess (Exp_CLess underCursor)
 
                 _ ->
-                    Debug.todo "Not wellformed"
+                    Nothing
 
         Plus_CLess_cctx1 _ arg2 ->
             case wellformed of
                 Root_e_CLess underCursor ->
-                    Root_e_CLess (Plus_CLess underCursor arg2)
+                    Just <| Root_e_CLess (Plus_CLess underCursor arg2)
 
                 _ ->
-                    Debug.todo "Not wellformed"
+                    Nothing
 
         Plus_CLess_cctx2 arg1 _ ->
             case wellformed of
                 Root_e_CLess underCursor ->
-                    Root_e_CLess (Plus_CLess arg1 underCursor)
+                    Just <| Root_e_CLess (Plus_CLess arg1 underCursor)
 
                 _ ->
-                    Debug.todo "Not wellformed"
+                    Nothing
 
 
 parent : ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
@@ -616,13 +612,49 @@ parent decomposed =
         ( cctx, wellformed ) =
             decomposed
     in
-    moveCCtxHoleUp cctx (getCctxPath cctx [])
-        |> Maybe.map
-            (\( newCctx, removedCctx ) ->
-                ( newCctx
-                , addParent removedCctx wellformed
-                )
-            )
+    case moveCCtxHoleUp cctx (getCctxPath cctx []) of
+        Nothing ->
+            Nothing
+
+        Just ( newCctx, removedCctx ) ->
+            case addParent removedCctx wellformed of
+                Nothing ->
+                    Nothing
+
+                Just newWellformed ->
+                    Just ( newCctx, newWellformed )
+
+
+substitute : ( Cctx, Wellformed ) -> CursorLess -> Maybe ( Cctx, Wellformed )
+substitute decomposed sub =
+    -- ensure that the new tree is of same sort as the cursorless
+    -- operator under the cursor in the well-formed tree
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_s_CLess _ ->
+            case sub of
+                -- we know that the current under cursor is S_CLess
+                -- let's check if the sub tree is also S_CLess
+                S_CLess sub_ ->
+                    Just ( cctx, Root_s_CLess sub_ )
+
+                _ ->
+                    -- if not, we cannot substitute
+                    Nothing
+
+        Root_e_CLess _ ->
+            case sub of
+                -- we know that the current under cursor is E_CLess
+                -- let's check if the sub tree is also E_CLess
+                E_CLess sub_ ->
+                    Just ( cctx, Root_e_CLess sub_ )
+
+                _ ->
+                    -- if not, we cannot substitute
+                    Nothing
 
 
 example2 : Base

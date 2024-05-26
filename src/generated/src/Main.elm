@@ -287,16 +287,15 @@ getCursorPath path base =
         Vd vd ->
             case vd of
                 Vardecl arg1 arg2 ( boundVars3, arg3 ) ->
-                    (getCursorPath
-                        (path ++ [ 1 ])
-                        (T arg1)
+                    (getCursorPath (path ++ [ 1 ]) (T arg1)
                         ++ getCursorPath
-                            (path ++ [ 2 ])
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
                             (E arg2)
                     )
-                        ++ getCursorPath
-                            (path ++ [ 3 ])
-                            (Bi arg3)
+                        ++ getCursorPath (path ++ [ 3 ]) (Bi arg3)
 
                 Hole_vd ->
                     []
@@ -2589,3 +2588,1305 @@ child i decomposed =
 
                 Hole_cond_CLess ->
                     Nothing
+
+
+substitute : ( Cctx, Wellformed ) -> CursorLess -> Maybe ( Cctx, Wellformed )
+substitute decomposed sub =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_p_CLess _ ->
+            case sub of
+                P_CLess sub0 ->
+                    Just ( cctx, Root_p_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_s_CLess _ ->
+            case sub of
+                S_CLess sub0 ->
+                    Just ( cctx, Root_s_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_vd_CLess _ ->
+            case sub of
+                Vd_CLess sub0 ->
+                    Just ( cctx, Root_vd_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_fd_CLess _ ->
+            case sub of
+                Fd_CLess sub0 ->
+                    Just ( cctx, Root_fd_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_t_CLess _ ->
+            case sub of
+                T_CLess sub0 ->
+                    Just ( cctx, Root_t_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_id_CLess _ ->
+            case sub of
+                Id_CLess sub0 ->
+                    Just ( cctx, Root_id_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_e_CLess _ ->
+            case sub of
+                E_CLess sub0 ->
+                    Just ( cctx, Root_e_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_b_CLess _ ->
+            case sub of
+                B_CLess sub0 ->
+                    Just ( cctx, Root_b_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_bi_CLess _ ->
+            case sub of
+                Bi_CLess sub0 ->
+                    Just ( cctx, Root_bi_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_fa_CLess _ ->
+            case sub of
+                Fa_CLess sub0 ->
+                    Just ( cctx, Root_fa_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_cond_CLess _ ->
+            case sub of
+                Cond_CLess sub0 ->
+                    Just ( cctx, Root_cond_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+
+getCctxPath : Cctx -> List Int -> List Int
+getCctxPath cctx path =
+    case cctx of
+        Cctx_hole ->
+            path
+
+        Program_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Block_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Blockstmts_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Vardecl_CLess_cctx1 arg1 arg2 ( boundVars3, arg3 ) ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Vardecl_CLess_cctx2 arg1 arg2 ( boundVars3, arg3 ) ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Vardecl_CLess_cctx3 arg1 arg2 ( boundVars3, arg3 ) ->
+            getCctxPath arg3 (path ++ [ 3 ])
+
+        Fundecl1_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Fundecl1_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Fundecl1_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            getCctxPath arg3 (path ++ [ 3 ])
+
+        Fundecl1_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            getCctxPath arg4 (path ++ [ 4 ])
+
+        Fundecl2_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Fundecl2_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Fundecl2_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            getCctxPath arg3 (path ++ [ 3 ])
+
+        Fundecl2_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            getCctxPath arg4 (path ++ [ 4 ])
+
+        Fundecl2_CLess_cctx5 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            getCctxPath arg5 (path ++ [ 5 ])
+
+        Assignment_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Assignment_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Stmtfuncall_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Stmtfuncall_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Return_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Conditional_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Compstmt_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Compstmt_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Funarg_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Funarg_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Funargs_CLess_cctx1 arg1 arg2 arg3 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Funargs_CLess_cctx2 arg1 arg2 arg3 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Funargs_CLess_cctx3 arg1 arg2 arg3 ->
+            getCctxPath arg3 (path ++ [ 3 ])
+
+        Ifelse_CLess_cctx1 arg1 arg2 arg3 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Ifelse_CLess_cctx2 arg1 arg2 arg3 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Ifelse_CLess_cctx3 arg1 arg2 arg3 ->
+            getCctxPath arg3 (path ++ [ 3 ])
+
+        Plus_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Plus_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Equals_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Equals_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Expfuncall_CLess_cctx1 arg1 arg2 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+        Expfuncall_CLess_cctx2 arg1 arg2 ->
+            getCctxPath arg2 (path ++ [ 2 ])
+
+        Expident_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
+
+moveCCtxHoleUp : Cctx -> List Int -> Maybe ( Cctx, Cctx )
+moveCCtxHoleUp cctx path =
+    case path of
+        [ _, _ ] ->
+            case cctx of
+                Cctx_hole ->
+                    Nothing
+
+                Program_CLess_cctx1 arg1 ->
+                    Just ( Program_CLess_cctx1 Cctx_hole, arg1 )
+
+                Block_CLess_cctx1 arg1 ->
+                    Just ( Block_CLess_cctx1 Cctx_hole, arg1 )
+
+                Blockstmts_CLess_cctx1 arg1 ->
+                    Just ( Blockstmts_CLess_cctx1 Cctx_hole, arg1 )
+
+                Vardecl_CLess_cctx1 arg1 arg2 ( boundVars3, arg3 ) ->
+                    Just
+                        ( Vardecl_CLess_cctx1 Cctx_hole arg2 ( boundVars3, arg3 )
+                        , arg1
+                        )
+
+                Vardecl_CLess_cctx2 arg1 arg2 ( boundVars3, arg3 ) ->
+                    Just
+                        ( Vardecl_CLess_cctx2 arg1 Cctx_hole ( boundVars3, arg3 )
+                        , arg2
+                        )
+
+                Vardecl_CLess_cctx3 arg1 arg2 ( boundVars3, arg3 ) ->
+                    Just
+                        ( Vardecl_CLess_cctx3 arg1 arg2 ( boundVars3, Cctx_hole )
+                        , arg3
+                        )
+
+                Fundecl1_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    Just
+                        ( Fundecl1_CLess_cctx1
+                            Cctx_hole
+                            ( boundVars2, arg2 )
+                            arg3
+                            ( boundVars4, arg4 )
+                        , arg1
+                        )
+
+                Fundecl1_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    Just
+                        ( Fundecl1_CLess_cctx2
+                            arg1
+                            ( boundVars2, Cctx_hole )
+                            arg3
+                            ( boundVars4, arg4 )
+                        , arg2
+                        )
+
+                Fundecl1_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    Just
+                        ( Fundecl1_CLess_cctx3
+                            arg1
+                            ( boundVars2, arg2 )
+                            Cctx_hole
+                            ( boundVars4, arg4 )
+                        , arg3
+                        )
+
+                Fundecl1_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    Just
+                        ( Fundecl1_CLess_cctx4
+                            arg1
+                            ( boundVars2, arg2 )
+                            arg3
+                            ( boundVars4, Cctx_hole )
+                        , arg4
+                        )
+
+                Fundecl2_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    Just
+                        ( Fundecl2_CLess_cctx1
+                            Cctx_hole
+                            ( boundVars2, arg2 )
+                            arg3
+                            arg4
+                            ( boundVars5, arg5 )
+                        , arg1
+                        )
+
+                Fundecl2_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    Just
+                        ( Fundecl2_CLess_cctx2
+                            arg1
+                            ( boundVars2, Cctx_hole )
+                            arg3
+                            arg4
+                            ( boundVars5, arg5 )
+                        , arg2
+                        )
+
+                Fundecl2_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    Just
+                        ( Fundecl2_CLess_cctx3
+                            arg1
+                            ( boundVars2, arg2 )
+                            Cctx_hole
+                            arg4
+                            ( boundVars5, arg5 )
+                        , arg3
+                        )
+
+                Fundecl2_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    Just
+                        ( Fundecl2_CLess_cctx4
+                            arg1
+                            ( boundVars2, arg2 )
+                            arg3
+                            Cctx_hole
+                            ( boundVars5, arg5 )
+                        , arg4
+                        )
+
+                Fundecl2_CLess_cctx5 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    Just
+                        ( Fundecl2_CLess_cctx5
+                            arg1
+                            ( boundVars2, arg2 )
+                            arg3
+                            arg4
+                            ( boundVars5, Cctx_hole )
+                        , arg5
+                        )
+
+                Assignment_CLess_cctx1 arg1 arg2 ->
+                    Just ( Assignment_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Assignment_CLess_cctx2 arg1 arg2 ->
+                    Just ( Assignment_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Stmtfuncall_CLess_cctx1 arg1 arg2 ->
+                    Just ( Stmtfuncall_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Stmtfuncall_CLess_cctx2 arg1 arg2 ->
+                    Just ( Stmtfuncall_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Return_CLess_cctx1 arg1 ->
+                    Just ( Return_CLess_cctx1 Cctx_hole, arg1 )
+
+                Conditional_CLess_cctx1 arg1 ->
+                    Just ( Conditional_CLess_cctx1 Cctx_hole, arg1 )
+
+                Compstmt_CLess_cctx1 arg1 arg2 ->
+                    Just ( Compstmt_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Compstmt_CLess_cctx2 arg1 arg2 ->
+                    Just ( Compstmt_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Funarg_CLess_cctx1 arg1 arg2 ->
+                    Just ( Funarg_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Funarg_CLess_cctx2 arg1 arg2 ->
+                    Just ( Funarg_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Funargs_CLess_cctx1 arg1 arg2 arg3 ->
+                    Just ( Funargs_CLess_cctx1 Cctx_hole arg2 arg3, arg1 )
+
+                Funargs_CLess_cctx2 arg1 arg2 arg3 ->
+                    Just ( Funargs_CLess_cctx2 arg1 Cctx_hole arg3, arg2 )
+
+                Funargs_CLess_cctx3 arg1 arg2 arg3 ->
+                    Just ( Funargs_CLess_cctx3 arg1 arg2 Cctx_hole, arg3 )
+
+                Ifelse_CLess_cctx1 arg1 arg2 arg3 ->
+                    Just ( Ifelse_CLess_cctx1 Cctx_hole arg2 arg3, arg1 )
+
+                Ifelse_CLess_cctx2 arg1 arg2 arg3 ->
+                    Just ( Ifelse_CLess_cctx2 arg1 Cctx_hole arg3, arg2 )
+
+                Ifelse_CLess_cctx3 arg1 arg2 arg3 ->
+                    Just ( Ifelse_CLess_cctx3 arg1 arg2 Cctx_hole, arg3 )
+
+                Plus_CLess_cctx1 arg1 arg2 ->
+                    Just ( Plus_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Plus_CLess_cctx2 arg1 arg2 ->
+                    Just ( Plus_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Equals_CLess_cctx1 arg1 arg2 ->
+                    Just ( Equals_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Equals_CLess_cctx2 arg1 arg2 ->
+                    Just ( Equals_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Expfuncall_CLess_cctx1 arg1 arg2 ->
+                    Just ( Expfuncall_CLess_cctx1 Cctx_hole arg2, arg1 )
+
+                Expfuncall_CLess_cctx2 arg1 arg2 ->
+                    Just ( Expfuncall_CLess_cctx2 arg1 Cctx_hole, arg2 )
+
+                Expident_CLess_cctx1 arg1 ->
+                    Just ( Expident_CLess_cctx1 Cctx_hole, arg1 )
+
+        [ _ ] ->
+            Just ( Cctx_hole, cctx )
+
+        _ :: rest ->
+            case cctx of
+                Cctx_hole ->
+                    Nothing
+
+                Program_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Program_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Block_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Block_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Blockstmts_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Blockstmts_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Vardecl_CLess_cctx1 arg1 arg2 ( boundVars3, arg3 ) ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Vardecl_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                    ( boundVars3, arg3 )
+                                , removedCctx
+                                )
+                            )
+
+                Vardecl_CLess_cctx2 arg1 arg2 ( boundVars3, arg3 ) ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Vardecl_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                    ( boundVars3, arg3 )
+                                , removedCctx
+                                )
+                            )
+
+                Vardecl_CLess_cctx3 arg1 arg2 ( boundVars3, arg3 ) ->
+                    moveCCtxHoleUp arg3 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Vardecl_CLess_cctx3
+                                    arg1
+                                    arg2
+                                    ( boundVars3, newCctx )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl1_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl1_CLess_cctx1
+                                    newCctx
+                                    ( boundVars2, arg2 )
+                                    arg3
+                                    ( boundVars4, arg4 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl1_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl1_CLess_cctx2
+                                    arg1
+                                    ( boundVars2, newCctx )
+                                    arg3
+                                    ( boundVars4, arg4 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl1_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    moveCCtxHoleUp arg3 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl1_CLess_cctx3
+                                    arg1
+                                    ( boundVars2, arg2 )
+                                    newCctx
+                                    ( boundVars4, arg4 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl1_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+                    moveCCtxHoleUp arg4 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl1_CLess_cctx4
+                                    arg1
+                                    ( boundVars2, arg2 )
+                                    arg3
+                                    ( boundVars4, newCctx )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl2_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl2_CLess_cctx1
+                                    newCctx
+                                    ( boundVars2, arg2 )
+                                    arg3
+                                    arg4
+                                    ( boundVars5, arg5 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl2_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl2_CLess_cctx2
+                                    arg1
+                                    ( boundVars2, newCctx )
+                                    arg3
+                                    arg4
+                                    ( boundVars5, arg5 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl2_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    moveCCtxHoleUp arg3 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl2_CLess_cctx3
+                                    arg1
+                                    ( boundVars2, arg2 )
+                                    newCctx
+                                    arg4
+                                    ( boundVars5, arg5 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl2_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    moveCCtxHoleUp arg4 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl2_CLess_cctx4
+                                    arg1
+                                    ( boundVars2, arg2 )
+                                    arg3
+                                    newCctx
+                                    ( boundVars5, arg5 )
+                                , removedCctx
+                                )
+                            )
+
+                Fundecl2_CLess_cctx5 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+                    moveCCtxHoleUp arg5 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Fundecl2_CLess_cctx5
+                                    arg1
+                                    ( boundVars2, arg2 )
+                                    arg3
+                                    arg4
+                                    ( boundVars5, newCctx )
+                                , removedCctx
+                                )
+                            )
+
+                Assignment_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Assignment_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Assignment_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Assignment_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Stmtfuncall_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Stmtfuncall_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Stmtfuncall_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Stmtfuncall_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Return_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Return_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Conditional_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Conditional_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Compstmt_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Compstmt_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Compstmt_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Compstmt_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Funarg_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Funarg_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Funarg_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Funarg_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Funargs_CLess_cctx1 arg1 arg2 arg3 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Funargs_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                    arg3
+                                , removedCctx
+                                )
+                            )
+
+                Funargs_CLess_cctx2 arg1 arg2 arg3 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Funargs_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                    arg3
+                                , removedCctx
+                                )
+                            )
+
+                Funargs_CLess_cctx3 arg1 arg2 arg3 ->
+                    moveCCtxHoleUp arg3 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Funargs_CLess_cctx3
+                                    arg1
+                                    arg2
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Ifelse_CLess_cctx1 arg1 arg2 arg3 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Ifelse_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                    arg3
+                                , removedCctx
+                                )
+                            )
+
+                Ifelse_CLess_cctx2 arg1 arg2 arg3 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Ifelse_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                    arg3
+                                , removedCctx
+                                )
+                            )
+
+                Ifelse_CLess_cctx3 arg1 arg2 arg3 ->
+                    moveCCtxHoleUp arg3 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Ifelse_CLess_cctx3
+                                    arg1
+                                    arg2
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Plus_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Plus_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Plus_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Plus_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Equals_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Equals_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Equals_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Equals_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Expfuncall_CLess_cctx1 arg1 arg2 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Expfuncall_CLess_cctx1
+                                    newCctx
+                                    arg2
+                                , removedCctx
+                                )
+                            )
+
+                Expfuncall_CLess_cctx2 arg1 arg2 ->
+                    moveCCtxHoleUp arg2 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Expfuncall_CLess_cctx2
+                                    arg1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Expident_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Expident_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+        [] ->
+            Nothing
+
+
+addParent : Cctx -> Wellformed -> Maybe Wellformed
+addParent cctx wellformed =
+    case cctx of
+        Cctx_hole ->
+            Nothing
+
+        Program_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_fd_CLess underCursor ->
+                    Just (Root_p_CLess (Program_CLess underCursor))
+
+                _ ->
+                    Nothing
+
+        Block_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_bi_CLess underCursor ->
+                    Just (Root_b_CLess (Block_CLess underCursor))
+
+                _ ->
+                    Nothing
+
+        Blockstmts_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_s_CLess underCursor ->
+                    Just (Root_bi_CLess (Blockstmts_CLess underCursor))
+
+                _ ->
+                    Nothing
+
+        Vardecl_CLess_cctx1 arg1 arg2 ( boundVars3, arg3 ) ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just
+                        (Root_vd_CLess
+                            (Vardecl_CLess underCursor arg2 ( boundVars3, arg3 ))
+                        )
+
+                _ ->
+                    Nothing
+
+        Vardecl_CLess_cctx2 arg1 arg2 ( boundVars3, arg3 ) ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just
+                        (Root_vd_CLess
+                            (Vardecl_CLess arg1 underCursor ( boundVars3, arg3 ))
+                        )
+
+                _ ->
+                    Nothing
+
+        Vardecl_CLess_cctx3 arg1 arg2 ( boundVars3, arg3 ) ->
+            case wellformed of
+                Root_bi_CLess underCursor ->
+                    Just
+                        (Root_vd_CLess
+                            (Vardecl_CLess arg1 arg2 ( boundVars3, underCursor ))
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl1_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl1_CLess
+                                underCursor
+                                ( boundVars2, arg2 )
+                                arg3
+                                ( boundVars4, arg4 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl1_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            case wellformed of
+                Root_fd_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl1_CLess
+                                arg1
+                                ( boundVars2, underCursor )
+                                arg3
+                                ( boundVars4, arg4 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl1_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl1_CLess
+                                arg1
+                                ( boundVars2, arg2 )
+                                underCursor
+                                ( boundVars4, arg4 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl1_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 ( boundVars4, arg4 ) ->
+            case wellformed of
+                Root_b_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl1_CLess
+                                arg1
+                                ( boundVars2, arg2 )
+                                arg3
+                                ( boundVars4, underCursor )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl2_CLess_cctx1 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl2_CLess
+                                underCursor
+                                ( boundVars2, arg2 )
+                                arg3
+                                arg4
+                                ( boundVars5, arg5 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl2_CLess_cctx2 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            case wellformed of
+                Root_fd_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl2_CLess
+                                arg1
+                                ( boundVars2, underCursor )
+                                arg3
+                                arg4
+                                ( boundVars5, arg5 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl2_CLess_cctx3 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl2_CLess
+                                arg1
+                                ( boundVars2, arg2 )
+                                underCursor
+                                arg4
+                                ( boundVars5, arg5 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl2_CLess_cctx4 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl2_CLess
+                                arg1
+                                ( boundVars2, arg2 )
+                                arg3
+                                underCursor
+                                ( boundVars5, arg5 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Fundecl2_CLess_cctx5 arg1 ( boundVars2, arg2 ) arg3 arg4 ( boundVars5, arg5 ) ->
+            case wellformed of
+                Root_b_CLess underCursor ->
+                    Just
+                        (Root_fd_CLess
+                            (Fundecl2_CLess
+                                arg1
+                                ( boundVars2, arg2 )
+                                arg3
+                                arg4
+                                ( boundVars5, underCursor )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+
+        Assignment_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_s_CLess (Assignment_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Assignment_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_s_CLess (Assignment_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Stmtfuncall_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_s_CLess (Stmtfuncall_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Stmtfuncall_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_fa_CLess underCursor ->
+                    Just (Root_s_CLess (Stmtfuncall_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Return_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_s_CLess (Return_CLess underCursor))
+
+                _ ->
+                    Nothing
+
+        Conditional_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_cond_CLess underCursor ->
+                    Just (Root_s_CLess (Conditional_CLess underCursor))
+
+                _ ->
+                    Nothing
+
+        Compstmt_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_s_CLess underCursor ->
+                    Just (Root_s_CLess (Compstmt_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Compstmt_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_s_CLess underCursor ->
+                    Just (Root_s_CLess (Compstmt_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Funarg_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just (Root_fa_CLess (Funarg_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Funarg_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_fa_CLess (Funarg_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Funargs_CLess_cctx1 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_t_CLess underCursor ->
+                    Just (Root_fa_CLess (Funargs_CLess underCursor arg2 arg3))
+
+                _ ->
+                    Nothing
+
+        Funargs_CLess_cctx2 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_fa_CLess (Funargs_CLess arg1 underCursor arg3))
+
+                _ ->
+                    Nothing
+
+        Funargs_CLess_cctx3 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_fa_CLess underCursor ->
+                    Just (Root_fa_CLess (Funargs_CLess arg1 arg2 underCursor))
+
+                _ ->
+                    Nothing
+
+        Ifelse_CLess_cctx1 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_cond_CLess (Ifelse_CLess underCursor arg2 arg3))
+
+                _ ->
+                    Nothing
+
+        Ifelse_CLess_cctx2 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_b_CLess underCursor ->
+                    Just (Root_cond_CLess (Ifelse_CLess arg1 underCursor arg3))
+
+                _ ->
+                    Nothing
+
+        Ifelse_CLess_cctx3 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_b_CLess underCursor ->
+                    Just (Root_cond_CLess (Ifelse_CLess arg1 arg2 underCursor))
+
+                _ ->
+                    Nothing
+
+        Plus_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_e_CLess (Plus_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Plus_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_e_CLess (Plus_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Equals_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_e_CLess (Equals_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Equals_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just (Root_e_CLess (Equals_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Expfuncall_CLess_cctx1 arg1 arg2 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_e_CLess (Expfuncall_CLess underCursor arg2))
+
+                _ ->
+                    Nothing
+
+        Expfuncall_CLess_cctx2 arg1 arg2 ->
+            case wellformed of
+                Root_fa_CLess underCursor ->
+                    Just (Root_e_CLess (Expfuncall_CLess arg1 underCursor))
+
+                _ ->
+                    Nothing
+
+        Expident_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_e_CLess (Expident_CLess underCursor))
+
+                _ ->
+                    Nothing
+
+
+parent : ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
+parent decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case moveCCtxHoleUp cctx (getCctxPath cctx []) of
+        Nothing ->
+            Nothing
+
+        Just ( newCctx, removedCctx ) ->
+            case addParent removedCctx wellformed of
+                Nothing ->
+                    Nothing
+
+                Just newWellformed ->
+                    Just ( newCctx, newWellformed )
+
+
+example : Base
+example =
+    P <|
+        Program <|
+            Fundecl1 Tint
+                ( [ Ident ], Hole_fd )
+                Tint
+                ( [ Ident ]
+                , Block <|
+                    Blockstmts <|
+                        Compstmt (Stmtfuncall Ident Hole_fa) (Cursor_s <| Return (Expident Ident))
+                )

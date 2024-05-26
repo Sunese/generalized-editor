@@ -7,7 +7,9 @@ import Gen.Decomposable
 import Gen.Substitutable
 import GetCursorPath exposing (..)
 import Movement exposing (..)
+import Parent exposing (..)
 import Parser exposing (..)
+import Substitution exposing (..)
 import Syntax exposing (..)
 import ToCCtx exposing (..)
 import ToCLess exposing (..)
@@ -79,6 +81,11 @@ exampleFiles =
                     (fromCLessToCCtxSyntax <| createCursorlessSyntax exampleSyntax)
                     (fromCLessToWellFormedSyntax <| createCursorlessSyntax exampleSyntax)
                ]
+            ++ [ createSubFun (fromCLessToWellFormedSyntax <| createCursorlessSyntax exampleSyntax)
+               ]
+            ++ createParentFuns 
+              (filterCLess <| createCursorlessSyntax exampleSyntax) 
+              (filterCctx <| fromCLessToCCtxSyntax <| createCursorlessSyntax exampleSyntax)
 
     -- ++ [createDecomposeFun <| addCursorHoleOps <| exampleSyntax]
     -- ++ [ createToCursorLessFun <| addCursorHoleOps <| exampleSyntax ]
@@ -86,6 +93,42 @@ exampleFiles =
     -- ++ convertableInstances (addCursorHoleOps exampleSyntax)
     ]
 
+
+samplegetCLessSortOfCCtxOp : String
+samplegetCLessSortOfCCtxOp =
+    getCLessSortOfCCtxOp (createCursorlessSyntax exampleSyntax)
+        { term = "TODO"
+        , arity = [ ( [], "Bind E_CLess S_CLess" ) ]
+        , name = "program_CLess_cctx1"
+        , synCat = "Cctx"
+        }
+
+
+filterCLess : Syntax -> Syntax
+filterCLess syntax =
+    { synCats = List.filter (\x -> String.endsWith "_CLess" x.exp) syntax.synCats
+    , synCatOps = List.filter (\x -> String.endsWith "_CLess" x.synCat) syntax.synCatOps
+    }
+
+
+filterCctx : Syntax -> Syntax
+filterCctx syntax =
+    { synCats = List.filter (\x -> x.exp == "cctx") syntax.synCats
+    , synCatOps = List.filter (\x -> x.synCat == "cctx") syntax.synCatOps
+    }
+
+
+filterWellformed : Syntax -> Syntax
+filterWellformed syntax =
+    { synCats = List.filter (\x -> x.exp == "wellformed") syntax.synCats
+    , synCatOps = List.filter (\x -> x.synCat == "wellformed") syntax.synCatOps
+    }
+
+
+sampleOp : Elm.Declaration
+sampleOp =
+  Elm.declaration "sampleOp" <|
+    Elm.val ""
 
 exampleSynCats : List SynCat
 exampleSynCats =
