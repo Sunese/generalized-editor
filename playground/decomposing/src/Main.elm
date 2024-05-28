@@ -10,8 +10,8 @@ type S
 
 type E
     = Plus E E
-    | Num
-    | Var
+    | Num Int
+    | Var String
     | Hole_e
     | Cursor_e E
 
@@ -55,6 +55,15 @@ type Wellformed
 
 type alias Bind a b =
     ( List a, b )
+
+
+type alias String =
+    String
+
+
+exampleString : String
+exampleString =
+    "Hello, World!"
 
 
 getCursorPath : List Int -> Base -> List Int

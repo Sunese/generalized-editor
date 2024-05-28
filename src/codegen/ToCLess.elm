@@ -110,7 +110,13 @@ getBranchFromOp op =
     else
         case List.length op.arity of
             0 ->
-                Branch.variant0 op.name (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                case op.literal of
+                    Nothing ->
+                        Branch.variant0 op.name (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+
+                    Just _ ->
+                        Branch.variant1 op.name (Branch.var "lit") <|
+                            \lit -> Elm.apply (Elm.val <| firstCharToUpper <| op.name ++ "_CLess") [ lit ]
 
             1 ->
                 Branch.variant1

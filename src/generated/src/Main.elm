@@ -26,6 +26,7 @@ type Vd
 type Fd
     = Fundecl1 T (Bind Id Fd) T (Bind Id B)
     | Fundecl2 T (Bind Id Fd) T T (Bind Id B)
+    | Fundecldone
     | Hole_fd
     | Cursor_fd Fd
 
@@ -39,15 +40,15 @@ type T
 
 
 type Id
-    = Ident
+    = Ident String
     | Hole_id
     | Cursor_id Id
 
 
 type E
-    = Cint
-    | Cchar
-    | Cbool
+    = Int Int
+    | Char Char
+    | Bool Bool
     | Plus E E
     | Equals E E
     | Expfuncall Id Fa
@@ -63,7 +64,7 @@ type B
 
 
 type Bi
-    = Blockdecls
+    = Blockdecls Vd
     | Blockstmts S
     | Blockdone
     | Hole_bi
@@ -119,6 +120,7 @@ type Vd_CLess
 type Fd_CLess
     = Fundecl1_CLess T_CLess (Bind Id_CLess Fd_CLess) T_CLess (Bind Id_CLess B_CLess)
     | Fundecl2_CLess T_CLess (Bind Id_CLess Fd_CLess) T_CLess T_CLess (Bind Id_CLess B_CLess)
+    | Fundecldone_CLess
     | Hole_fd_CLess
 
 
@@ -130,14 +132,14 @@ type T_CLess
 
 
 type Id_CLess
-    = Ident_CLess
+    = Ident_CLess String
     | Hole_id_CLess
 
 
 type E_CLess
-    = Cint_CLess
-    | Cchar_CLess
-    | Cbool_CLess
+    = Int_CLess Int
+    | Char_CLess Char
+    | Bool_CLess Bool
     | Plus_CLess E_CLess E_CLess
     | Equals_CLess E_CLess E_CLess
     | Expfuncall_CLess Id_CLess Fa_CLess
@@ -151,7 +153,7 @@ type B_CLess
 
 
 type Bi_CLess
-    = Blockdecls_CLess
+    = Blockdecls_CLess Vd_CLess
     | Blockstmts_CLess S_CLess
     | Blockdone_CLess
     | Hole_bi_CLess
@@ -186,6 +188,7 @@ type Cctx
     = Cctx_hole
     | Program_CLess_cctx1 Cctx
     | Block_CLess_cctx1 Cctx
+    | Blockdecls_CLess_cctx1 Cctx
     | Blockstmts_CLess_cctx1 Cctx
     | Vardecl_CLess_cctx1 Cctx E_CLess (Bind Id_CLess Bi_CLess)
     | Vardecl_CLess_cctx2 T_CLess Cctx (Bind Id_CLess Bi_CLess)
@@ -269,8 +272,8 @@ getCursorPath path base =
 
         Bi bi ->
             case bi of
-                Blockdecls ->
-                    []
+                Blockdecls arg1 ->
+                    getCursorPath (path ++ [ 1 ]) (Vd arg1)
 
                 Blockstmts arg1 ->
                     getCursorPath (path ++ [ 1 ]) (S arg1)
@@ -334,6 +337,9 @@ getCursorPath path base =
                         ++ getCursorPath (path ++ [ 4 ]) (T arg4)
                     )
                         ++ getCursorPath (path ++ [ 5 ]) (B arg5)
+
+                Fundecldone ->
+                    []
 
                 Hole_fd ->
                     []
@@ -448,13 +454,13 @@ getCursorPath path base =
 
         E e ->
             case e of
-                Cint ->
+                Int lit ->
                     []
 
-                Cchar ->
+                Char lit ->
                     []
 
-                Cbool ->
+                Bool lit ->
                     []
 
                 Plus arg1 arg2 ->
@@ -495,7 +501,7 @@ getCursorPath path base =
 
         Id id ->
             case id of
-                Ident ->
+                Ident lit ->
                     []
 
                 Hole_id ->
@@ -534,8 +540,8 @@ toCLess_b b =
 toCLess_bi : Bi -> Bi_CLess
 toCLess_bi bi =
     case bi of
-        Blockdecls ->
-            Blockdecls_CLess
+        Blockdecls arg1 ->
+            Blockdecls_CLess (toCLess_vd arg1)
 
         Blockstmts arg1 ->
             Blockstmts_CLess (toCLess_s arg1)
@@ -583,6 +589,9 @@ toCLess_fd fd =
                 (toCLess_t arg3)
                 (toCLess_t arg4)
                 ( List.map toCLess_id boundVars5, toCLess_b arg5 )
+
+        Fundecldone ->
+            Fundecldone_CLess
 
         Hole_fd ->
             Hole_fd_CLess
@@ -667,14 +676,14 @@ toCLess_t t =
 toCLess_e : E -> E_CLess
 toCLess_e e =
     case e of
-        Cint ->
-            Cint_CLess
+        Int lit ->
+            Int_CLess lit
 
-        Cchar ->
-            Cchar_CLess
+        Char lit ->
+            Char_CLess lit
 
-        Cbool ->
-            Cbool_CLess
+        Bool lit ->
+            Bool_CLess lit
 
         Plus arg1 arg2 ->
             Plus_CLess (toCLess_e arg1) (toCLess_e arg2)
@@ -698,8 +707,8 @@ toCLess_e e =
 toCLess_id : Id -> Id_CLess
 toCLess_id id =
     case id of
-        Ident ->
-            Ident_CLess
+        Ident lit ->
+            Ident_CLess lit
 
         Hole_id ->
             Hole_id_CLess
@@ -811,9 +820,17 @@ toCCtx_bi bi path =
 
         i :: rest ->
             case bi of
-                Blockdecls ->
-                    Debug.todo
-                        "Invalid path: we hit a 0-arity operator but path list is non-empty"
+                Blockdecls arg1 ->
+                    case i of
+                        1 ->
+                            let
+                                ( cctxChild, restTree ) =
+                                    toCCtx_vd arg1 rest
+                            in
+                            ( Blockdecls_CLess_cctx1 cctxChild, restTree )
+
+                        _ ->
+                            Debug.todo "Invalid path"
 
                 Blockstmts arg1 ->
                     case i of
@@ -1069,6 +1086,10 @@ toCCtx_fd fd path =
 
                         _ ->
                             Debug.todo "Invalid path"
+
+                Fundecldone ->
+                    Debug.todo
+                        "Invalid path: we hit a 0-arity operator but path list is non-empty"
 
                 Hole_fd ->
                     Debug.todo
@@ -1369,15 +1390,15 @@ toCCtx_e e path =
 
         i :: rest ->
             case e of
-                Cint ->
+                Int lit ->
                     Debug.todo
                         "Invalid path: we hit a 0-arity operator but path list is non-empty"
 
-                Cchar ->
+                Char lit ->
                     Debug.todo
                         "Invalid path: we hit a 0-arity operator but path list is non-empty"
 
-                Cbool ->
+                Bool lit ->
                     Debug.todo
                         "Invalid path: we hit a 0-arity operator but path list is non-empty"
 
@@ -1479,7 +1500,7 @@ toCCtx_id id path =
 
         i :: rest ->
             case id of
-                Ident ->
+                Ident lit ->
                     Debug.todo
                         "Invalid path: we hit a 0-arity operator but path list is non-empty"
 
@@ -1700,8 +1721,13 @@ replaceCctxHole i orig_cctx underCursor =
 
                 Bi_CLess underCursor0 ->
                     case underCursor0 of
-                        Blockdecls_CLess ->
-                            Debug.todo "Invalid replacement"
+                        Blockdecls_CLess arg1 ->
+                            case i of
+                                1 ->
+                                    Blockdecls_CLess_cctx1 Cctx_hole
+
+                                _ ->
+                                    Debug.todo "Invalid arg position"
 
                         Blockstmts_CLess arg1 ->
                             case i of
@@ -1825,6 +1851,9 @@ replaceCctxHole i orig_cctx underCursor =
                                 _ ->
                                     Debug.todo "Invalid arg position"
 
+                        Fundecldone_CLess ->
+                            Debug.todo "Invalid replacement"
+
                         Hole_fd_CLess ->
                             Debug.todo "Invalid replacement"
 
@@ -1947,13 +1976,13 @@ replaceCctxHole i orig_cctx underCursor =
 
                 E_CLess underCursor0 ->
                     case underCursor0 of
-                        Cint_CLess ->
+                        Int_CLess lit ->
                             Debug.todo "Invalid replacement"
 
-                        Cchar_CLess ->
+                        Char_CLess lit ->
                             Debug.todo "Invalid replacement"
 
-                        Cbool_CLess ->
+                        Bool_CLess lit ->
                             Debug.todo "Invalid replacement"
 
                         Plus_CLess arg1 arg2 ->
@@ -2002,7 +2031,7 @@ replaceCctxHole i orig_cctx underCursor =
 
                 Id_CLess underCursor0 ->
                     case underCursor0 of
-                        Ident_CLess ->
+                        Ident_CLess lit ->
                             Debug.todo "Invalid replacement"
 
                         Hole_id_CLess ->
@@ -2013,6 +2042,9 @@ replaceCctxHole i orig_cctx underCursor =
 
         Block_CLess_cctx1 cctx ->
             Block_CLess_cctx1 (replaceCctxHole i cctx underCursor)
+
+        Blockdecls_CLess_cctx1 cctx ->
+            Blockdecls_CLess_cctx1 (replaceCctxHole i cctx underCursor)
 
         Blockstmts_CLess_cctx1 cctx ->
             Blockstmts_CLess_cctx1 (replaceCctxHole i cctx underCursor)
@@ -2368,6 +2400,9 @@ child i decomposed =
                         _ ->
                             Nothing
 
+                Fundecldone_CLess ->
+                    Nothing
+
                 Hole_fd_CLess ->
                     Nothing
 
@@ -2387,7 +2422,7 @@ child i decomposed =
 
         Root_id_CLess underCursor ->
             case underCursor of
-                Ident_CLess ->
+                Ident_CLess lit ->
                     Nothing
 
                 Hole_id_CLess ->
@@ -2395,13 +2430,13 @@ child i decomposed =
 
         Root_e_CLess underCursor ->
             case underCursor of
-                Cint_CLess ->
+                Int_CLess lit ->
                     Nothing
 
-                Cchar_CLess ->
+                Char_CLess lit ->
                     Nothing
 
-                Cbool_CLess ->
+                Bool_CLess lit ->
                     Nothing
 
                 Plus_CLess arg1 arg2 ->
@@ -2487,8 +2522,16 @@ child i decomposed =
 
         Root_bi_CLess underCursor ->
             case underCursor of
-                Blockdecls_CLess ->
-                    Nothing
+                Blockdecls_CLess arg1 ->
+                    case i of
+                        1 ->
+                            Just
+                                ( replaceCctxHole i cctx (Bi_CLess underCursor)
+                                , Root_vd_CLess arg1
+                                )
+
+                        _ ->
+                            Nothing
 
                 Blockstmts_CLess arg1 ->
                     case i of
@@ -2698,6 +2741,9 @@ getCctxPath cctx path =
         Block_CLess_cctx1 arg1 ->
             getCctxPath arg1 (path ++ [ 1 ])
 
+        Blockdecls_CLess_cctx1 arg1 ->
+            getCctxPath arg1 (path ++ [ 1 ])
+
         Blockstmts_CLess_cctx1 arg1 ->
             getCctxPath arg1 (path ++ [ 1 ])
 
@@ -2820,6 +2866,9 @@ moveCCtxHoleUp cctx path =
 
                 Block_CLess_cctx1 arg1 ->
                     Just ( Block_CLess_cctx1 Cctx_hole, arg1 )
+
+                Blockdecls_CLess_cctx1 arg1 ->
+                    Just ( Blockdecls_CLess_cctx1 Cctx_hole, arg1 )
 
                 Blockstmts_CLess_cctx1 arg1 ->
                     Just ( Blockstmts_CLess_cctx1 Cctx_hole, arg1 )
@@ -3029,6 +3078,16 @@ moveCCtxHoleUp cctx path =
                         |> Maybe.map
                             (\( newCctx, removedCctx ) ->
                                 ( Block_CLess_cctx1
+                                    newCctx
+                                , removedCctx
+                                )
+                            )
+
+                Blockdecls_CLess_cctx1 arg1 ->
+                    moveCCtxHoleUp arg1 rest
+                        |> Maybe.map
+                            (\( newCctx, removedCctx ) ->
+                                ( Blockdecls_CLess_cctx1
                                     newCctx
                                 , removedCctx
                                 )
@@ -3484,6 +3543,14 @@ addParent cctx wellformed =
                 _ ->
                     Nothing
 
+        Blockdecls_CLess_cctx1 arg1 ->
+            case wellformed of
+                Root_vd_CLess underCursor ->
+                    Just (Root_bi_CLess (Blockdecls_CLess underCursor))
+
+                _ ->
+                    Nothing
+
         Blockstmts_CLess_cctx1 arg1 ->
             case wellformed of
                 Root_s_CLess underCursor ->
@@ -3882,11 +3949,16 @@ example : Base
 example =
     P <|
         Program <|
-            Fundecl1 Tint
-                ( [ Ident ], Hole_fd )
+            Fundecl1
                 Tint
-                ( [ Ident ]
-                , Block <|
-                    Blockstmts <|
-                        Compstmt (Stmtfuncall Ident Hole_fa) (Cursor_s <| Return (Expident Ident))
+                ( [ Ident "main" ], Fundecldone )
+                Tint
+                ( [ Ident "x" ]
+                , Block
+                    (Blockstmts
+                        (Compstmt
+                            (Assignment (Ident "x") (Cursor_e Hole_e))
+                            (Return (Expident (Ident "x")))
+                        )
+                    )
                 )

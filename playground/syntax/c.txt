@@ -1,0 +1,23 @@
+p in Prog
+s in Stmt
+vd in VariableDecl
+fd in FunDecl
+t in Type
+id in Id
+e in Exp
+b in Block
+bi in BlockItem
+fa in Funarg
+cond in Conditional
+
+p ::= fd # (fd)p # program
+b ::= bi # (bi)b # block
+bi ::= vd # (vd)bi # blockdecls | s # (s)bi # blockstmts | epsilon # ()bi # blockdone
+vd ::= t id \"=\" e; bi # (t,e,id.bi)vd # vardecl
+fd ::= t_1 id_1 \"(\" t_2 id_2 \")\" \"{\" b \"}\" # (t,id.fd,t,id.b)fd # fundecl1 | t_1 id_1 \"(\" t_2 id_2, t_3 id_3 \")\" \"{\" b \"}\" # (t,id.fd,t,t,id.id.b)fd # fundecl2 | epsilon # ()fd # fundecldone
+s ::= id \"=\" e \";\" # (id,e)s # assignment | id \"(\" fa \")\";\" # (id,fa)s # stmtfuncall | \"return \" e \";\" # (e)s # return | cond # (cond)s # conditional | s s # (s,s)s # compstmt
+fa ::= t id # (t,id)fa # funarg | t id, fa # (t,id,fa)fa # funargs
+cond ::= \"if (\" e \")\" \"{\" b_1 \"} else {\" b_2 \"}\" # (e,b,b)cond # ifelse
+t ::= \"int\" # ()t # tint | \"char\" # ()t # tchar | \"bool\" # ()t # tbool
+e ::= %int # ()e # int[Int] | %char # ()e # char[Char] | %bool # ()e # bool[Bool] | e_1 \"+\" e_2 # (e,e)e # plus | e_1 \"==\" e_2 # (e,e)e # equals | id \"(\" fa \")\" # (id,fa)e # expfuncall | id # (id)e # expident
+id ::= %string # ()id # ident[String]

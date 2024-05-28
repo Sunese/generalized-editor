@@ -1,5 +1,6 @@
 module RawSyntaxP exposing (..)
 
+import Html exposing (li)
 import Parser exposing (..)
 
 
@@ -24,6 +25,7 @@ type alias RawOp =
     { term : String
     , arity : String
     , name : String
+    , literal : Maybe String
     }
 
 
@@ -75,7 +77,7 @@ derivationP =
             , end = ""
             , spaces = Parser.chompWhile (\c -> c == ' ')
             , item = expP
-            , trailing = Optional
+            , trailing = Forbidden
             }
 
 
@@ -84,16 +86,42 @@ expP =
     Parser.succeed RawOp
         |= termP
         |. Parser.keyword "#"
-        |. Parser.spaces
+        |. Parser.chompWhile (\c -> c == ' ')
         |= arityP
         |. Parser.keyword "#"
-        |. Parser.spaces
-        |= operatorP
+        |. Parser.chompWhile (\c -> c == ' ')
+        |= nameP
+        |= literalP
 
 
-operatorP : Parser String
-operatorP =
-    Parser.chompWhile (\c -> c /= '\n' && c /= '|')
+literalP : Parser (Maybe String)
+literalP =
+    Parser.chompWhile (\c -> c == '[')
+        |> Parser.getChompedString
+        |> Parser.andThen
+            (\s ->
+                if String.isEmpty s then
+                    Parser.succeed Nothing
+
+                else
+                    Parser.chompWhile (\c -> c /= ']')
+                        |> Parser.getChompedString
+                        |> Parser.andThen
+                            (\s_ ->
+                                if String.isEmpty s_ then
+                                    Parser.problem "Expected a literal"
+
+                                else
+                                    Parser.symbol "]"
+                                        |> Parser.andThen
+                                            (\_ -> Parser.succeed (Just s_))
+                            )
+            )
+
+
+nameP : Parser String
+nameP =
+    Parser.chompWhile (\c -> c /= '\n' && c /= '|' && c /= '[')
         |> Parser.getChompedString
         |> Parser.andThen
             (\s ->

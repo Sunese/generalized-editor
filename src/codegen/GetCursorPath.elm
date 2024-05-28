@@ -97,7 +97,13 @@ getBranchFromOp op =
     else
         case List.length op.arity of
             0 ->
-                Branch.variant0 op.name <| Elm.list []
+                case op.literal of
+                    Just _ ->
+                        Branch.variant1 op.name (Branch.var "lit") <|
+                            \_ -> Elm.list []
+
+                    Nothing ->
+                        Branch.variant0 op.name <| Elm.list []
 
             1 ->
                 Branch.variant1
@@ -298,7 +304,7 @@ getBranchFromOp op =
                     )
 
             _ ->
-                Debug.todo "More than 5 arguments not supported"
+                Debug.todo <| "More than 5 arguments not supported: " ++ op.name
 
 
 getPatternFromArg : Int -> ( List String, String ) -> Maybe (Branch.Pattern Elm.Expression)

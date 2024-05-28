@@ -115,7 +115,13 @@ getUnderCursorBranch underCursor op =
     in
     case List.length op.arity of
         0 ->
-            Branch.variant0 op.name <| Elm.nothing
+            case op.literal of
+                Nothing ->
+                    Branch.variant0 op.name <| Elm.nothing
+
+                Just lit ->
+                    Branch.variant1 op.name (Branch.var "lit") <|
+                        \x -> Elm.nothing
 
         1 ->
             let
@@ -826,16 +832,30 @@ getBranchFromOp op =
     in
     case List.length op.arity of
         0 ->
-            Branch.variant0 op.name
-                (Elm.apply
-                    (Elm.value
-                        { importFrom = [ "Debug" ]
-                        , name = "todo"
-                        , annotation = Nothing
-                        }
-                    )
-                    [ Elm.string "Invalid replacement" ]
-                )
+            case op.literal of
+                Nothing ->
+                    Branch.variant0 op.name
+                        (Elm.apply
+                            (Elm.value
+                                { importFrom = [ "Debug" ]
+                                , name = "todo"
+                                , annotation = Nothing
+                                }
+                            )
+                            [ Elm.string "Invalid replacement" ]
+                        )
+
+                Just lit ->
+                    Branch.variant1 op.name (Branch.var "lit") <|
+                        \x ->
+                            Elm.apply
+                                (Elm.value
+                                    { importFrom = [ "Debug" ]
+                                    , name = "todo"
+                                    , annotation = Nothing
+                                    }
+                                )
+                                [ Elm.string "Invalid replacement" ]
 
         1 ->
             Branch.variant1

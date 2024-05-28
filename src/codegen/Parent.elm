@@ -588,6 +588,7 @@ getCLessEquivalentCCtxOp cctxOp clessSyntax =
         , arity = []
         , name = "ERROR"
         , synCat = "ERROR"
+        , literal = Nothing
         }
     <|
         List.head <|

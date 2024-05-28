@@ -24,6 +24,7 @@ type alias Operator =
     , arity : Arity
     , name : String
     , synCat : String
+    , literal : Maybe String
     }
 
 
@@ -159,6 +160,7 @@ addCursorSortAndOps syntax =
                     , arity = [ ( [], syncat.exp ) ]
                     , name = "root_" ++ syncat.exp
                     , synCat = "wellformed"
+                    , literal = Nothing
                     }
                 )
                 syntax.synCats
@@ -213,6 +215,7 @@ addCCtxOp syntax =
                           , arity = []
                           , name = "Cctx_hole"
                           , synCat = "cctx"
+                          , literal = Nothing
                           }
                         ]
                      , synCat = "cctx"
@@ -262,6 +265,7 @@ toCCtxOps ops =
                             op.arity
                     , name = op.name ++ "_cctx" ++ String.fromInt (i + 1)
                     , synCat = "cctx"
+                    , literal = op.literal
                     }
                 )
                 op.arity
@@ -406,6 +410,7 @@ createHoleOperator synCatRules =
     , arity = []
     , name = "hole_" ++ synCatRules.synCat
     , synCat = synCatRules.synCat
+    , literal = Nothing
     }
 
 
@@ -415,6 +420,7 @@ createCursorOperator synCatRules =
     , arity = [ ( [], synCatRules.synCat ) ]
     , name = "cursor_" ++ synCatRules.synCat
     , synCat = synCatRules.synCat
+    , literal = Nothing
     }
 
 
@@ -807,51 +813,61 @@ getCustomType synCat syntax =
     in
     Elm.customType synCat <|
         List.map
-            (\rule ->
-                Elm.variantWith rule.name (getNamedAnnotations rule.arity)
+            (\op ->
+                Elm.variantWith op.name (getNamedAnnotations op)
             )
             ops
 
 
-getNamedAnnotations : Arity -> List Annotation
-getNamedAnnotations arity =
-    List.map
-        (\( boundvars, param ) ->
-            case boundvars of
-                [] ->
-                    Type.named [] param
+getNamedAnnotations : Operator -> List Annotation
+getNamedAnnotations op =
+    if List.isEmpty op.arity then
+        case op.literal of
+            Nothing ->
+                []
 
-                _ ->
-                    -- Due to the limitation of the list of bound variables being of the same type,
-                    -- we extract only the first element of the list
-                    Type.namedWith [] "Bind" <|
-                        [ Type.named [] <| Maybe.withDefault "" <| List.head boundvars
-                        , Type.named [] param
-                        ]
-        )
-        arity
+            Just literal ->
+                [ Type.named [] literal ]
+
+    else
+        List.map
+            (\( boundvars, param ) ->
+                case boundvars of
+                    [] ->
+                        Type.named [] param
+
+                    _ ->
+                        -- Due to the limitation of the list of bound variables being of the same type,
+                        -- we extract only the first element of the list
+                        Type.namedWith [] "Bind" <|
+                            [ Type.named [] <| Maybe.withDefault "" <| List.head boundvars
+                            , Type.named [] param
+                            ]
+            )
+            op.arity
 
 
-rawSyntaxToSyntax : RawSyntax -> Syntax
-rawSyntaxToSyntax rs =
+fromRawSyntax : RawSyntax -> Syntax
+fromRawSyntax rs =
     { synCats = rs.synCats
-    , synCatOps = List.map rawSynCatRulesToSynCatRules rs.synCatRules
+    , synCatOps = List.map fromRawSynCatRules rs.synCatRules
     }
 
 
-rawSynCatRulesToSynCatRules : RawSynCatRules -> SynCatOps
-rawSynCatRulesToSynCatRules raw =
-    { ops = List.map rawRuleToRule raw.operators
+fromRawSynCatRules : RawSynCatRules -> SynCatOps
+fromRawSynCatRules raw =
+    { ops = List.map fromRawOp raw.operators
     , synCat = raw.synCat
     }
 
 
-rawRuleToRule : RawOp -> Operator
-rawRuleToRule re =
-    { term = re.term
-    , arity = rawArityToArity re.arity
-    , name = re.name
-    , synCat = getSynCat re.arity
+fromRawOp : RawOp -> Operator
+fromRawOp raw =
+    { term = raw.term
+    , arity = rawArityToArity raw.arity
+    , name = raw.name
+    , synCat = getSynCat raw.arity
+    , literal = raw.literal
     }
 
 
@@ -865,32 +881,37 @@ getSynCat s =
 
 rawArityToArity : String -> Arity
 rawArityToArity rawArity =
-    -- ignore parentheses
-    rawArity
-        -- drop '('
-        |> String.dropLeft 1
-        -- drop ')s'
-        |> String.split ")"
-        |> List.head
-        |> Maybe.withDefault ""
-        |> String.split ","
-        |> List.map
-            (\arity ->
-                case String.split "." arity of
-                    _ :: binders ->
-                        case binders of
-                            -- there are no binders
-                            [] ->
-                                ( [], arity )
+    let
+        inbetweenparens =
+            String.dropLeft 1 rawArity |> String.split ")" |> List.head
+    in
+    case inbetweenparens of
+        Nothing ->
+            []
 
-                            _ ->
-                                -- there are binders
-                                getBoundVariablesAndBinder arity
+        Just s ->
+            if String.isEmpty s then
+                []
 
-                    _ ->
-                        -- the string is empty
-                        ( [], arity )
-            )
+            else
+                String.split "," s
+                    |> List.map
+                        (\arity ->
+                            case String.split "." arity of
+                                _ :: binders ->
+                                    case binders of
+                                        -- there are no binders
+                                        [] ->
+                                            ( [], arity )
+
+                                        _ ->
+                                            -- there are binders
+                                            getBoundVariablesAndBinder arity
+
+                                _ ->
+                                    -- the string is empty
+                                    ( [], arity )
+                        )
 
 
 getBoundVariablesAndBinder : String -> ( List String, String )

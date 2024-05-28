@@ -143,16 +143,30 @@ getBranchFromOp op =
     else
         case List.length op.arity of
             0 ->
-                Branch.variant0 op.name
-                    (Elm.apply
-                        (Elm.value
-                            { importFrom = [ "Debug" ]
-                            , name = "todo"
-                            , annotation = Nothing
-                            }
-                        )
-                        [ Elm.string "Invalid path: we hit a 0-arity operator but path list is non-empty" ]
-                    )
+                case op.literal of
+                    Nothing ->
+                        Branch.variant0 op.name
+                            (Elm.apply
+                                (Elm.value
+                                    { importFrom = [ "Debug" ]
+                                    , name = "todo"
+                                    , annotation = Nothing
+                                    }
+                                )
+                                [ Elm.string "Invalid path: we hit a 0-arity operator but path list is non-empty" ]
+                            )
+
+                    Just lit ->
+                        Branch.variant1 op.name (Branch.var "lit") <|
+                            \x ->
+                                Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Debug" ]
+                                        , name = "todo"
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.string "Invalid path: we hit a 0-arity operator but path list is non-empty" ]
 
             1 ->
                 let
