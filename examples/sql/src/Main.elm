@@ -150,10 +150,7 @@ getCursorPath path base =
                 Select arg1 arg2 arg3 ->
                     (getCursorPath (path ++ [ 1 ]) (Id arg1)
                         ++ getCursorPath
-                            (path
-                                ++ [ 2
-                                   ]
-                            )
+                            (path ++ [ 2 ])
                             (Id arg2)
                     )
                         ++ getCursorPath (path ++ [ 3 ]) (Clause arg3)
