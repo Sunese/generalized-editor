@@ -1,0 +1,14 @@
+d in LatexDocument
+e in Environment
+cmd in Command
+a in Argument
+id in Identifier
+c in Content
+
+d ::= \"\\documentclass{\" id_1 \"}\
+ewenvironment{\" id_2 \"}\" a_1 a_2 \"\\begin{document} \" c \"\\end{document}\" # (id,e,a,a,id.b)d # latexdoc
+id ::= %string # ()id # ident[String]
+e ::= \"\\begin{\" id \"}\" c \"\\end{\" id \"}\" # (id,c,id)e # environment
+cmd ::= \"\\\" id a # (id,a)cmd # command
+a ::= \"{\" c \"}\" # (c)a # argument
+c ::= %string # ()c # textContent[String] | cmd # (cmd)c # cmdContent | e # (e)c # envContent | c c # (c,c)c # seqContent

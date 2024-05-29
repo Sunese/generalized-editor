@@ -142,12 +142,13 @@ getUnderCursorBranch underCursor op =
                         [ Branch.int 1 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
                                     (Elm.withType
                                         (Type.named [] "Wellformed")
@@ -187,25 +188,27 @@ getUnderCursorBranch underCursor op =
                         [ Branch.int 1 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -233,36 +236,39 @@ getUnderCursorBranch underCursor op =
                         [ Branch.int 1 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.int 3 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -294,47 +300,51 @@ getUnderCursorBranch underCursor op =
                         [ Branch.int 1 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.int 3 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
                         , Branch.int 4 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -370,58 +380,63 @@ getUnderCursorBranch underCursor op =
                         [ Branch.int 1 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
                         , Branch.int 3 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
                         , Branch.int 4 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
                         , Branch.int 5 <|
                             Elm.just <|
                                 Elm.tuple
-                                    (Elm.apply
-                                        (Elm.val "replaceCctxHole")
-                                        [ Elm.val "i"
-                                        , Elm.val "cctx"
-                                        , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
-                                        ]
+                                    (Elm.withType (Type.named [] "Cctx") <|
+                                        Elm.apply
+                                            (Elm.val "replaceCctxHole")
+                                            [ Elm.val "i"
+                                            , Elm.val "cctx"
+                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            ]
                                     )
-                                    (Elm.apply (Elm.val <| "Root_" ++ arg5Sort) [ Elm.val "arg5" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg5Sort) [ Elm.val "arg5" ])
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
