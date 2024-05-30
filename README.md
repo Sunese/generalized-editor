@@ -1,21 +1,4 @@
-# 👷⚒️ ... Under construction ... 👷⚒️
-
-## Type-safe generalized syntax-directed editor
-
-This project is part of my master's thesis, where one of my main goals is to
-implement a type-safe generalized syntax-directed editor.
-
-Already heard enough? See [how to run it](#how-to-run-the-editor)!
-
-The editor is generalized in the sense that it can perform edit actions on any
-language, as long as it's syntax is provided. See [examples](#example-languages-and-their-syntax) of how the syntax should be provided.
-
-The editor guarantees that no syntactical errors can be produced and allows for
-incomplete programs (or parts thereof).
-
-The editor has some limitations, including:
-
-- **TODO**
+# README
 
 ## Dependencies
 
@@ -25,17 +8,27 @@ The editor has some limitations, including:
 
 ## How to run the editor
 
-<!-- TODO: replace these with a bash (or similiar) script
-            that do the manual work of invoking the syntax parser
-            and running codegen for us  -->
-Run the following commands from the project's root:
+### Use one of the generated examples
 
-**Powershell**:
+- Navigate to an example src folder, e.g. examples\c\src, and run the Elm REPL:
 
-    rm .\generated\src\*; elm-codegen run --output generated/src
+    ```bash
+    > import Main exposing (..)
+    > ---> do editing here <---
+    ```
 
-**Unix**:
+See examples in the report for more information.
 
-    rm -rf .\generated\src\ && elm-codegen run --output generated/src
+### Generate one yourself
 
-## Example languages and their syntax
+- Write up a language specification
+- Paste it in the `rawSyntax` declaration in src\codegen\Example.elm
+- Run `elm-codegen run --debug --output \repo-dir\src\generated\src`
+- Navigate to \repo-dir\src\generated\src and run the Elm REPL:
+
+    ```bash
+    > import Main exposing (..)
+    > ---> do editing here <---
+    ```
+
+See examples in the report for more information.
