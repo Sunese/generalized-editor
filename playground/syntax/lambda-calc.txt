@@ -1,1 +1,0 @@
-s in S\ne in E\n\ns ::= let x = e # (e,e.s)s # let | e # (e)s # exp\ne ::= e + e # (e,e)e # plus | n # ()e # num[Int] | x # ()e # var[String]\n
