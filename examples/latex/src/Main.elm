@@ -2,7 +2,7 @@ module Main exposing (..)
 
 
 type D
-    = Latexdoc Id A A (Bind Id C)
+    = Latexdoc Id E A A (Bind Id C)
     | Hole_d
     | Cursor_d D
 
@@ -49,13 +49,8 @@ type Base
     | C C
 
 
-example : Base
-example =
-    D (Latexdoc (Ident "article") Hole_a Hole_a ( [ Ident "myenv" ], Cursor_c (TextContent "Hello World!") ))
-
-
 type D_CLess
-    = Latexdoc_CLess Id_CLess A_CLess A_CLess (Bind Id_CLess C_CLess)
+    = Latexdoc_CLess Id_CLess E_CLess A_CLess A_CLess (Bind Id_CLess C_CLess)
     | Hole_d_CLess
 
 
@@ -98,10 +93,11 @@ type CursorLess
 
 type Cctx
     = Cctx_hole
-    | Latexdoc_CLess_cctx1 Cctx A_CLess A_CLess (Bind Id_CLess C_CLess)
-    | Latexdoc_CLess_cctx2 Id_CLess Cctx A_CLess (Bind Id_CLess C_CLess)
-    | Latexdoc_CLess_cctx3 Id_CLess A_CLess Cctx (Bind Id_CLess C_CLess)
-    | Latexdoc_CLess_cctx4 Id_CLess A_CLess A_CLess (Bind Id_CLess Cctx)
+    | Latexdoc_CLess_cctx1 Cctx E_CLess A_CLess A_CLess (Bind Id_CLess C_CLess)
+    | Latexdoc_CLess_cctx2 Id_CLess Cctx A_CLess A_CLess (Bind Id_CLess C_CLess)
+    | Latexdoc_CLess_cctx3 Id_CLess E_CLess Cctx A_CLess (Bind Id_CLess C_CLess)
+    | Latexdoc_CLess_cctx4 Id_CLess E_CLess A_CLess Cctx (Bind Id_CLess C_CLess)
+    | Latexdoc_CLess_cctx5 Id_CLess E_CLess A_CLess A_CLess (Bind Id_CLess Cctx)
     | Environment_CLess_cctx1 Cctx C_CLess Id_CLess
     | Environment_CLess_cctx2 Id_CLess Cctx Id_CLess
     | Environment_CLess_cctx3 Id_CLess C_CLess Cctx
@@ -132,18 +128,17 @@ getCursorPath path base =
     case base of
         D d ->
             case d of
-                Latexdoc arg1 arg2 arg3 ( boundVars4, arg4 ) ->
-                    ((getCursorPath (path ++ [ 1 ]) (Id arg1)
-                        ++ getCursorPath
-                            (path
-                                ++ [ 2
-                                   ]
-                            )
-                            (A arg2)
-                     )
-                        ++ getCursorPath (path ++ [ 3 ]) (A arg3)
-                    )
-                        ++ getCursorPath (path ++ [ 4 ]) (C arg4)
+                Latexdoc arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    (((getCursorPath (path ++ [ 1 ]) (Id arg1) ++ getCursorPath
+                                                                          (path ++ [ 2
+                                                                                   ]
+                                                                          )
+                                                                          (E
+                                                                                   arg2
+                                                                          )
+                      ) ++ getCursorPath (path ++ [ 3 ]) (A arg3)
+                     ) ++ getCursorPath (path ++ [ 4 ]) (A arg4)
+                    ) ++ getCursorPath (path ++ [ 5 ]) (C arg5)
 
                 Hole_d ->
                     []
@@ -165,15 +160,12 @@ getCursorPath path base =
         E e ->
             case e of
                 Environment arg1 arg2 arg3 ->
-                    (getCursorPath (path ++ [ 1 ]) (Id arg1)
-                        ++ getCursorPath
-                            (path
-                                ++ [ 2
-                                   ]
-                            )
-                            (C arg2)
-                    )
-                        ++ getCursorPath (path ++ [ 3 ]) (Id arg3)
+                    (getCursorPath (path ++ [ 1 ]) (Id arg1) ++ getCursorPath
+                                                                        (path ++ [ 2
+                                                                                 ]
+                                                                        )
+                                                                        (C arg2)
+                    ) ++ getCursorPath (path ++ [ 3 ]) (Id arg3)
 
                 Hole_e ->
                     []
@@ -184,13 +176,11 @@ getCursorPath path base =
         Cmd cmd ->
             case cmd of
                 Command arg1 arg2 ->
-                    getCursorPath (path ++ [ 1 ]) (Id arg1)
-                        ++ getCursorPath
-                            (path
-                                ++ [ 2
-                                   ]
-                            )
-                            (A arg2)
+                    getCursorPath (path ++ [ 1 ]) (Id arg1) ++ getCursorPath
+                                                                       (path ++ [ 2
+                                                                                ]
+                                                                       )
+                                                                       (A arg2)
 
                 Hole_cmd ->
                     []
@@ -221,13 +211,11 @@ getCursorPath path base =
                     getCursorPath (path ++ [ 1 ]) (E arg1)
 
                 SeqContent arg1 arg2 ->
-                    getCursorPath (path ++ [ 1 ]) (C arg1)
-                        ++ getCursorPath
-                            (path
-                                ++ [ 2
-                                   ]
-                            )
-                            (C arg2)
+                    getCursorPath (path ++ [ 1 ]) (C arg1) ++ getCursorPath
+                                                                      (path ++ [ 2
+                                                                               ]
+                                                                      )
+                                                                      (C arg2)
 
                 Hole_c ->
                     []
@@ -239,12 +227,13 @@ getCursorPath path base =
 toCLess_d : D -> D_CLess
 toCLess_d d =
     case d of
-        Latexdoc arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             Latexdoc_CLess
                 (toCLess_id arg1)
-                (toCLess_a arg2)
+                (toCLess_e arg2)
                 (toCLess_a arg3)
-                ( List.map toCLess_id boundVars4, toCLess_c arg4 )
+                (toCLess_a arg4)
+                ( List.map toCLess_id boundVars5, toCLess_c arg5 )
 
         Hole_d ->
             Hole_d_CLess
@@ -360,7 +349,7 @@ toCCtx_d d path =
 
         i :: rest ->
             case d of
-                Latexdoc arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                Latexdoc arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                     case i of
                         1 ->
                             let
@@ -369,10 +358,11 @@ toCCtx_d d path =
                             in
                             ( Latexdoc_CLess_cctx1
                                 cctxChild
-                                (toCLess_a arg2)
+                                (toCLess_e arg2)
                                 (toCLess_a arg3)
-                                ( List.map toCLess_id boundVars4
-                                , toCLess_c arg4
+                                (toCLess_a arg4)
+                                ( List.map toCLess_id boundVars5
+                                , toCLess_c arg5
                                 )
                             , restTree
                             )
@@ -380,14 +370,15 @@ toCCtx_d d path =
                         2 ->
                             let
                                 ( cctxChild, restTree ) =
-                                    toCCtx_a arg2 rest
+                                    toCCtx_e arg2 rest
                             in
                             ( Latexdoc_CLess_cctx2
                                 (toCLess_id arg1)
                                 cctxChild
                                 (toCLess_a arg3)
-                                ( List.map toCLess_id boundVars4
-                                , toCLess_c arg4
+                                (toCLess_a arg4)
+                                ( List.map toCLess_id boundVars5
+                                , toCLess_c arg5
                                 )
                             , restTree
                             )
@@ -399,10 +390,11 @@ toCCtx_d d path =
                             in
                             ( Latexdoc_CLess_cctx3
                                 (toCLess_id arg1)
-                                (toCLess_a arg2)
+                                (toCLess_e arg2)
                                 cctxChild
-                                ( List.map toCLess_id boundVars4
-                                , toCLess_c arg4
+                                (toCLess_a arg4)
+                                ( List.map toCLess_id boundVars5
+                                , toCLess_c arg5
                                 )
                             , restTree
                             )
@@ -410,13 +402,30 @@ toCCtx_d d path =
                         4 ->
                             let
                                 ( cctxChild, restTree ) =
-                                    toCCtx_c arg4 rest
+                                    toCCtx_a arg4 rest
                             in
                             ( Latexdoc_CLess_cctx4
                                 (toCLess_id arg1)
-                                (toCLess_a arg2)
+                                (toCLess_e arg2)
                                 (toCLess_a arg3)
-                                ( List.map toCLess_id boundVars4, cctxChild )
+                                cctxChild
+                                ( List.map toCLess_id boundVars5
+                                , toCLess_c arg5
+                                )
+                            , restTree
+                            )
+
+                        5 ->
+                            let
+                                ( cctxChild, restTree ) =
+                                    toCCtx_c arg5 rest
+                            in
+                            ( Latexdoc_CLess_cctx5
+                                (toCLess_id arg1)
+                                (toCLess_e arg2)
+                                (toCLess_a arg3)
+                                (toCLess_a arg4)
+                                ( List.map toCLess_id boundVars5, cctxChild )
                             , restTree
                             )
 
@@ -760,35 +769,47 @@ replaceCctxHole i orig_cctx underCursor =
             case underCursor of
                 D_CLess underCursor0 ->
                     case underCursor0 of
-                        Latexdoc_CLess arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                        Latexdoc_CLess arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                             case i of
                                 1 ->
                                     Latexdoc_CLess_cctx1
                                         Cctx_hole
                                         arg2
                                         arg3
-                                        ( boundVars4, arg4 )
+                                        arg4
+                                        (boundVars5, arg5)
 
                                 2 ->
                                     Latexdoc_CLess_cctx2
                                         arg1
                                         Cctx_hole
                                         arg3
-                                        ( boundVars4, arg4 )
+                                        arg4
+                                        (boundVars5, arg5)
 
                                 3 ->
                                     Latexdoc_CLess_cctx3
                                         arg1
                                         arg2
                                         Cctx_hole
-                                        ( boundVars4, arg4 )
+                                        arg4
+                                        (boundVars5, arg5)
 
                                 4 ->
                                     Latexdoc_CLess_cctx4
                                         arg1
                                         arg2
                                         arg3
-                                        ( boundVars4, Cctx_hole )
+                                        Cctx_hole
+                                        (boundVars5, arg5)
+
+                                5 ->
+                                    Latexdoc_CLess_cctx5
+                                        arg1
+                                        arg2
+                                        arg3
+                                        arg4
+                                        ( boundVars5, Cctx_hole )
 
                                 _ ->
                                     Debug.todo "Invalid arg position"
@@ -887,33 +908,45 @@ replaceCctxHole i orig_cctx underCursor =
                         Hole_c_CLess ->
                             Debug.todo "Invalid replacement"
 
-        Latexdoc_CLess_cctx1 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             Latexdoc_CLess_cctx1
                 (replaceCctxHole i arg1 underCursor)
                 arg2
                 arg3
-                ( boundVars4, arg4 )
+                arg4
+                (boundVars5, arg5)
 
-        Latexdoc_CLess_cctx2 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx2 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             Latexdoc_CLess_cctx2
                 arg1
                 (replaceCctxHole i arg2 underCursor)
                 arg3
-                ( boundVars4, arg4 )
+                arg4
+                (boundVars5, arg5)
 
-        Latexdoc_CLess_cctx3 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx3 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             Latexdoc_CLess_cctx3
                 arg1
                 arg2
                 (replaceCctxHole i arg3 underCursor)
-                ( boundVars4, arg4 )
+                arg4
+                (boundVars5, arg5)
 
-        Latexdoc_CLess_cctx4 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx4 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             Latexdoc_CLess_cctx4
                 arg1
                 arg2
                 arg3
-                ( boundVars4, replaceCctxHole i arg4 underCursor )
+                (replaceCctxHole i arg4 underCursor)
+                (boundVars5, arg5)
+
+        Latexdoc_CLess_cctx5 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+            Latexdoc_CLess_cctx5
+                arg1
+                arg2
+                arg3
+                arg4
+                ( boundVars5, replaceCctxHole i arg5 underCursor )
 
         Environment_CLess_cctx1 arg1 arg2 arg3 ->
             Environment_CLess_cctx1
@@ -964,7 +997,7 @@ child i decomposed =
     case wellformed of
         Root_d_CLess underCursor ->
             case underCursor of
-                Latexdoc_CLess arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                Latexdoc_CLess arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                     case i of
                         1 ->
                             Just
@@ -975,7 +1008,7 @@ child i decomposed =
                         2 ->
                             Just
                                 ( replaceCctxHole i cctx (D_CLess underCursor)
-                                , Root_a_CLess arg2
+                                , Root_e_CLess arg2
                                 )
 
                         3 ->
@@ -987,7 +1020,13 @@ child i decomposed =
                         4 ->
                             Just
                                 ( replaceCctxHole i cctx (D_CLess underCursor)
-                                , Root_c_CLess arg4
+                                , Root_a_CLess arg4
+                                )
+
+                        5 ->
+                            Just
+                                ( replaceCctxHole i cctx (D_CLess underCursor)
+                                , Root_c_CLess arg5
                                 )
 
                         _ ->
@@ -1180,17 +1219,20 @@ getCctxPath cctx path =
         Cctx_hole ->
             path
 
-        Latexdoc_CLess_cctx1 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             getCctxPath arg1 (path ++ [ 1 ])
 
-        Latexdoc_CLess_cctx2 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx2 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             getCctxPath arg2 (path ++ [ 2 ])
 
-        Latexdoc_CLess_cctx3 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx3 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             getCctxPath arg3 (path ++ [ 3 ])
 
-        Latexdoc_CLess_cctx4 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx4 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             getCctxPath arg4 (path ++ [ 4 ])
+
+        Latexdoc_CLess_cctx5 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+            getCctxPath arg5 (path ++ [ 5 ])
 
         Environment_CLess_cctx1 arg1 arg2 arg3 ->
             getCctxPath arg1 (path ++ [ 1 ])
@@ -1226,49 +1268,64 @@ getCctxPath cctx path =
 moveCCtxHoleUp : Cctx -> List Int -> Maybe ( Cctx, Cctx )
 moveCCtxHoleUp cctx path =
     case path of
-        [ _, _ ] ->
+        [_,_] ->
             case cctx of
                 Cctx_hole ->
                     Nothing
 
-                Latexdoc_CLess_cctx1 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                     Just
                         ( Latexdoc_CLess_cctx1
                             Cctx_hole
                             arg2
                             arg3
-                            ( boundVars4, arg4 )
+                            arg4
+                            (boundVars5, arg5)
                         , arg1
                         )
 
-                Latexdoc_CLess_cctx2 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                Latexdoc_CLess_cctx2 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                     Just
                         ( Latexdoc_CLess_cctx2
                             arg1
                             Cctx_hole
                             arg3
-                            ( boundVars4, arg4 )
+                            arg4
+                            (boundVars5, arg5)
                         , arg2
                         )
 
-                Latexdoc_CLess_cctx3 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                Latexdoc_CLess_cctx3 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                     Just
                         ( Latexdoc_CLess_cctx3
                             arg1
                             arg2
                             Cctx_hole
-                            ( boundVars4, arg4 )
+                            arg4
+                            (boundVars5, arg5)
                         , arg3
                         )
 
-                Latexdoc_CLess_cctx4 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+                Latexdoc_CLess_cctx4 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
                     Just
                         ( Latexdoc_CLess_cctx4
                             arg1
                             arg2
                             arg3
-                            ( boundVars4, Cctx_hole )
+                            Cctx_hole
+                            (boundVars5, arg5)
                         , arg4
+                        )
+
+                Latexdoc_CLess_cctx5 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    Just
+                        ( Latexdoc_CLess_cctx5
+                            arg1
+                            arg2
+                            arg3
+                            arg4
+                            (boundVars5, Cctx_hole )
+                        , arg5
                         )
 
                 Environment_CLess_cctx1 arg1 arg2 arg3 ->
@@ -1301,7 +1358,7 @@ moveCCtxHoleUp cctx path =
                 SeqContent_CLess_cctx2 arg1 arg2 ->
                     Just ( SeqContent_CLess_cctx2 arg1 Cctx_hole, arg2 )
 
-        [ _ ] ->
+        [_] ->
             Just ( Cctx_hole, cctx )
 
         _ :: rest ->
@@ -1309,167 +1366,170 @@ moveCCtxHoleUp cctx path =
                 Cctx_hole ->
                     Nothing
 
-                Latexdoc_CLess_cctx1 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Latexdoc_CLess_cctx1
-                                    newCctx
-                                    arg2
-                                    arg3
-                                    ( boundVars4, arg4 )
-                                , removedCctx
-                                )
-                            )
+                Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Latexdoc_CLess_cctx1
+                                                                     newCctx
+                                                                     arg2
+                                                                     arg3
+                                                                     arg4
+                                                                     (boundVars5, arg5)
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
-                Latexdoc_CLess_cctx2 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
-                    moveCCtxHoleUp arg2 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Latexdoc_CLess_cctx2
-                                    arg1
-                                    newCctx
-                                    arg3
-                                    ( boundVars4, arg4 )
-                                , removedCctx
-                                )
-                            )
+                Latexdoc_CLess_cctx2 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    moveCCtxHoleUp arg2 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Latexdoc_CLess_cctx2
+                                                                     arg1
+                                                                     newCctx
+                                                                     arg3
+                                                                     arg4
+                                                                     (boundVars5, arg5)
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
-                Latexdoc_CLess_cctx3 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
-                    moveCCtxHoleUp arg3 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Latexdoc_CLess_cctx3
-                                    arg1
-                                    arg2
-                                    newCctx
-                                    ( boundVars4, arg4 )
-                                , removedCctx
-                                )
-                            )
+                Latexdoc_CLess_cctx3 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    moveCCtxHoleUp arg3 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Latexdoc_CLess_cctx3
+                                                                     arg1
+                                                                     arg2
+                                                                     newCctx
+                                                                     arg4
+                                                                     (boundVars5, arg5)
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
-                Latexdoc_CLess_cctx4 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
-                    moveCCtxHoleUp arg4 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Latexdoc_CLess_cctx4
-                                    arg1
-                                    arg2
-                                    arg3
-                                    ( boundVars4, newCctx )
-                                , removedCctx
-                                )
-                            )
+                Latexdoc_CLess_cctx4 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    moveCCtxHoleUp arg4 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Latexdoc_CLess_cctx4
+                                                                     arg1
+                                                                     arg2
+                                                                     arg3
+                                                                     newCctx
+                                                                     (boundVars5, arg5)
+                                                                 , removedCctx
+                                                                 )
+                                                        )
+
+                Latexdoc_CLess_cctx5 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+                    moveCCtxHoleUp arg5 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Latexdoc_CLess_cctx5
+                                                                     arg1
+                                                                     arg2
+                                                                     arg3
+                                                                     arg4
+                                                                     (boundVars5, newCctx )
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 Environment_CLess_cctx1 arg1 arg2 arg3 ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Environment_CLess_cctx1
-                                    newCctx
-                                    arg2
-                                    arg3
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Environment_CLess_cctx1
+                                                                     newCctx
+                                                                     arg2
+                                                                     arg3
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 Environment_CLess_cctx2 arg1 arg2 arg3 ->
-                    moveCCtxHoleUp arg2 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Environment_CLess_cctx2
-                                    arg1
-                                    newCctx
-                                    arg3
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg2 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Environment_CLess_cctx2
+                                                                     arg1
+                                                                     newCctx
+                                                                     arg3
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 Environment_CLess_cctx3 arg1 arg2 arg3 ->
-                    moveCCtxHoleUp arg3 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Environment_CLess_cctx3
-                                    arg1
-                                    arg2
-                                    newCctx
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg3 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Environment_CLess_cctx3
+                                                                     arg1
+                                                                     arg2
+                                                                     newCctx
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 Command_CLess_cctx1 arg1 arg2 ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Command_CLess_cctx1
-                                    newCctx
-                                    arg2
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Command_CLess_cctx1
+                                                                     newCctx
+                                                                     arg2
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 Command_CLess_cctx2 arg1 arg2 ->
-                    moveCCtxHoleUp arg2 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Command_CLess_cctx2
-                                    arg1
-                                    newCctx
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg2 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Command_CLess_cctx2
+                                                                     arg1
+                                                                     newCctx
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 Argument_CLess_cctx1 arg1 ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( Argument_CLess_cctx1
-                                    newCctx
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( Argument_CLess_cctx1
+                                                                     newCctx
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 CmdContent_CLess_cctx1 arg1 ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( CmdContent_CLess_cctx1
-                                    newCctx
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( CmdContent_CLess_cctx1
+                                                                     newCctx
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 EnvContent_CLess_cctx1 arg1 ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( EnvContent_CLess_cctx1
-                                    newCctx
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( EnvContent_CLess_cctx1
+                                                                     newCctx
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 SeqContent_CLess_cctx1 arg1 arg2 ->
-                    moveCCtxHoleUp arg1 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( SeqContent_CLess_cctx1
-                                    newCctx
-                                    arg2
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg1 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( SeqContent_CLess_cctx1
+                                                                     newCctx
+                                                                     arg2
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
                 SeqContent_CLess_cctx2 arg1 arg2 ->
-                    moveCCtxHoleUp arg2 rest
-                        |> Maybe.map
-                            (\( newCctx, removedCctx ) ->
-                                ( SeqContent_CLess_cctx2
-                                    arg1
-                                    newCctx
-                                , removedCctx
-                                )
-                            )
+                    moveCCtxHoleUp arg2 rest |> Maybe.map
+                                                        (\(newCctx, removedCctx) ->
+                                                                 ( SeqContent_CLess_cctx2
+                                                                     arg1
+                                                                     newCctx
+                                                                 , removedCctx
+                                                                 )
+                                                        )
 
         [] ->
             Nothing
@@ -1481,65 +1541,86 @@ addParent cctx wellformed =
         Cctx_hole ->
             Nothing
 
-        Latexdoc_CLess_cctx1 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             case wellformed of
                 Root_id_CLess underCursor ->
                     Just
                         (Root_d_CLess
-                            (Latexdoc_CLess
-                                underCursor
-                                arg2
-                                arg3
-                                ( boundVars4, arg4 )
-                            )
+                             (Latexdoc_CLess
+                                  underCursor
+                                  arg2
+                                  arg3
+                                  arg4
+                                  (boundVars5, arg5)
+                             )
                         )
 
                 _ ->
                     Nothing
 
-        Latexdoc_CLess_cctx2 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx2 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
+            case wellformed of
+                Root_e_CLess underCursor ->
+                    Just
+                        (Root_d_CLess
+                             (Latexdoc_CLess
+                                  arg1
+                                  underCursor
+                                  arg3
+                                  arg4
+                                  (boundVars5, arg5)
+                             )
+                        )
+
+                _ ->
+                    Nothing
+
+        Latexdoc_CLess_cctx3 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             case wellformed of
                 Root_a_CLess underCursor ->
                     Just
                         (Root_d_CLess
-                            (Latexdoc_CLess
-                                arg1
-                                underCursor
-                                arg3
-                                ( boundVars4, arg4 )
-                            )
+                             (Latexdoc_CLess
+                                  arg1
+                                  arg2
+                                  underCursor
+                                  arg4
+                                  (boundVars5, arg5)
+                             )
                         )
 
                 _ ->
                     Nothing
 
-        Latexdoc_CLess_cctx3 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx4 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             case wellformed of
                 Root_a_CLess underCursor ->
                     Just
                         (Root_d_CLess
-                            (Latexdoc_CLess
-                                arg1
-                                arg2
-                                underCursor
-                                ( boundVars4, arg4 )
-                            )
+                             (Latexdoc_CLess
+                                  arg1
+                                  arg2
+                                  arg3
+                                  underCursor
+                                  (boundVars5, arg5)
+                             )
                         )
 
                 _ ->
                     Nothing
 
-        Latexdoc_CLess_cctx4 arg1 arg2 arg3 ( boundVars4, arg4 ) ->
+        Latexdoc_CLess_cctx5 arg1 arg2 arg3 arg4 (boundVars5, arg5) ->
             case wellformed of
                 Root_c_CLess underCursor ->
                     Just
                         (Root_d_CLess
-                            (Latexdoc_CLess
-                                arg1
-                                arg2
-                                arg3
-                                ( boundVars4, underCursor )
-                            )
+                             (Latexdoc_CLess
+                                  arg1
+                                  arg2
+                                  arg3
+                                  arg4
+                                  (boundVars5, underCursor )
+                             )
                         )
 
                 _ ->
@@ -1646,3 +1727,299 @@ parent decomposed =
 
                 Just newWellformed ->
                     Just ( newCctx, newWellformed )
+
+
+type EditorCond
+    = Neg EditorCond
+    | Conjunction EditorCond EditorCond
+    | Disjunction EditorCond EditorCond
+    | At CursorLess
+    | Possibly CursorLess
+    | Necessarily CursorLess
+
+
+type alias Decomposed =
+    ( Cctx, Wellformed )
+
+
+evalCond : Decomposed -> EditorCond -> Bool
+evalCond decomposed cond =
+    case cond of
+        Neg arg1 ->
+            not (evalCond decomposed arg1)
+
+        Conjunction arg1 arg2 ->
+            evalCond decomposed arg1 && evalCond decomposed arg2
+
+        Disjunction arg1 arg2 ->
+            evalCond decomposed arg1 || evalCond decomposed arg2
+
+        At cursorlessOp ->
+            atOp cursorlessOp (Just decomposed)
+
+        Possibly cursorlessOp ->
+            possibly cursorlessOp (Just decomposed)
+
+        Necessarily cursorlessOp ->
+            necessity cursorlessOp decomposed
+
+
+atOp : CursorLess -> Maybe Decomposed -> Bool
+atOp cursorlessop maybedecomposed =
+    case maybedecomposed of
+        Nothing ->
+            False
+
+        Just decomposed ->
+            case ( cursorlessop, getOpAtCursor decomposed ) of
+                ( D_CLess query, D_CLess op ) ->
+                    same_d_CLess query op
+
+                ( Id_CLess query, Id_CLess op ) ->
+                    same_id_CLess query op
+
+                ( E_CLess query, E_CLess op ) ->
+                    same_e_CLess query op
+
+                ( Cmd_CLess query, Cmd_CLess op ) ->
+                    same_cmd_CLess query op
+
+                ( A_CLess query, A_CLess op ) ->
+                    same_a_CLess query op
+
+                ( C_CLess query, C_CLess op ) ->
+                    same_c_CLess query op
+
+                _ ->
+                    False
+
+
+getOpAtCursor : Decomposed -> CursorLess
+getOpAtCursor decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_d_CLess arg1 ->
+            D_CLess arg1
+
+        Root_e_CLess arg1 ->
+            E_CLess arg1
+
+        Root_cmd_CLess arg1 ->
+            Cmd_CLess arg1
+
+        Root_a_CLess arg1 ->
+            A_CLess arg1
+
+        Root_id_CLess arg1 ->
+            Id_CLess arg1
+
+        Root_c_CLess arg1 ->
+            C_CLess arg1
+
+
+possibly : CursorLess -> Maybe Decomposed -> Bool
+possibly cursorlessop maybedecomposed =
+    case maybedecomposed of
+        Nothing ->
+            False
+
+        Just decomposed ->
+            atOp cursorlessop (Just decomposed) || possibly
+                                                           cursorlessop
+                                                           (child 1 decomposed
+                                                           ) || possibly
+                                                                            cursorlessop
+                                                                            (child
+                                                                                         2
+                                                                                         decomposed
+                                                                            ) || possibly
+                                                                                                 cursorlessop
+                                                                                                 (child
+                                                                                                                  3
+                                                                                                                  decomposed
+                                                                                                 ) || possibly
+                                                                                                                          cursorlessop
+                                                                                                                          (child
+                                                                                                                                               4
+                                                                                                                                               decomposed
+                                                                                                                          ) || possibly
+                                                                                                                                                       cursorlessop
+                                                                                                                                                       (child
+                                                                                                                                                                                5
+                                                                                                                                                                                decomposed
+                                                                                                                                                       )
+
+
+necessity : CursorLess -> Decomposed -> Bool
+necessity cursorlessop decomposed =
+    case getOpAtCursor decomposed of
+        D_CLess arg1 ->
+            case arg1 of
+                Latexdoc_CLess _ _ _ _ _ ->
+                    (((possibly cursorlessop (child 1 decomposed) && possibly
+                                                                             cursorlessop
+                                                                             (child
+                                                                                      2
+                                                                                      decomposed
+                                                                             )
+                      ) && possibly cursorlessop (child 3 decomposed)
+                     ) && possibly cursorlessop (child 4 decomposed)
+                    ) && possibly cursorlessop (child 5 decomposed)
+
+                Hole_d_CLess ->
+                    False
+
+        Id_CLess arg1 ->
+            case arg1 of
+                Ident_CLess _ ->
+                    False
+
+                Hole_id_CLess ->
+                    False
+
+        E_CLess arg1 ->
+            case arg1 of
+                Environment_CLess _ _ _ ->
+                    (possibly cursorlessop (child 1 decomposed) && possibly
+                                                                           cursorlessop
+                                                                           (child
+                                                                                    2
+                                                                                    decomposed
+                                                                           )
+                    ) && possibly cursorlessop (child 3 decomposed)
+
+                Hole_e_CLess ->
+                    False
+
+        Cmd_CLess arg1 ->
+            case arg1 of
+                Command_CLess _ _ ->
+                    possibly cursorlessop (child 1 decomposed) && possibly
+                                                                          cursorlessop
+                                                                          (child
+                                                                                   2
+                                                                                   decomposed
+                                                                          )
+
+                Hole_cmd_CLess ->
+                    False
+
+        A_CLess arg1 ->
+            case arg1 of
+                Argument_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                Hole_a_CLess ->
+                    False
+
+        C_CLess arg1 ->
+            case arg1 of
+                TextContent_CLess _ ->
+                    False
+
+                CmdContent_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                EnvContent_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                SeqContent_CLess _ _ ->
+                    possibly cursorlessop (child 1 decomposed) && possibly
+                                                                          cursorlessop
+                                                                          (child
+                                                                                   2
+                                                                                   decomposed
+                                                                          )
+
+                Hole_c_CLess ->
+                    False
+
+
+same_d_CLess : D_CLess -> D_CLess -> Bool
+same_d_CLess query op =
+    case ( query, op ) of
+        ( Latexdoc_CLess _ _ _ _ _, Latexdoc_CLess _ _ _ _ _ ) ->
+            True
+
+        ( Hole_d_CLess, Hole_d_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_id_CLess : Id_CLess -> Id_CLess -> Bool
+same_id_CLess query op =
+    case ( query, op ) of
+        ( Ident_CLess _, Ident_CLess _ ) ->
+            True
+
+        ( Hole_id_CLess, Hole_id_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_e_CLess : E_CLess -> E_CLess -> Bool
+same_e_CLess query op =
+    case ( query, op ) of
+        ( Environment_CLess _ _ _, Environment_CLess _ _ _ ) ->
+            True
+
+        ( Hole_e_CLess, Hole_e_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_cmd_CLess : Cmd_CLess -> Cmd_CLess -> Bool
+same_cmd_CLess query op =
+    case ( query, op ) of
+        ( Command_CLess _ _, Command_CLess _ _ ) ->
+            True
+
+        ( Hole_cmd_CLess, Hole_cmd_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_a_CLess : A_CLess -> A_CLess -> Bool
+same_a_CLess query op =
+    case ( query, op ) of
+        ( Argument_CLess _, Argument_CLess _ ) ->
+            True
+
+        ( Hole_a_CLess, Hole_a_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_c_CLess : C_CLess -> C_CLess -> Bool
+same_c_CLess query op =
+    case ( query, op ) of
+        ( TextContent_CLess _, TextContent_CLess _ ) ->
+            True
+
+        ( CmdContent_CLess _, CmdContent_CLess _ ) ->
+            True
+
+        ( EnvContent_CLess _, EnvContent_CLess _ ) ->
+            True
+
+        ( SeqContent_CLess _ _, SeqContent_CLess _ _ ) ->
+            True
+
+        ( Hole_c_CLess, Hole_c_CLess ) ->
+            True
+
+        _ ->
+            False

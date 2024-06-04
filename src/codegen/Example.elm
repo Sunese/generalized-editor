@@ -1,5 +1,6 @@
 module Example exposing (..)
 
+import Conditionals exposing (..)
 import DecomposeFun exposing (..)
 import Elm
 import Elm.Annotation as Type exposing (..)
@@ -87,6 +88,8 @@ exampleFiles =
             ++ createParentFuns
                 (filterCLess <| createCursorlessSyntax exampleSyntax)
                 (filterCctx <| fromCLessToCCtxSyntax <| createCursorlessSyntax exampleSyntax)
+            ++ createEditorCondDecls (filterCLess <| createCursorlessSyntax exampleSyntax)
+                (filterWellformed <| fromCLessToWellFormedSyntax <| createCursorlessSyntax exampleSyntax)
 
     -- ++ [createDecomposeFun <| addCursorHoleOps <| exampleSyntax]
     -- ++ [ createToCursorLessFun <| addCursorHoleOps <| exampleSyntax ]
@@ -107,7 +110,7 @@ exampleSyntax =
 
 rawSyntax : String
 rawSyntax =
-    "q in Query\ncmd in Command\nid in Id\nconst in Const\nclause in Clause\ncond in Condition\nexp in Expression\n\nq ::= \" SELECT \" id_1 \" FROM \" id_2 clause # (id,id,clause)q # select\ncmd ::= \" INSERT INTO \" id_1 \" AS \" id_2 q # (id,id.q)cmd # insert\nid ::= %string # ()id # ident[String]\nconst ::= %number # ()const # num[Int] | \"'\" %string \"'\" # ()const # str[String]\nclause ::= \" WHERE \" cond # (cond)clause # where | \" HAVING \" cond # (cond)clause # having\ncond ::= exp_1 \">\" exp_2 # (exp,exp)cond # greater | exp_1 \"=\" exp_2 # (exp,exp)cond # equals\nexp ::= const # (const)exp # econst | id # (id)exp # eident\n"
+    "p in Prog\ns in Stmt\nvd in VariableDecl\nfd in FunDecl\nt in Type\nid in Id\ne in Exp\nb in Block\nbi in BlockItem\nfa in Funarg\ncond in Conditional\n\np ::= fd # (fd)p # program\nb ::= bi # (bi)b # block\nbi ::= vd # (vd)bi # blockdecls | s # (s)bi # blockstmts | epsilon # ()bi # blockdone\nvd ::= t id \"=\" e; bi # (t,e,id.bi)vd # vardecl\nfd ::= t_1 id_1 \"(\" t_2 id_2 \")\" \"{\" b \"}\" # (t,id.fd,t,id.b)fd # fundecl1 | t_1 id_1 \"(\" t_2 id_2, t_3 id_3 \")\" \"{\" b \"}\" # (t,id.fd,t,t,id.id.b)fd # fundecl2 | epsilon # ()fd # fundecldone\ns ::= id \"=\" e \";\" # (id,e)s # assignment | id \"(\" fa \")\";\" # (id,fa)s # stmtfuncall | \"return \" e \";\" # (e)s # return | cond # (cond)s # conditional | s s # (s,s)s # compstmt\nfa ::= t id # (t,id)fa # funarg | t id, fa # (t,id,fa)fa # funargs\ncond ::= \"if (\" e \")\" \"{\" b_1 \"} else {\" b_2 \"}\" # (e,b,b)cond # ifelse\nt ::= \"int\" # ()t # tint | \"char\" # ()t # tchar | \"bool\" # ()t # tbool\ne ::= %int # ()e # int[Int] | %char # ()e # char[Char] | %bool # ()e # bool[Bool] | e_1 \"+\" e_2 # (e,e)e # plus | e_1 \"==\" e_2 # (e,e)e # equals | id \"(\" fa \")\" # (id,fa)e # expfuncall | id # (id)e # expident\nid ::= %string # ()id # ident[String]"
 
 
 filterCctx : Syntax -> Syntax

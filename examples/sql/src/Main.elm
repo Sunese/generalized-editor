@@ -57,11 +57,6 @@ type Base
     | Exp Exp
 
 
-example : Base
-example =
-    Q (Select (Ident "col-a") (Ident "table-b") (Where (Greater (Eident (Ident "col-a")) (Econst (Num 2)))))
-
-
 type Q_CLess
     = Select_CLess Id_CLess Id_CLess Clause_CLess
     | Hole_q_CLess
@@ -150,7 +145,10 @@ getCursorPath path base =
                 Select arg1 arg2 arg3 ->
                     (getCursorPath (path ++ [ 1 ]) (Id arg1)
                         ++ getCursorPath
-                            (path ++ [ 2 ])
+                            (path
+                                ++ [ 2
+                                   ]
+                            )
                             (Id arg2)
                     )
                         ++ getCursorPath (path ++ [ 3 ]) (Clause arg3)
@@ -1624,3 +1622,338 @@ parent decomposed =
 
                 Just newWellformed ->
                     Just ( newCctx, newWellformed )
+
+
+type EditorCond
+    = Neg EditorCond
+    | Conjunction EditorCond EditorCond
+    | Disjunction EditorCond EditorCond
+    | At CursorLess
+    | Possibly CursorLess
+    | Necessarily CursorLess
+
+
+type alias Decomposed =
+    ( Cctx, Wellformed )
+
+
+evalCond : Decomposed -> EditorCond -> Bool
+evalCond decomposed cond =
+    case cond of
+        Neg arg1 ->
+            not (evalCond decomposed arg1)
+
+        Conjunction arg1 arg2 ->
+            evalCond decomposed arg1 && evalCond decomposed arg2
+
+        Disjunction arg1 arg2 ->
+            evalCond decomposed arg1 || evalCond decomposed arg2
+
+        At cursorlessOp ->
+            atOp cursorlessOp (Just decomposed)
+
+        Possibly cursorlessOp ->
+            possibly cursorlessOp (Just decomposed)
+
+        Necessarily cursorlessOp ->
+            necessity cursorlessOp decomposed
+
+
+atOp : CursorLess -> Maybe Decomposed -> Bool
+atOp cursorlessop maybedecomposed =
+    case maybedecomposed of
+        Nothing ->
+            False
+
+        Just decomposed ->
+            case ( cursorlessop, getOpAtCursor decomposed ) of
+                ( Q_CLess query, Q_CLess op ) ->
+                    same_q_CLess query op
+
+                ( Cmd_CLess query, Cmd_CLess op ) ->
+                    same_cmd_CLess query op
+
+                ( Id_CLess query, Id_CLess op ) ->
+                    same_id_CLess query op
+
+                ( Const_CLess query, Const_CLess op ) ->
+                    same_const_CLess query op
+
+                ( Clause_CLess query, Clause_CLess op ) ->
+                    same_clause_CLess query op
+
+                ( Cond_CLess query, Cond_CLess op ) ->
+                    same_cond_CLess query op
+
+                ( Exp_CLess query, Exp_CLess op ) ->
+                    same_exp_CLess query op
+
+                _ ->
+                    False
+
+
+getOpAtCursor : Decomposed -> CursorLess
+getOpAtCursor decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_q_CLess arg1 ->
+            Q_CLess arg1
+
+        Root_cmd_CLess arg1 ->
+            Cmd_CLess arg1
+
+        Root_id_CLess arg1 ->
+            Id_CLess arg1
+
+        Root_const_CLess arg1 ->
+            Const_CLess arg1
+
+        Root_clause_CLess arg1 ->
+            Clause_CLess arg1
+
+        Root_cond_CLess arg1 ->
+            Cond_CLess arg1
+
+        Root_exp_CLess arg1 ->
+            Exp_CLess arg1
+
+
+possibly : CursorLess -> Maybe Decomposed -> Bool
+possibly cursorlessop maybedecomposed =
+    case maybedecomposed of
+        Nothing ->
+            False
+
+        Just decomposed ->
+            atOp cursorlessop (Just decomposed)
+                || possibly
+                    cursorlessop
+                    (child 1 decomposed)
+                || possibly
+                    cursorlessop
+                    (child
+                        2
+                        decomposed
+                    )
+                || possibly
+                    cursorlessop
+                    (child
+                        3
+                        decomposed
+                    )
+                || possibly
+                    cursorlessop
+                    (child
+                        4
+                        decomposed
+                    )
+                || possibly
+                    cursorlessop
+                    (child
+                        5
+                        decomposed
+                    )
+
+
+necessity : CursorLess -> Decomposed -> Bool
+necessity cursorlessop decomposed =
+    case getOpAtCursor decomposed of
+        Q_CLess arg1 ->
+            case arg1 of
+                Select_CLess _ _ _ ->
+                    (possibly cursorlessop (child 1 decomposed)
+                        && possibly
+                            cursorlessop
+                            (child
+                                2
+                                decomposed
+                            )
+                    )
+                        && possibly cursorlessop (child 3 decomposed)
+
+                Hole_q_CLess ->
+                    False
+
+        Cmd_CLess arg1 ->
+            case arg1 of
+                Insert_CLess _ _ ->
+                    possibly cursorlessop (child 1 decomposed)
+                        && possibly
+                            cursorlessop
+                            (child
+                                2
+                                decomposed
+                            )
+
+                Hole_cmd_CLess ->
+                    False
+
+        Id_CLess arg1 ->
+            case arg1 of
+                Ident_CLess _ ->
+                    False
+
+                Hole_id_CLess ->
+                    False
+
+        Const_CLess arg1 ->
+            case arg1 of
+                Num_CLess _ ->
+                    False
+
+                Str_CLess _ ->
+                    False
+
+                Hole_const_CLess ->
+                    False
+
+        Clause_CLess arg1 ->
+            case arg1 of
+                Where_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                Having_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                Hole_clause_CLess ->
+                    False
+
+        Cond_CLess arg1 ->
+            case arg1 of
+                Greater_CLess _ _ ->
+                    possibly cursorlessop (child 1 decomposed)
+                        && possibly
+                            cursorlessop
+                            (child
+                                2
+                                decomposed
+                            )
+
+                Equals_CLess _ _ ->
+                    possibly cursorlessop (child 1 decomposed)
+                        && possibly
+                            cursorlessop
+                            (child
+                                2
+                                decomposed
+                            )
+
+                Hole_cond_CLess ->
+                    False
+
+        Exp_CLess arg1 ->
+            case arg1 of
+                Econst_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                Eident_CLess _ ->
+                    possibly cursorlessop (child 1 decomposed)
+
+                Hole_exp_CLess ->
+                    False
+
+
+same_q_CLess : Q_CLess -> Q_CLess -> Bool
+same_q_CLess query op =
+    case ( query, op ) of
+        ( Select_CLess _ _ _, Select_CLess _ _ _ ) ->
+            True
+
+        ( Hole_q_CLess, Hole_q_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_cmd_CLess : Cmd_CLess -> Cmd_CLess -> Bool
+same_cmd_CLess query op =
+    case ( query, op ) of
+        ( Insert_CLess _ _, Insert_CLess _ _ ) ->
+            True
+
+        ( Hole_cmd_CLess, Hole_cmd_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_id_CLess : Id_CLess -> Id_CLess -> Bool
+same_id_CLess query op =
+    case ( query, op ) of
+        ( Ident_CLess _, Ident_CLess _ ) ->
+            True
+
+        ( Hole_id_CLess, Hole_id_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_const_CLess : Const_CLess -> Const_CLess -> Bool
+same_const_CLess query op =
+    case ( query, op ) of
+        ( Num_CLess _, Num_CLess _ ) ->
+            True
+
+        ( Str_CLess _, Str_CLess _ ) ->
+            True
+
+        ( Hole_const_CLess, Hole_const_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_clause_CLess : Clause_CLess -> Clause_CLess -> Bool
+same_clause_CLess query op =
+    case ( query, op ) of
+        ( Where_CLess _, Where_CLess _ ) ->
+            True
+
+        ( Having_CLess _, Having_CLess _ ) ->
+            True
+
+        ( Hole_clause_CLess, Hole_clause_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_cond_CLess : Cond_CLess -> Cond_CLess -> Bool
+same_cond_CLess query op =
+    case ( query, op ) of
+        ( Greater_CLess _ _, Greater_CLess _ _ ) ->
+            True
+
+        ( Equals_CLess _ _, Equals_CLess _ _ ) ->
+            True
+
+        ( Hole_cond_CLess, Hole_cond_CLess ) ->
+            True
+
+        _ ->
+            False
+
+
+same_exp_CLess : Exp_CLess -> Exp_CLess -> Bool
+same_exp_CLess query op =
+    case ( query, op ) of
+        ( Econst_CLess _, Econst_CLess _ ) ->
+            True
+
+        ( Eident_CLess _, Eident_CLess _ ) ->
+            True
+
+        ( Hole_exp_CLess, Hole_exp_CLess ) ->
+            True
+
+        _ ->
+            False
