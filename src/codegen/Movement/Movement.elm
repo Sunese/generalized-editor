@@ -1,4 +1,4 @@
-module Movement exposing (..)
+module Movement.Movement exposing (..)
 
 import Array
 import Elm
@@ -11,8 +11,8 @@ import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Html exposing (a)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 createChildFun : Syntax -> CLessSyntax -> CCtxSyntax -> WellFormedSyntax -> Elm.Declaration
@@ -21,20 +21,20 @@ createChildFun extendedSyntax clessSyntax cctxSyntax wellformedSyntax =
         Elm.withType
             (Type.function
                 [ Type.int
-                , Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed")
+                , Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                 ]
-                (Type.maybe <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))
+                (Type.maybe <| Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed"))
             )
         <|
             Elm.fn2
                 ( "i", Just Type.int )
-                ( "decomposed", Just <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed") )
+                ( "decomposed", Just <| Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed") )
                 (\i decomposed ->
                     Elm.Let.letIn
                         (\( cctx, wellformed ) ->
                             Elm.Case.custom
                                 wellformed
-                                (Type.named [] "Wellformed")
+                                (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                 (wellformedCases
                                     clessSyntax
                                     (List.filter (\x -> x.synCat == "wellformed") wellformedSyntax.synCatOps)
@@ -48,11 +48,11 @@ createChildFun extendedSyntax clessSyntax cctxSyntax wellformedSyntax =
 createReplaceCCtxHoleFun : Syntax -> CLessSyntax -> CCtxSyntax -> Elm.Declaration
 createReplaceCCtxHoleFun extendedSyntax clessSyntax cctxSyntax =
     Elm.declaration "replaceCctxHole" <|
-        Elm.withType (Type.function [ Type.int, Type.named [] "Cctx", Type.named [] "CursorLess" ] (Type.named [] "Cctx")) <|
+        Elm.withType (Type.function [ Type.int, Type.named [ "Syntax", "CCtx" ] "Cctx", Type.named [ "Syntax", "Cursorless" ] "CursorLess" ] (Type.named [ "Syntax", "CCtx" ] "Cctx")) <|
             Elm.fn3
                 ( "i", Just Type.int )
-                ( "orig_cctx", Just <| Type.named [] "Cctx" )
-                ( "underCursor", Just <| Type.named [] "CursorLess" )
+                ( "orig_cctx", Just <| Type.named [ "Syntax", "CCtx" ] "Cctx" )
+                ( "underCursor", Just <| Type.named [ "Syntax", "Cursorless" ] "CursorLess" )
                 (\i orig_cctx underCursor ->
                     -- create a case expression for every CCtx operator
                     cctxCases extendedSyntax cctxSyntax clessSyntax i orig_cctx underCursor
@@ -83,7 +83,7 @@ wellformedCases clessSyntax wellformedsynCatOps =
                 (Branch.var "underCursor")
                 (\underCursor ->
                     Elm.Case.custom underCursor
-                        (Type.named [] (firstCharToUpper clessName))
+                        (Type.named [ "Syntax", "Cursorless" ] (firstCharToUpper clessName))
                         (List.map
                             (getUnderCursorBranch underCursor)
                             (List.filter (\x -> x.synCat == clessName) allCLessOps)
@@ -147,13 +147,27 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
                                     (Elm.withType
                                         (Type.named [] "Wellformed")
                                      <|
-                                        Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ]
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg1Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg1" ]
                                     )
 
                         -- (Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
@@ -193,10 +207,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg1Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg1" ]
+                                    )
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
@@ -205,10 +235,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg2Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg2" ]
+                                    )
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -241,10 +287,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg1Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg1" ]
+                                    )
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
@@ -253,10 +315,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg2Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg2" ]
+                                    )
                         , Branch.int 3 <|
                             Elm.just <|
                                 Elm.tuple
@@ -265,10 +343,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg3Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg3" ]
+                                    )
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -305,10 +399,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg1Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg1" ]
+                                    )
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
@@ -317,10 +427,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg2Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg2" ]
+                                    )
                         , Branch.int 3 <|
                             Elm.just <|
                                 Elm.tuple
@@ -329,10 +455,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg3Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg3" ]
+                                    )
                         , Branch.int 4 <|
                             Elm.just <|
                                 Elm.tuple
@@ -341,10 +483,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg4Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg4" ]
+                                    )
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -385,10 +543,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg1Sort) [ Elm.val "arg1" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg1Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg1" ]
+                                    )
                         , Branch.int 2 <|
                             Elm.just <|
                                 Elm.tuple
@@ -397,10 +571,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg2Sort) [ Elm.val "arg2" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg2Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg2" ]
+                                    )
                         , Branch.int 3 <|
                             Elm.just <|
                                 Elm.tuple
@@ -409,10 +599,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg3Sort) [ Elm.val "arg3" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg3Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg3" ]
+                                    )
                         , Branch.int 4 <|
                             Elm.just <|
                                 Elm.tuple
@@ -421,10 +627,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg4Sort) [ Elm.val "arg4" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg4Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg4" ]
+                                    )
                         , Branch.int 5 <|
                             Elm.just <|
                                 Elm.tuple
@@ -433,10 +655,26 @@ getUnderCursorBranch underCursor op =
                                             (Elm.val "replaceCctxHole")
                                             [ Elm.val "i"
                                             , Elm.val "cctx"
-                                            , Elm.apply (Elm.val <| firstCharToUpper op.synCat) [ underCursor ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Cursorless" ]
+                                                    , name = firstCharToUpper op.synCat
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ underCursor ]
                                             ]
                                     )
-                                    (Elm.withType (Type.named [] "Wellformed") <| Elm.apply (Elm.val <| "Root_" ++ arg5Sort) [ Elm.val "arg5" ])
+                                    (Elm.withType (Type.named [] "Wellformed") <|
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ arg5Sort
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg5" ]
+                                    )
                         , Branch.ignore <| Elm.nothing
                         ]
                 )
@@ -455,13 +693,13 @@ cctxCases :
     -> Elm.Expression
 cctxCases extendedSyntax cctxSyntax clessSyntax i orig_cctx underCursor =
     Elm.Case.custom orig_cctx
-        (Type.named [] "Cctx")
+        (Type.named [ "Syntax", "CCtx" ] "Cctx")
         (List.map
             (\cctxop ->
                 if cctxop.name == "Cctx_hole" then
                     Branch.variant0 cctxop.name <|
                         Elm.Case.custom underCursor
-                            (Type.named [] "CursorLess")
+                            (Type.named [ "Syntax", "Cursorless" ] "CursorLess")
                             (List.map
                                 getBranchFromSynCatsOp
                                 clessSyntax.synCatOps
@@ -503,7 +741,12 @@ cctxRecurseBranch cctxOp =
                 (Branch.var "cctx")
                 (\cctx ->
                     Elm.apply
-                        (Elm.val <| firstCharToUpper cctxOp.name)
+                        (Elm.value
+                            { importFrom = [ "Syntax", "CCtx" ]
+                            , name = firstCharToUpper cctxOp.name
+                            , annotation = Nothing
+                            }
+                        )
                         [ Elm.apply
                             (Elm.val "replaceCctxHole")
                             [ Elm.val "i", cctx, Elm.val "underCursor" ]
@@ -524,7 +767,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 1 patternsArray)
                         (\arg1 arg2 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ getRecursionExp 0 recursionExpArray
                                 , arg2
                                 ]
@@ -537,7 +785,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 1 patternsArray)
                         (\arg1 arg2 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , getRecursionExp 1 recursionExpArray
                                 ]
@@ -561,7 +814,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 2 patternsArray)
                         (\arg1 arg2 arg3 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ getRecursionExp 0 recursionExpArray
                                 , arg2
                                 , arg3
@@ -576,7 +834,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 2 patternsArray)
                         (\arg1 arg2 arg3 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , getRecursionExp 1 recursionExpArray
                                 , arg3
@@ -591,7 +854,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 2 patternsArray)
                         (\arg1 arg2 arg3 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , arg2
                                 , getRecursionExp 2 recursionExpArray
@@ -617,7 +885,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 3 patternsArray)
                         (\arg1 arg2 arg3 arg4 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ getRecursionExp 0 recursionExpArray
                                 , arg2
                                 , arg3
@@ -634,7 +907,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 3 patternsArray)
                         (\arg1 arg2 arg3 arg4 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , getRecursionExp 1 recursionExpArray
                                 , arg3
@@ -651,7 +929,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 3 patternsArray)
                         (\arg1 arg2 arg3 arg4 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , arg2
                                 , getRecursionExp 2 recursionExpArray
@@ -668,7 +951,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 3 patternsArray)
                         (\arg1 arg2 arg3 arg4 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , arg2
                                 , arg3
@@ -696,7 +984,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 4 patternsArray)
                         (\arg1 arg2 arg3 arg4 arg5 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ getRecursionExp 0 recursionExpArray
                                 , arg2
                                 , arg3
@@ -715,7 +1008,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 4 patternsArray)
                         (\arg1 arg2 arg3 arg4 arg5 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , getRecursionExp 1 recursionExpArray
                                 , arg3
@@ -734,7 +1032,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 4 patternsArray)
                         (\arg1 arg2 arg3 arg4 arg5 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , arg2
                                 , getRecursionExp 2 recursionExpArray
@@ -753,7 +1056,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 4 patternsArray)
                         (\arg1 arg2 arg3 arg4 arg5 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , arg2
                                 , arg3
@@ -772,7 +1080,12 @@ cctxRecurseBranch cctxOp =
                         (getBranchPattern 4 patternsArray)
                         (\arg1 arg2 arg3 arg4 arg5 ->
                             Elm.apply
-                                (Elm.val <| firstCharToUpper cctxOp.name)
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper cctxOp.name
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1
                                 , arg2
                                 , arg3
@@ -811,7 +1124,7 @@ getBranchFromSynCatsOp synCatOp =
         (Branch.var "underCursor")
         (\under_cursor ->
             Elm.Case.custom under_cursor
-                (Type.named [] (firstCharToUpper synCatOp.synCat))
+                (Type.named [ "Syntax", "Cursorless" ] (firstCharToUpper synCatOp.synCat))
                 (List.map
                     getBranchFromOp
                     synCatOp.ops
@@ -831,7 +1144,11 @@ getBranchFromOp op =
 
                         Nothing ->
                             ( Branch.var ("arg" ++ String.fromInt (i + 1))
-                            , Elm.val "Cctx_hole"
+                            , Elm.value
+                                { importFrom = [ "Syntax", "CCtx" ]
+                                , name = "Cctx_hole"
+                                , annotation = Nothing
+                                }
                             )
                 )
                 op.arity
@@ -885,8 +1202,18 @@ getBranchFromOp op =
                         Type.int
                         [ Branch.int 1 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx1")
-                                [ Elm.val "Cctx_hole" ]
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx1"
+                                    , annotation = Nothing
+                                    }
+                                )
+                                [ Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = "Cctx_hole"
+                                    , annotation = Nothing
+                                    }
+                                ]
                         , Branch.ignore <|
                             Elm.apply
                                 (Elm.value
@@ -916,11 +1243,21 @@ getBranchFromOp op =
                         Type.int
                         [ Branch.int 1 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx1")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx1"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ replacement1, arg2 ]
                         , Branch.int 2 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx2")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx2"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, replacement2 ]
                         , Branch.ignore <|
                             Elm.apply
@@ -955,15 +1292,30 @@ getBranchFromOp op =
                         Type.int
                         [ Branch.int 1 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx1")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx1"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ replacement1, arg2, arg3 ]
                         , Branch.int 2 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx2")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx2"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, replacement2, arg3 ]
                         , Branch.int 3 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx3")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx3"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, arg2, replacement3 ]
                         , Branch.ignore <|
                             Elm.apply
@@ -1002,19 +1354,39 @@ getBranchFromOp op =
                         Type.int
                         [ Branch.int 1 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx1")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx1"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ replacement1, arg2, arg3, arg4 ]
                         , Branch.int 2 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx2")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx2"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, replacement2, arg3, arg4 ]
                         , Branch.int 3 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx3")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx3"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, arg2, replacement3, arg4 ]
                         , Branch.int 4 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx4")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx4"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, arg2, arg3, replacement4 ]
                         , Branch.ignore <|
                             Elm.apply
@@ -1057,23 +1429,48 @@ getBranchFromOp op =
                         Type.int
                         [ Branch.int 1 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx1")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx1"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ replacement1, arg2, arg3, arg4, arg5 ]
                         , Branch.int 2 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx2")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx2"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, replacement2, arg3, arg4, arg5 ]
                         , Branch.int 3 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx3")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx3"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, arg2, replacement3, arg4, arg5 ]
                         , Branch.int 4 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx4")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx4"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, arg2, arg3, replacement4, arg5 ]
                         , Branch.int 5 <|
                             Elm.apply
-                                (Elm.val <| firstCharToUpper <| op.name ++ "_cctx5")
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = firstCharToUpper <| op.name ++ "_cctx5"
+                                    , annotation = Nothing
+                                    }
+                                )
                                 [ arg1, arg2, arg3, arg4, replacement5 ]
                         , Branch.ignore <|
                             Elm.apply
@@ -1142,5 +1539,11 @@ getPatternAndReplacement i arg =
         ( boundVars, arg_ ) ->
             Just
                 ( Branch.var <| "(boundVars" ++ String.fromInt i ++ ", arg" ++ String.fromInt i ++ ")"
-                , Elm.tuple (Elm.val <| "boundVars" ++ String.fromInt i) (Elm.val "Cctx_hole")
+                , Elm.tuple (Elm.val <| "boundVars" ++ String.fromInt i)
+                    (Elm.value
+                        { importFrom = [ "Syntax", "CCtx" ]
+                        , name = "Cctx_hole"
+                        , annotation = Nothing
+                        }
+                    )
                 )

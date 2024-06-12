@@ -1,4 +1,4 @@
-module GetCursorPath exposing (..)
+module Movement.GetCursorPath exposing (..)
 
 import Array
 import Elm
@@ -13,14 +13,11 @@ import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Html exposing (a)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 
--- This file defines the functions to be generated
--- This includes functions for getting the path to a cursor in a tree
--- And functions for decomposing an AST into a CCTX,Wellformed tuple etc.alias
 {-
    Given a Base syntax, get the path to the cursor in the tree
 -}
@@ -32,7 +29,7 @@ createGetCursorPath syntax =
         Elm.withType
             (Type.function
                 [ Type.list Type.int
-                , Type.named [] "Base"
+                , Type.named [ "Syntax", "Base" ] "Base"
                 ]
                 (Type.list Type.int)
             )
@@ -41,7 +38,7 @@ createGetCursorPath syntax =
                 ( "base", Nothing )
                 (\_ base ->
                     Elm.Case.custom base
-                        (Type.named [] "Base")
+                        (Type.named [ "Syntax", "Base" ] "Base")
                         (getBranchList syntax)
                 )
             )
@@ -54,7 +51,7 @@ getBranchList syntax =
             Branch.variant1 synCatOp.synCat (Branch.var synCatOp.synCat) <|
                 \s ->
                     Elm.Case.custom s
-                        (Type.named [] synCatOp.synCat)
+                        (Type.named [ "Syntax", "Base" ] synCatOp.synCat)
                         (getBranchListSynCatOp synCatOp)
         )
         syntax.synCatOps
@@ -117,7 +114,14 @@ getBranchFromOp op =
                         Elm.apply
                             (Elm.val "getCursorPath")
                             [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                            , Elm.apply (Elm.val (firstCharToUpper argSort)) [ arg ]
+                            , Elm.apply
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "Base" ]
+                                    , name = firstCharToUpper argSort
+                                    , annotation = Nothing
+                                    }
+                                )
+                                [ arg ]
                             ]
                     )
 
@@ -138,13 +142,27 @@ getBranchFromOp op =
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
+                                , Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Base" ]
+                                        , name = firstCharToUpper argSort1
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.val "arg1" ]
                                 ]
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
+                                , Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Base" ]
+                                        , name = firstCharToUpper argSort2
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.val "arg2" ]
                                 ]
                             )
                      -- Elm.list []
@@ -171,20 +189,41 @@ getBranchFromOp op =
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
+                                    , Elm.apply
+                                        (Elm.value
+                                            { importFrom = [ "Syntax", "Base" ]
+                                            , name = firstCharToUpper argSort1
+                                            , annotation = Nothing
+                                            }
+                                        )
+                                        [ Elm.val "arg1" ]
                                     ]
                                 )
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
+                                    , Elm.apply
+                                        (Elm.value
+                                            { importFrom = [ "Syntax", "Base" ]
+                                            , name = firstCharToUpper argSort2
+                                            , annotation = Nothing
+                                            }
+                                        )
+                                        [ Elm.val "arg2" ]
                                     ]
                                 )
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 3 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ Elm.val "arg3" ]
+                                , Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Base" ]
+                                        , name = firstCharToUpper argSort3
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.val "arg3" ]
                                 ]
                             )
                     )
@@ -215,27 +254,55 @@ getBranchFromOp op =
                                     (Elm.apply
                                         (Elm.val "getCursorPath")
                                         [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                        , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
+                                        , Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Base" ]
+                                                , name = firstCharToUpper argSort1
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg1" ]
                                         ]
                                     )
                                     (Elm.apply
                                         (Elm.val "getCursorPath")
                                         [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                        , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
+                                        , Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Base" ]
+                                                , name = firstCharToUpper argSort2
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg2" ]
                                         ]
                                     )
                                 )
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 3 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ Elm.val "arg3" ]
+                                    , Elm.apply
+                                        (Elm.value
+                                            { importFrom = [ "Syntax", "Base" ]
+                                            , name = firstCharToUpper argSort3
+                                            , annotation = Nothing
+                                            }
+                                        )
+                                        [ Elm.val "arg3" ]
                                     ]
                                 )
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 4 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort4)) [ Elm.val "arg4" ]
+                                , Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Base" ]
+                                        , name = firstCharToUpper argSort4
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.val "arg4" ]
                                 ]
                             )
                     )
@@ -271,34 +338,69 @@ getBranchFromOp op =
                                         (Elm.apply
                                             (Elm.val "getCursorPath")
                                             [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 1 ])
-                                            , Elm.apply (Elm.val (firstCharToUpper argSort1)) [ Elm.val "arg1" ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Base" ]
+                                                    , name = firstCharToUpper argSort1
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ Elm.val "arg1" ]
                                             ]
                                         )
                                         (Elm.apply
                                             (Elm.val "getCursorPath")
                                             [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 2 ])
-                                            , Elm.apply (Elm.val (firstCharToUpper argSort2)) [ Elm.val "arg2" ]
+                                            , Elm.apply
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "Base" ]
+                                                    , name = firstCharToUpper argSort2
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ Elm.val "arg2" ]
                                             ]
                                         )
                                     )
                                     (Elm.apply
                                         (Elm.val "getCursorPath")
                                         [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 3 ])
-                                        , Elm.apply (Elm.val (firstCharToUpper argSort3)) [ Elm.val "arg3" ]
+                                        , Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Base" ]
+                                                , name = firstCharToUpper argSort3
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.val "arg3" ]
                                         ]
                                     )
                                 )
                                 (Elm.apply
                                     (Elm.val "getCursorPath")
                                     [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 4 ])
-                                    , Elm.apply (Elm.val (firstCharToUpper argSort4)) [ Elm.val "arg4" ]
+                                    , Elm.apply
+                                        (Elm.value
+                                            { importFrom = [ "Syntax", "Base" ]
+                                            , name = firstCharToUpper argSort4
+                                            , annotation = Nothing
+                                            }
+                                        )
+                                        [ Elm.val "arg4" ]
                                     ]
                                 )
                             )
                             (Elm.apply
                                 (Elm.val "getCursorPath")
                                 [ Elm.Op.append (Elm.val "path") (Elm.list [ Elm.int 5 ])
-                                , Elm.apply (Elm.val (firstCharToUpper argSort5)) [ Elm.val "arg5" ]
+                                , Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Base" ]
+                                        , name = firstCharToUpper argSort5
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ Elm.val "arg5" ]
                                 ]
                             )
                     )

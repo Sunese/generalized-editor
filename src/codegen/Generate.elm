@@ -6,7 +6,7 @@ import Elm
 import Elm.Annotation exposing (..)
 import Example exposing (..)
 import Gen.CodeGen.Generate as Generate
-import Syntax exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 main : Program {} () ()

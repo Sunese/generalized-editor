@@ -1,4 +1,4 @@
-module RawSyntaxP exposing (..)
+module Syntax.RawSyntaxP exposing (..)
 
 import Html exposing (li)
 import Parser exposing (..)

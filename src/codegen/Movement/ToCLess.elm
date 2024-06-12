@@ -1,4 +1,4 @@
-module ToCLess exposing (..)
+module Movement.ToCLess exposing (..)
 
 import Array
 import Elm
@@ -13,8 +13,8 @@ import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Html exposing (a)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 
@@ -30,20 +30,34 @@ createToCLessFuns : Syntax -> List Elm.Declaration
 createToCLessFuns syntax =
     List.map createToCLessFun syntax.synCatOps
         ++ [ Elm.declaration "toCLess" <|
-                Elm.withType (Type.function [ Type.named [] "Base" ] (Type.named [] "CursorLess")) <|
+                Elm.withType (Type.function [ Type.named [ "Syntax", "Base" ] "Base" ] (Type.named [ "Syntax", "Cursorless" ] "CursorLess")) <|
                     Elm.fn
                         ( "base", Nothing )
                         (\base ->
                             Elm.Case.custom base
-                                (Type.named [] "Base")
+                                (Type.named [ "Syntax", "Base" ] "Base")
                                 (List.map
                                     (\synCatOp ->
                                         Elm.Case.branchWith
                                             synCatOp.synCat
                                             1
                                             (\exps ->
-                                                Elm.apply (Elm.val <| firstCharToUpper <| synCatOp.synCat ++ "_CLess")
-                                                    [ Elm.apply (Elm.val <| "toCLess_" ++ synCatOp.synCat) exps ]
+                                                Elm.apply
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                        , name = firstCharToUpper <| synCatOp.synCat ++ "_CLess"
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ Elm.apply
+                                                        (Elm.value
+                                                            { importFrom = []
+                                                            , name = "toCLess_" ++ synCatOp.synCat
+                                                            , annotation = Nothing
+                                                            }
+                                                        )
+                                                        exps
+                                                    ]
                                             )
                                     )
                                     syntax.synCatOps
@@ -55,12 +69,12 @@ createToCLessFuns syntax =
 createToCLessFun : SynCatOps -> Elm.Declaration
 createToCLessFun synCatOp =
     Elm.declaration ("toCLess_" ++ synCatOp.synCat) <|
-        Elm.withType (Type.function [ Type.named [] synCatOp.synCat ] (Type.named [] (synCatOp.synCat ++ "_CLess"))) <|
+        Elm.withType (Type.function [ Type.named [ "Syntax", "Base" ] synCatOp.synCat ] (Type.named [ "Syntax", "Cursorless" ] (synCatOp.synCat ++ "_CLess"))) <|
             Elm.fn
                 ( synCatOp.synCat, Nothing )
                 (\base ->
                     Elm.Case.custom base
-                        (Type.named [] synCatOp.synCat)
+                        (Type.named [ "Syntax", "Base" ] synCatOp.synCat)
                         (getBranchListSynCatOp
                             synCatOp
                         )
@@ -112,11 +126,25 @@ getBranchFromOp op =
             0 ->
                 case op.literal of
                     Nothing ->
-                        Branch.variant0 op.name (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                        Branch.variant0 op.name
+                            (Elm.value
+                                { importFrom = [ "Syntax", "Cursorless" ]
+                                , name = firstCharToUpper <| op.name ++ "_CLess"
+                                , annotation = Nothing
+                                }
+                            )
 
                     Just _ ->
                         Branch.variant1 op.name (Branch.var "lit") <|
-                            \lit -> Elm.apply (Elm.val <| firstCharToUpper <| op.name ++ "_CLess") [ lit ]
+                            \lit ->
+                                Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                        , name = firstCharToUpper <| op.name ++ "_CLess"
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ lit ]
 
             1 ->
                 Branch.variant1
@@ -128,7 +156,12 @@ getBranchFromOp op =
                                 Maybe.withDefault ( [], "ERROR" ) (Array.get 0 argsArray) |> Tuple.second
                         in
                         Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            (Elm.value
+                                { importFrom = [ "Syntax", "Cursorless" ]
+                                , name = firstCharToUpper <| op.name ++ "_CLess"
+                                , annotation = Nothing
+                                }
+                            )
                             [ Elm.apply (Elm.val <| "toCLess" ++ "_" ++ argSort) [ arg ]
                             ]
                     )
@@ -147,7 +180,12 @@ getBranchFromOp op =
                                 Maybe.withDefault ( [], "ERROR" ) (Array.get 1 argsArray)
                         in
                         Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            (Elm.value
+                                { importFrom = [ "Syntax", "Cursorless" ]
+                                , name = firstCharToUpper <| op.name ++ "_CLess"
+                                , annotation = Nothing
+                                }
+                            )
                             [ argToCLessTransformation 1 arg1
                             , argToCLessTransformation 2 arg2
                             ]
@@ -171,7 +209,12 @@ getBranchFromOp op =
                                 Maybe.withDefault ( [], "ERROR" ) (Array.get 2 argsArray)
                         in
                         Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            (Elm.value
+                                { importFrom = [ "Syntax", "Cursorless" ]
+                                , name = firstCharToUpper <| op.name ++ "_CLess"
+                                , annotation = Nothing
+                                }
+                            )
                             [ argToCLessTransformation 1 arg1
                             , argToCLessTransformation 2 arg2
                             , argToCLessTransformation 3 arg3
@@ -200,7 +243,12 @@ getBranchFromOp op =
                                 Maybe.withDefault ( [], "ERROR" ) (Array.get 3 argsArray)
                         in
                         Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            (Elm.value
+                                { importFrom = [ "Syntax", "Cursorless" ]
+                                , name = firstCharToUpper <| op.name ++ "_CLess"
+                                , annotation = Nothing
+                                }
+                            )
                             [ argToCLessTransformation 1 arg1
                             , argToCLessTransformation 2 arg2
                             , argToCLessTransformation 3 arg3
@@ -234,7 +282,12 @@ getBranchFromOp op =
                                 Maybe.withDefault ( [], "ERROR" ) (Array.get 4 argsArray)
                         in
                         Elm.apply
-                            (Elm.val <| firstCharToUpper <| op.name ++ "_CLess")
+                            (Elm.value
+                                { importFrom = [ "Syntax", "Cursorless" ]
+                                , name = firstCharToUpper <| op.name ++ "_CLess"
+                                , annotation = Nothing
+                                }
+                            )
                             [ argToCLessTransformation 1 arg1
                             , argToCLessTransformation 2 arg2
                             , argToCLessTransformation 3 arg3

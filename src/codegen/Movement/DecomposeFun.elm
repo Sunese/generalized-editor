@@ -1,4 +1,4 @@
-module DecomposeFun exposing (..)
+module Movement.DecomposeFun exposing (..)
 
 import Array
 import Elm
@@ -13,8 +13,8 @@ import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Html exposing (a)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 createDecomposeFuns : Syntax -> List Elm.Declaration
@@ -24,10 +24,10 @@ createDecomposeFuns syntax =
     , Elm.declaration "decompose" <|
         Elm.withType
             (Type.function
-                [ Type.named [] "Base" ]
+                [ Type.named [ "Syntax", "Base" ] "Base" ]
                 (Type.tuple
-                    (Type.named [] "Cctx")
-                    (Type.named [] "Wellformed")
+                    (Type.named [ "Syntax", "CCtx" ] "Cctx")
+                    (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                 )
             )
         <|
@@ -64,20 +64,25 @@ createDecomposeFuns syntax =
 createToWellFormedFun : Syntax -> Elm.Declaration
 createToWellFormedFun syntax =
     Elm.declaration "toWellformed" <|
-        Elm.withType (Type.function [ Type.named [] "Base" ] (Type.named [] "Wellformed")) <|
+        Elm.withType (Type.function [ Type.named [ "Syntax", "Base" ] "Base" ] (Type.named [ "Syntax", "Wellformed" ] "Wellformed")) <|
             Elm.fn
                 ( "base", Nothing )
                 (\base ->
                     Elm.Case.custom
                         (Elm.apply (Elm.val "consumeCursor") [ base ])
-                        (Type.named [] "Base")
+                        (Type.named [ "Syntax", "Base" ] "Base")
                         (List.map
                             (\synCatOp ->
                                 branchWith synCatOp.synCat
                                     1
                                     (\exps ->
                                         Elm.apply
-                                            (Elm.val <| "Root_" ++ synCatOp.synCat ++ "_CLess")
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "Wellformed" ]
+                                                , name = "Root_" ++ synCatOp.synCat ++ "_CLess"
+                                                , annotation = Nothing
+                                                }
+                                            )
                                             [ Elm.apply (Elm.val <| "toCLess_" ++ synCatOp.synCat) exps ]
                                     )
                             )
@@ -89,12 +94,12 @@ createToWellFormedFun syntax =
 createConsumeCursorFun : Syntax -> Elm.Declaration
 createConsumeCursorFun syntax =
     Elm.declaration "consumeCursor" <|
-        Elm.withType (Type.function [ Type.named [] "Base" ] (Type.named [] "Base")) <|
+        Elm.withType (Type.function [ Type.named [ "Syntax", "Base" ] "Base" ] (Type.named [ "Syntax", "Base" ] "Base")) <|
             Elm.fn
                 ( "base", Nothing )
                 (\base ->
                     Elm.Case.custom base
-                        (Type.named [] "Base")
+                        (Type.named [ "Syntax", "Base" ] "Base")
                         (List.map
                             (\synCatOp ->
                                 branchWith synCatOp.synCat
@@ -104,16 +109,26 @@ createConsumeCursorFun syntax =
                                             (Elm.val "arg1")
                                             (Type.named [] (firstCharToUpper synCatOp.synCat))
                                             [ Branch.variant1
-                                                ("Cursor_" ++ synCatOp.synCat)
+                                                ("Syntax.Base.Cursor_" ++ synCatOp.synCat)
                                                 (Branch.var "underCursor")
                                                 (\exp ->
                                                     Elm.apply
-                                                        (Elm.val <| firstCharToUpper synCatOp.synCat)
+                                                        (Elm.value
+                                                            { importFrom = [ "Syntax", "Base" ]
+                                                            , name = firstCharToUpper synCatOp.synCat
+                                                            , annotation = Nothing
+                                                            }
+                                                        )
                                                         [ exp ]
                                                 )
                                             , Branch.ignore
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper synCatOp.synCat)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "Base" ]
+                                                        , name = firstCharToUpper synCatOp.synCat
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     exps
                                                 )
                                             ]

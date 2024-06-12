@@ -1,4 +1,4 @@
-module Syntax exposing (..)
+module Syntax.Syntax exposing (..)
 
 import Elm
 import Elm.Annotation as Type exposing (..)
@@ -9,7 +9,7 @@ import Gen.Decomposable exposing (..)
 import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
+import Syntax.RawSyntaxP exposing (..)
 
 
 type alias Arity =
@@ -440,8 +440,27 @@ fromCLessToCCtxSyntaxSorts syntax =
         cctxSyntax =
             addCCtxOps <| addCCtxOp <| addCCtxSort syntax
     in
-    [ getCustomType "cctx" cctxSyntax
+    [ getCCtxCustomType cctxSyntax
     ]
+
+
+getCCtxCustomType : CCtxSyntax -> Elm.Declaration
+getCCtxCustomType syntax =
+    let
+        -- get all the operators that belong to the current syntactic category
+        ops =
+            List.filter
+                (\synCatRule -> synCatRule.synCat == "cctx")
+                syntax.synCatOps
+                |> List.map .ops
+                |> List.concat
+    in
+    Elm.customType "cctx" <|
+        List.map
+            (\op ->
+                Elm.variantWith op.name (getNamedAnnotationsWithImports op "cctx")
+            )
+            ops
 
 
 fromCLessToWellFormedSyntax : Syntax -> WellFormedSyntax
@@ -455,7 +474,7 @@ fromCLessToWellFormedSorts syntax =
         wellFormedSyntax =
             addCursorSortAndOps syntax
     in
-    [ getCustomType "wellformed" wellFormedSyntax
+    [ getCustomTypeWellformed wellFormedSyntax
     ]
 
 
@@ -819,6 +838,73 @@ getCustomType synCat syntax =
             ops
 
 
+getCustomTypeWellformed : WellFormedSyntax -> Elm.Declaration
+getCustomTypeWellformed syntax =
+    -- e.g. for synCat = Statement, getCustomType returns
+    -- Elm.customType "Statement" [ Elm.variantWith "Assignment" <--- operator
+    --                                  [Type.named [] "Id"] <--- arity (args)
+    --                             , Elm.variantWith "While" [] <--- operator without args
+    --                             ]
+    let
+        -- get all the operators that belong to the current syntactic category
+        ops =
+            List.filter
+                (\synCatRule -> synCatRule.synCat == "wellformed")
+                syntax.synCatOps
+                |> List.map .ops
+                |> List.concat
+    in
+    Elm.customType "wellformed" <|
+        List.map
+            (\op ->
+                Elm.variantWith op.name (getNamedAnnotationsWithImports op "wellformed")
+            )
+            ops
+
+
+getNamedAnnotationsWithImports : Operator -> String -> List Annotation
+getNamedAnnotationsWithImports op dontimport =
+    if List.isEmpty op.arity then
+        case op.literal of
+            Nothing ->
+                []
+
+            Just literal ->
+                [ Type.named [] literal ]
+
+    else
+        List.map
+            (\( boundvars, param ) ->
+                let
+                    parammodule =
+                        if param == dontimport then
+                            []
+
+                        else
+                            [ "Syntax", "Cursorless" ]
+
+                    binderModule =
+                        if (Maybe.withDefault "" <| List.head boundvars) == dontimport then
+                            []
+
+                        else
+                            [ "Syntax", "Cursorless" ]
+                in
+                case boundvars of
+                    [] ->
+                        Type.named parammodule param
+
+                    _ ->
+                        -- Due to the limitation of the list of bound variables being of the same type,
+                        -- we extract only the first element of the list
+                        Type.namedWith [ "Syntax", "Bind" ] "Bind" <|
+                            [ Type.named binderModule <| Maybe.withDefault "" <| List.head boundvars
+                            , Type.named parammodule param
+                            ]
+            )
+            op.arity
+
+
 getNamedAnnotations : Operator -> List Annotation
 getNamedAnnotations op =
     if List.isEmpty op.arity then
@@ -839,7 +925,7 @@ getNamedAnnotations op =
                     _ ->
                         -- Due to the limitation of the list of bound variables being of the same type,
                         -- we extract only the first element of the list
-                        Type.namedWith [] "Bind" <|
+                        Type.namedWith [ "Syntax", "Bind" ] "Bind" <|
                             [ Type.named [] <| Maybe.withDefault "" <| List.head boundvars
                             , Type.named [] param
                             ]

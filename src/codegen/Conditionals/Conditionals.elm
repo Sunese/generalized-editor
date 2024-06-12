@@ -1,4 +1,4 @@
-module Conditionals exposing (..)
+module Conditionals.Conditionals exposing (..)
 
 import Elm exposing (apply)
 import Elm.Annotation as Type exposing (..)
@@ -9,8 +9,8 @@ import Elm.Op
 import Gen.Decomposable exposing (..)
 import Gen.Substitutable exposing (..)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 createEditorCondDecls : CLessSyntax -> WellFormedSyntax -> List Elm.Declaration
@@ -40,16 +40,16 @@ createEditorCondType clessSyntax =
             [ Type.named [] "EditorCond", Type.named [] "EditorCond" ]
         , Elm.variantWith "Disjunction"
             [ Type.named [] "EditorCond", Type.named [] "EditorCond" ]
-        , Elm.variantWith "At" [ Type.named [] "CursorLess" ]
-        , Elm.variantWith "Possibly" [ Type.named [] "CursorLess" ]
-        , Elm.variantWith "Necessarily" [ Type.named [] "CursorLess" ]
+        , Elm.variantWith "At" [ Type.named [ "Syntax", "Cursorless" ] "CursorLess" ]
+        , Elm.variantWith "Possibly" [ Type.named [ "Syntax", "Cursorless" ] "CursorLess" ]
+        , Elm.variantWith "Necessarily" [ Type.named [ "Syntax", "Cursorless" ] "CursorLess" ]
         ]
 
 
 createDecomposedType : Elm.Declaration
 createDecomposedType =
     Elm.alias "Decomposed"
-        (Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))
+        (Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed"))
 
 
 createEvalCondFun : Elm.Declaration
@@ -142,7 +142,7 @@ createAtOpFun clessSyntax =
     <|
         Elm.withType
             (Type.function
-                [ Type.named [] "CursorLess", Type.maybe <| Type.named [] "Decomposed" ]
+                [ Type.named [ "Syntax", "Cursorless" ] "CursorLess", Type.maybe <| Type.named [] "Decomposed" ]
                 Type.bool
             )
         <|
@@ -163,13 +163,13 @@ createAtOpFun clessSyntax =
                                         cursorlessop
                                         (Elm.apply (Elm.val "getOpAtCursor") [ decomposed ])
                                     )
-                                    (Type.tuple (Type.named [] "CursorLess") (Type.named [] "CursorLess"))
+                                    (Type.tuple (Type.named [ "Syntax", "Wellformed" ] "CursorLess") (Type.named [ "Syntax", "Cursorless" ] "CursorLess"))
                                 <|
                                     List.map
                                         (\syncatOp ->
                                             Branch.tuple
-                                                (Branch.variant1 syncatOp.synCat (Branch.var "query") <| \_ -> Elm.val "dummy")
-                                                (Branch.variant1 syncatOp.synCat (Branch.var "op") <| \_ -> Elm.val "dummy")
+                                                (Branch.variant1 ("Syntax.Cursorless." ++ firstCharToUpper syncatOp.synCat) (Branch.var "query") <| \_ -> Elm.withType (Type.named [ "Syntax", "Cursorless" ] "Cursorless") <| Elm.val "dummy")
+                                                (Branch.variant1 ("Syntax.Cursorless." ++ firstCharToUpper syncatOp.synCat) (Branch.var "op") <| \_ -> Elm.val "dummy")
                                                 |> Branch.map
                                                     (\( _, _ ) ->
                                                         Elm.apply (Elm.val <| sameOpFunName syncatOp.synCat)
@@ -189,7 +189,7 @@ creategetOpAtCursorFun wellformedSyntax =
         Elm.withType
             (Type.function
                 [ Type.named [] "Decomposed" ]
-                (Type.named [] "CursorLess")
+                (Type.named [ "Syntax", "Cursorless" ] "CursorLess")
             )
         <|
             Elm.fn
@@ -200,16 +200,17 @@ creategetOpAtCursorFun wellformedSyntax =
                         (\( _, wellformed ) ->
                             Case.custom
                                 wellformed
-                                (Type.named [] "Wellformed")
+                                (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                 (List.map
                                     (\op ->
                                         Branch.variant1 op.name (Branch.var "arg1") <|
                                             \arg ->
                                                 Elm.apply
-                                                    (Elm.val
-                                                        (firstCharToUpper <|
-                                                            String.dropLeft 5 op.name
-                                                        )
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                        , name = firstCharToUpper <| String.dropLeft 5 op.name
+                                                        , annotation = Nothing
+                                                        }
                                                     )
                                                     [ arg ]
                                     )
@@ -227,12 +228,12 @@ createpossiblyFun =
     <|
         Elm.withType
             (Type.function
-                [ Type.named [] "CursorLess", Type.maybe <| Type.named [] "Decomposed" ]
+                [ Type.named [ "Syntax", "Cursorless" ] "CursorLess", Type.maybe <| Type.named [] "Decomposed" ]
                 Type.bool
             )
         <|
             Elm.fn2
-                ( "cursorlessop", Just <| Type.named [] "CursorLess" )
+                ( "cursorlessop", Just <| Type.named [ "Syntax", "Cursorless" ] "CursorLess" )
                 ( "maybedecomposed", Just <| Type.maybe <| Type.named [] "Decomposed" )
             <|
                 \c maybed ->
@@ -266,7 +267,14 @@ possiblychildi i cursorless decomposed =
     Elm.apply
         (Elm.val "possibly")
         [ cursorless
-        , Elm.apply (Elm.val "child") [ Elm.int i, decomposed ]
+        , Elm.apply
+            (Elm.value
+                { importFrom = [ "Movement" ]
+                , name = "child"
+                , annotation = Nothing
+                }
+            )
+            [ Elm.int i, decomposed ]
         ]
 
 
@@ -277,25 +285,25 @@ createNecessityFun clessSyntax =
     <|
         Elm.withType
             (Type.function
-                [ Type.named [] "CursorLess", Type.named [] "Decomposed" ]
+                [ Type.named [ "Syntax", "Cursorless" ] "CursorLess", Type.named [] "Decomposed" ]
                 Type.bool
             )
         <|
             Elm.fn2
-                ( "cursorlessop", Just <| Type.named [] "CursorLess" )
+                ( "cursorlessop", Just <| Type.named [ "Syntax", "Cursorless" ] "CursorLess" )
                 ( "decomposed", Just <| Type.named [] "Decomposed" )
             <|
                 \cursorlessop decomposed ->
                     Case.custom
                         (Elm.apply (Elm.val "getOpAtCursor") [ decomposed ])
-                        (Type.named [] "CursorLess")
+                        (Type.named [ "Syntax", "Cursorless" ] "CursorLess")
                         (List.map
                             (\syncatOp ->
                                 Branch.variant1 syncatOp.synCat (Branch.var "arg1") <|
                                     \clesssort ->
                                         Case.custom
                                             clesssort
-                                            (Type.named [] (firstCharToUpper syncatOp.synCat))
+                                            (Type.named [ "Syntax", "Cursorless" ] (firstCharToUpper syncatOp.synCat))
                                             (List.map
                                                 (\op ->
                                                     case op.literal of
@@ -319,7 +327,12 @@ createNecessityFun clessSyntax =
                                                                                 (Elm.val "possibly")
                                                                                 [ cursorlessop
                                                                                 , Elm.apply
-                                                                                    (Elm.val "child")
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Movement" ]
+                                                                                        , name = "child"
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ Elm.int 1, Elm.val "decomposed" ]
                                                                                 ]
 
@@ -335,7 +348,12 @@ createNecessityFun clessSyntax =
                                                                                     (Elm.val "possibly")
                                                                                     [ cursorlessop
                                                                                     , Elm.apply
-                                                                                        (Elm.val "child")
+                                                                                        (Elm.value
+                                                                                            { importFrom = [ "Movement" ]
+                                                                                            , name = "child"
+                                                                                            , annotation = Nothing
+                                                                                            }
+                                                                                        )
                                                                                         [ Elm.int 1, Elm.val "decomposed" ]
                                                                                     ]
                                                                                 )
@@ -343,7 +361,12 @@ createNecessityFun clessSyntax =
                                                                                     (Elm.val "possibly")
                                                                                     [ cursorlessop
                                                                                     , Elm.apply
-                                                                                        (Elm.val "child")
+                                                                                        (Elm.value
+                                                                                            { importFrom = [ "Movement" ]
+                                                                                            , name = "child"
+                                                                                            , annotation = Nothing
+                                                                                            }
+                                                                                        )
                                                                                         [ Elm.int 2, Elm.val "decomposed" ]
                                                                                     ]
                                                                                 )
@@ -362,7 +385,12 @@ createNecessityFun clessSyntax =
                                                                                         (Elm.val "possibly")
                                                                                         [ cursorlessop
                                                                                         , Elm.apply
-                                                                                            (Elm.val "child")
+                                                                                            (Elm.value
+                                                                                                { importFrom = [ "Movement" ]
+                                                                                                , name = "child"
+                                                                                                , annotation = Nothing
+                                                                                                }
+                                                                                            )
                                                                                             [ Elm.int 1, Elm.val "decomposed" ]
                                                                                         ]
                                                                                     )
@@ -370,7 +398,12 @@ createNecessityFun clessSyntax =
                                                                                         (Elm.val "possibly")
                                                                                         [ cursorlessop
                                                                                         , Elm.apply
-                                                                                            (Elm.val "child")
+                                                                                            (Elm.value
+                                                                                                { importFrom = [ "Movement" ]
+                                                                                                , name = "child"
+                                                                                                , annotation = Nothing
+                                                                                                }
+                                                                                            )
                                                                                             [ Elm.int 2, Elm.val "decomposed" ]
                                                                                         ]
                                                                                     )
@@ -379,7 +412,12 @@ createNecessityFun clessSyntax =
                                                                                     (Elm.val "possibly")
                                                                                     [ cursorlessop
                                                                                     , Elm.apply
-                                                                                        (Elm.val "child")
+                                                                                        (Elm.value
+                                                                                            { importFrom = [ "Movement" ]
+                                                                                            , name = "child"
+                                                                                            , annotation = Nothing
+                                                                                            }
+                                                                                        )
                                                                                         [ Elm.int 3, Elm.val "decomposed" ]
                                                                                     ]
                                                                                 )
@@ -400,7 +438,12 @@ createNecessityFun clessSyntax =
                                                                                             (Elm.val "possibly")
                                                                                             [ cursorlessop
                                                                                             , Elm.apply
-                                                                                                (Elm.val "child")
+                                                                                                (Elm.value
+                                                                                                    { importFrom = [ "Movement" ]
+                                                                                                    , name = "child"
+                                                                                                    , annotation = Nothing
+                                                                                                    }
+                                                                                                )
                                                                                                 [ Elm.int 1, Elm.val "decomposed" ]
                                                                                             ]
                                                                                         )
@@ -408,7 +451,12 @@ createNecessityFun clessSyntax =
                                                                                             (Elm.val "possibly")
                                                                                             [ cursorlessop
                                                                                             , Elm.apply
-                                                                                                (Elm.val "child")
+                                                                                                (Elm.value
+                                                                                                    { importFrom = [ "Movement" ]
+                                                                                                    , name = "child"
+                                                                                                    , annotation = Nothing
+                                                                                                    }
+                                                                                                )
                                                                                                 [ Elm.int 2, Elm.val "decomposed" ]
                                                                                             ]
                                                                                         )
@@ -417,7 +465,12 @@ createNecessityFun clessSyntax =
                                                                                         (Elm.val "possibly")
                                                                                         [ cursorlessop
                                                                                         , Elm.apply
-                                                                                            (Elm.val "child")
+                                                                                            (Elm.value
+                                                                                                { importFrom = [ "Movement" ]
+                                                                                                , name = "child"
+                                                                                                , annotation = Nothing
+                                                                                                }
+                                                                                            )
                                                                                             [ Elm.int 3, Elm.val "decomposed" ]
                                                                                         ]
                                                                                     )
@@ -426,7 +479,12 @@ createNecessityFun clessSyntax =
                                                                                     (Elm.val "possibly")
                                                                                     [ cursorlessop
                                                                                     , Elm.apply
-                                                                                        (Elm.val "child")
+                                                                                        (Elm.value
+                                                                                            { importFrom = [ "Movement" ]
+                                                                                            , name = "child"
+                                                                                            , annotation = Nothing
+                                                                                            }
+                                                                                        )
                                                                                         [ Elm.int 4, Elm.val "decomposed" ]
                                                                                     ]
                                                                                 )
@@ -449,7 +507,12 @@ createNecessityFun clessSyntax =
                                                                                                 (Elm.val "possibly")
                                                                                                 [ cursorlessop
                                                                                                 , Elm.apply
-                                                                                                    (Elm.val "child")
+                                                                                                    (Elm.value
+                                                                                                        { importFrom = [ "Movement" ]
+                                                                                                        , name = "child"
+                                                                                                        , annotation = Nothing
+                                                                                                        }
+                                                                                                    )
                                                                                                     [ Elm.int 1, Elm.val "decomposed" ]
                                                                                                 ]
                                                                                             )
@@ -457,7 +520,12 @@ createNecessityFun clessSyntax =
                                                                                                 (Elm.val "possibly")
                                                                                                 [ cursorlessop
                                                                                                 , Elm.apply
-                                                                                                    (Elm.val "child")
+                                                                                                    (Elm.value
+                                                                                                        { importFrom = [ "Movement" ]
+                                                                                                        , name = "child"
+                                                                                                        , annotation = Nothing
+                                                                                                        }
+                                                                                                    )
                                                                                                     [ Elm.int 2, Elm.val "decomposed" ]
                                                                                                 ]
                                                                                             )
@@ -466,7 +534,12 @@ createNecessityFun clessSyntax =
                                                                                             (Elm.val "possibly")
                                                                                             [ cursorlessop
                                                                                             , Elm.apply
-                                                                                                (Elm.val "child")
+                                                                                                (Elm.value
+                                                                                                    { importFrom = [ "Movement" ]
+                                                                                                    , name = "child"
+                                                                                                    , annotation = Nothing
+                                                                                                    }
+                                                                                                )
                                                                                                 [ Elm.int 3, Elm.val "decomposed" ]
                                                                                             ]
                                                                                         )
@@ -475,7 +548,12 @@ createNecessityFun clessSyntax =
                                                                                         (Elm.val "possibly")
                                                                                         [ cursorlessop
                                                                                         , Elm.apply
-                                                                                            (Elm.val "child")
+                                                                                            (Elm.value
+                                                                                                { importFrom = [ "Movement" ]
+                                                                                                , name = "child"
+                                                                                                , annotation = Nothing
+                                                                                                }
+                                                                                            )
                                                                                             [ Elm.int 4, Elm.val "decomposed" ]
                                                                                         ]
                                                                                     )
@@ -484,7 +562,12 @@ createNecessityFun clessSyntax =
                                                                                     (Elm.val "possibly")
                                                                                     [ cursorlessop
                                                                                     , Elm.apply
-                                                                                        (Elm.val "child")
+                                                                                        (Elm.value
+                                                                                            { importFrom = [ "Movement" ]
+                                                                                            , name = "child"
+                                                                                            , annotation = Nothing
+                                                                                            }
+                                                                                        )
                                                                                         [ Elm.int 5, Elm.val "decomposed" ]
                                                                                     ]
                                                                                 )
@@ -508,7 +591,7 @@ createSameOpFuns clessSyntax =
             <|
                 Elm.withType
                     (Type.function
-                        [ Type.named [] syncatOp.synCat, Type.named [] syncatOp.synCat ]
+                        [ Type.named [ "Syntax", "Cursorless" ] syncatOp.synCat, Type.named [ "Syntax", "Cursorless" ] syncatOp.synCat ]
                         Type.bool
                     )
                 <|
@@ -519,15 +602,15 @@ createSameOpFuns clessSyntax =
                         \query op ->
                             Case.custom
                                 (Elm.tuple query op)
-                                (Type.tuple (Type.named [] syncatOp.synCat) (Type.named [] syncatOp.synCat))
+                                (Type.tuple (Type.named [ "Syntax", "Cursorless" ] syncatOp.synCat) (Type.named [ "Syntax", "Cursorless" ] syncatOp.synCat))
                             <|
                                 List.map
                                     (\clessop ->
                                         case clessop.literal of
                                             Just _ ->
                                                 Branch.tuple
-                                                    (Branch.variant1 clessop.name (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
-                                                    (Branch.variant1 clessop.name (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
+                                                    (Branch.variant1 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
+                                                    (Branch.variant1 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
                                                     |> Branch.map
                                                         (\( _, _ ) ->
                                                             Elm.val "True"
@@ -537,8 +620,8 @@ createSameOpFuns clessSyntax =
                                                 case List.length clessop.arity of
                                                     0 ->
                                                         Branch.tuple
-                                                            (Branch.variant0 clessop.name (Elm.val "dummy"))
-                                                            (Branch.variant0 clessop.name (Elm.val "dummy"))
+                                                            (Branch.variant0 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Elm.val "dummy"))
+                                                            (Branch.variant0 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Elm.val "dummy"))
                                                             |> Branch.map
                                                                 (\( _, _ ) ->
                                                                     Elm.val "True"
@@ -546,8 +629,8 @@ createSameOpFuns clessSyntax =
 
                                                     1 ->
                                                         Branch.tuple
-                                                            (Branch.variant1 clessop.name (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
-                                                            (Branch.variant1 clessop.name (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
+                                                            (Branch.variant1 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
+                                                            (Branch.variant1 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") <| \_ -> Elm.val "dummy")
                                                             |> Branch.map
                                                                 (\( _, _ ) ->
                                                                     Elm.val "True"
@@ -555,8 +638,8 @@ createSameOpFuns clessSyntax =
 
                                                     2 ->
                                                         Branch.tuple
-                                                            (Branch.variant2 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ -> Elm.val "dummy")
-                                                            (Branch.variant2 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ -> Elm.val "dummy")
+                                                            (Branch.variant2 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ -> Elm.val "dummy")
+                                                            (Branch.variant2 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ -> Elm.val "dummy")
                                                             |> Branch.map
                                                                 (\( _, _ ) ->
                                                                     Elm.val "True"
@@ -564,8 +647,8 @@ createSameOpFuns clessSyntax =
 
                                                     3 ->
                                                         Branch.tuple
-                                                            (Branch.variant3 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ -> Elm.val "dummy")
-                                                            (Branch.variant3 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ -> Elm.val "dummy")
+                                                            (Branch.variant3 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ -> Elm.val "dummy")
+                                                            (Branch.variant3 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ -> Elm.val "dummy")
                                                             |> Branch.map
                                                                 (\( _, _ ) ->
                                                                     Elm.val "True"
@@ -573,8 +656,8 @@ createSameOpFuns clessSyntax =
 
                                                     4 ->
                                                         Branch.tuple
-                                                            (Branch.variant4 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ -> Elm.val "dummy")
-                                                            (Branch.variant4 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ -> Elm.val "dummy")
+                                                            (Branch.variant4 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ -> Elm.val "dummy")
+                                                            (Branch.variant4 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ -> Elm.val "dummy")
                                                             |> Branch.map
                                                                 (\( _, _ ) ->
                                                                     Elm.val "True"
@@ -582,8 +665,8 @@ createSameOpFuns clessSyntax =
 
                                                     5 ->
                                                         Branch.tuple
-                                                            (Branch.variant5 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ _ -> Elm.val "dummy")
-                                                            (Branch.variant5 clessop.name (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ _ -> Elm.val "dummy")
+                                                            (Branch.variant5 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ _ -> Elm.val "dummy")
+                                                            (Branch.variant5 ("Syntax.Cursorless." ++ firstCharToUpper clessop.name) (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") (Branch.ignore "dummy") <| \_ _ _ _ _ -> Elm.val "dummy")
                                                             |> Branch.map
                                                                 (\( _, _ ) ->
                                                                     Elm.val "True"

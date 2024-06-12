@@ -1,4 +1,4 @@
-module Parent exposing (..)
+module Movement.Parent exposing (..)
 
 import Array
 import Elm
@@ -13,9 +13,9 @@ import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Html exposing (a)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
 import String exposing (replace)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 createParentFuns : CLessSyntax -> CCtxSyntax -> List Elm.Declaration
@@ -32,13 +32,13 @@ createParentFun =
     Elm.declaration "parent" <|
         Elm.withType
             (Type.function
-                [ Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed")
+                [ Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                 ]
-                (Type.maybe <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))
+                (Type.maybe <| Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed"))
             )
         <|
             Elm.fn
-                ( "decomposed", Just <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed") )
+                ( "decomposed", Just <| Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed") )
                 (\decomposed ->
                     Elm.Let.letIn
                         (\( cctx, wellformed ) ->
@@ -52,7 +52,7 @@ createParentFun =
                                         ]
                                     ]
                                 )
-                                (Type.maybe <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Wellformed"))
+                                (Type.maybe <| Type.tuple (Type.named [] "Cctx") (Type.named [ "Syntax", "Wellformed" ] "Wellformed"))
                                 [ Branch.variant0 "Nothing" <| Elm.nothing
                                 , Branch.variant1
                                     "Just"
@@ -86,19 +86,19 @@ createAddParentFun clessSyntax cctxSyntax =
     Elm.declaration "addParent" <|
         Elm.withType
             (Type.function
-                [ Type.named [] "Cctx"
-                , Type.named [] "Wellformed"
+                [ Type.named [ "Syntax", "CCtx" ] "Cctx"
+                , Type.named [ "Syntax", "Wellformed" ] "Wellformed"
                 ]
-                (Type.maybe <| Type.named [] "Wellformed")
+                (Type.maybe <| Type.named [ "Syntax", "Wellformed" ] "Wellformed")
             )
         <|
             Elm.fn2
-                ( "cctx", Just <| Type.named [] "Cctx" )
-                ( "wellformed", Just <| Type.named [] "Wellformed" )
+                ( "cctx", Just <| Type.named [ "Syntax", "CCtx" ] "Cctx" )
+                ( "wellformed", Just <| Type.named [ "Syntax", "Wellformed" ] "Wellformed" )
                 (\cctx wellformed ->
                     Elm.Case.custom
                         cctx
-                        (Type.named [] "Cctx")
+                        (Type.named [ "Syntax", "CCtx" ] "Cctx")
                         (List.map
                             (\cctxop ->
                                 let
@@ -148,7 +148,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     1 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 0 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 0 argsArray )
@@ -156,10 +156,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp 0 replacePatternsArray ]
                                                                                 ]
                                                                             )
@@ -180,7 +191,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     1 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 0 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 0 clessArgsArray )
@@ -188,10 +199,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp 0 replacePatternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     ]
@@ -203,7 +225,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     2 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 1 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -211,10 +233,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp 1 replacePatternsArray
                                                                                     ]
@@ -237,7 +270,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     1 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 0 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 0 clessArgsArray )
@@ -245,10 +278,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp 0 replacePatternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -261,7 +305,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     2 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 1 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -269,10 +313,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp 1 replacePatternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -285,7 +340,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     3 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 2 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -293,10 +348,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp 2 replacePatternsArray
@@ -321,7 +387,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     1 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 0 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 0 clessArgsArray )
@@ -329,10 +395,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp 0 replacePatternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -346,7 +423,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     2 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 1 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -354,10 +431,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp 1 replacePatternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -371,7 +459,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     3 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 2 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -379,10 +467,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp 2 replacePatternsArray
@@ -396,7 +495,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     4 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 3 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -404,10 +503,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -434,7 +544,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     1 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 0 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 0 clessArgsArray )
@@ -442,10 +552,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp 0 replacePatternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -460,7 +581,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     2 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 1 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -468,10 +589,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp 1 replacePatternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -486,7 +618,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     3 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 2 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -494,10 +626,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp 2 replacePatternsArray
@@ -512,7 +655,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     4 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 3 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -520,10 +663,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -538,7 +692,7 @@ createAddParentFun clessSyntax cctxSyntax =
                                                     5 ->
                                                         Elm.Case.custom
                                                             wellformed
-                                                            (Type.named [] "Wellformed")
+                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                             [ branch1
                                                                 ("Root_" ++ getArg 4 clessArgsArray)
                                                                 ( "underCursor", Type.named [] <| firstCharToUpper <| getArg 1 clessArgsArray )
@@ -546,10 +700,21 @@ createAddParentFun clessSyntax cctxSyntax =
                                                                 \undercursor ->
                                                                     Elm.just <|
                                                                         Elm.withType
-                                                                            (Type.named [] "Wellformed")
+                                                                            (Type.named [ "Syntax", "Wellformed" ] "Wellformed")
                                                                             (Elm.apply
-                                                                                (Elm.val <| "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop)
-                                                                                [ Elm.apply (Elm.val <| getCLessEquivalentCCtxOpName cctxop)
+                                                                                (Elm.value
+                                                                                    { importFrom = [ "Syntax", "Wellformed" ]
+                                                                                    , name = "Root_" ++ getCLessSortOfCCtxOp clessSyntax cctxop
+                                                                                    , annotation = Nothing
+                                                                                    }
+                                                                                )
+                                                                                [ Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "Syntax", "Cursorless" ]
+                                                                                        , name = getCLessEquivalentCCtxOpName cctxop
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
                                                                                     [ getPatternExp_ 0 patternsArray
                                                                                     , getPatternExp_ 1 patternsArray
                                                                                     , getPatternExp_ 2 patternsArray
@@ -613,19 +778,19 @@ createGetCctxPathFun cctxSyntax =
     Elm.declaration "getCctxPath" <|
         Elm.withType
             (Type.function
-                [ Type.named [] "Cctx"
+                [ Type.named [ "Syntax", "CCtx" ] "Cctx"
                 , Type.list Type.int
                 ]
                 (Type.list Type.int)
             )
         <|
             Elm.fn2
-                ( "cctx", Just <| Type.named [] "Cctx" )
+                ( "cctx", Just <| Type.named [ "Syntax", "CCtx" ] "Cctx" )
                 ( "path", Just <| Type.list Type.int )
                 (\cctx path ->
                     Elm.Case.custom
                         cctx
-                        (Type.named [] "Cctx")
+                        (Type.named [ "Syntax", "CCtx" ] "Cctx")
                         (List.map
                             (\cctxop ->
                                 let
@@ -730,14 +895,14 @@ createMoveCctxHoleUpFun cctxSyntax =
     Elm.declaration "moveCCtxHoleUp" <|
         Elm.withType
             (Type.function
-                [ Type.named [] "Cctx"
+                [ Type.named [ "Syntax", "CCtx" ] "Cctx"
                 , Type.list Type.int
                 ]
-                (Type.maybe <| Type.tuple (Type.named [] "Cctx") (Type.named [] "Cctx"))
+                (Type.maybe <| Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "CCtx" ] "Cctx"))
             )
         <|
             Elm.fn2
-                ( "cctx", Just <| Type.named [] "Cctx" )
+                ( "cctx", Just <| Type.named [ "Syntax", "CCtx" ] "Cctx" )
                 ( "path", Just <| Type.list Type.int )
                 (\cctx path ->
                     Elm.Case.custom
@@ -747,7 +912,14 @@ createMoveCctxHoleUpFun cctxSyntax =
                             moveCCtxParentCases cctx cctxSyntax
                         , branch0 "[_]" <|
                             Elm.just <|
-                                Elm.tuple (Elm.val "Cctx_hole") cctx
+                                Elm.tuple
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "CCtx" ]
+                                        , name = "Cctx_hole"
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    cctx
                         , branch0 "_ :: rest" <| moveCCtxRestCases cctx cctxSyntax
                         , branchList 0 <|
                             \xs -> Elm.nothing
@@ -759,7 +931,7 @@ moveCCtxRestCases : Elm.Expression -> CCtxSyntax -> Elm.Expression
 moveCCtxRestCases cctx cctxSyntax =
     custom
         cctx
-        (Type.named [] "Cctx")
+        (Type.named [ "Syntax", "CCtx" ] "Cctx")
         (List.map
             (\cctxop ->
                 let
@@ -808,7 +980,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                           <|
                                             \res ->
                                                 Elm.tuple
-                                                    (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.apply
+                                                        (Elm.value
+                                                            { importFrom = [ "Syntax", "CCtx" ]
+                                                            , name = firstCharToUpper cctxop.name
+                                                            , annotation = Nothing
+                                                            }
+                                                        )
                                                         [ Elm.val "newCctx" ]
                                                     )
                                                     (Elm.val "removedCctx")
@@ -835,7 +1013,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ getPatternExp 0 replacePatternsArray
                                                                 , arg2
                                                                 ]
@@ -856,7 +1040,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , getPatternExp 1 replacePatternsArray
                                                                 ]
@@ -889,7 +1079,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ getPatternExp 0 replacePatternsArray
                                                                 , arg2
                                                                 , arg3
@@ -911,7 +1107,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , getPatternExp 1 replacePatternsArray
                                                                 , arg3
@@ -933,7 +1135,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , arg2
                                                                 , getPatternExp 2 replacePatternsArray
@@ -968,7 +1176,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ getPatternExp 0 replacePatternsArray
                                                                 , arg2
                                                                 , arg3
@@ -991,7 +1205,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , getPatternExp 1 replacePatternsArray
                                                                 , arg3
@@ -1014,7 +1234,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , arg2
                                                                 , getPatternExp 2 replacePatternsArray
@@ -1037,7 +1263,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , arg2
                                                                 , arg3
@@ -1074,7 +1306,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ getPatternExp 0 replacePatternsArray
                                                                 , arg2
                                                                 , arg3
@@ -1098,7 +1336,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , getPatternExp 1 replacePatternsArray
                                                                 , arg3
@@ -1122,7 +1366,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , arg2
                                                                 , getPatternExp 2 replacePatternsArray
@@ -1146,7 +1396,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , arg2
                                                                 , arg3
@@ -1170,7 +1426,13 @@ moveCCtxRestCases cctx cctxSyntax =
                                                   <|
                                                     \res ->
                                                         Elm.tuple
-                                                            (Elm.apply (Elm.val <| firstCharToUpper cctxop.name)
+                                                            (Elm.apply
+                                                                (Elm.value
+                                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                                    , name = firstCharToUpper cctxop.name
+                                                                    , annotation = Nothing
+                                                                    }
+                                                                )
                                                                 [ arg1
                                                                 , arg2
                                                                 , arg3
@@ -1209,7 +1471,7 @@ moveCCtxParentCases : Elm.Expression -> CCtxSyntax -> Elm.Expression
 moveCCtxParentCases cctx cctxSyntax =
     custom
         cctx
-        (Type.named [] "Cctx")
+        (Type.named [ "Syntax", "CCtx" ] "Cctx")
         (List.map
             (\cctxop ->
                 let
@@ -1228,12 +1490,37 @@ moveCCtxParentCases cctx cctxSyntax =
                         List.indexedMap
                             (\i ( boundVars, _ ) ->
                                 if List.isEmpty boundVars then
-                                    "Cctx_hole"
+                                    "Syntax.CCtx.Cctx_hole"
 
                                 else
-                                    "(boundVars" ++ String.fromInt (i + 1) ++ ", Cctx_hole )"
+                                    "(boundVars" ++ String.fromInt (i + 1) ++ ", Syntax.CCtx.Cctx_hole )"
                             )
                             cctxop.arity
+
+                    expReplacePatterns =
+                        List.indexedMap
+                            (\i ( boundVars, _ ) ->
+                                if List.isEmpty boundVars then
+                                    Elm.value
+                                        { importFrom = [ "Syntax", "CCtx" ]
+                                        , name = "Cctx_hole"
+                                        , annotation = Nothing
+                                        }
+
+                                else
+                                    Elm.tuple
+                                        (Elm.val <| "boundVars" ++ String.fromInt (i + 1))
+                                        (Elm.value
+                                            { importFrom = [ "Syntax", "CCtx" ]
+                                            , name = "Cctx_hole"
+                                            , annotation = Nothing
+                                            }
+                                        )
+                            )
+                            cctxop.arity
+
+                    expReplacePatternsArray =
+                        Array.fromList expReplacePatterns
 
                     replacePatternsArray =
                         Array.fromList replacePatterns
@@ -1253,8 +1540,21 @@ moveCCtxParentCases cctx cctxSyntax =
                             \arg1 ->
                                 Elm.just <|
                                     Elm.tuple
-                                        (Elm.apply (Elm.val <| firstCharToUpper cctxop.name) [ Elm.val "Cctx_hole" ])
-                                        ((Elm.val <| "arg" ++ getCCtxNumAsStr cctxop) |> Elm.withType (Type.named [] "Cctx"))
+                                        (Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Syntax", "CCtx" ]
+                                                , name = firstCharToUpper cctxop.name
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Elm.value
+                                                { importFrom = [ "Syntax", "CCtx" ]
+                                                , name = "Cctx_hole"
+                                                , annotation = Nothing
+                                                }
+                                            ]
+                                        )
+                                        ((Elm.val <| "arg" ++ getCCtxNumAsStr cctxop) |> Elm.withType (Type.named [ "Syntax", "CCtx" ] "Cctx"))
 
                     2 ->
                         branch2
@@ -1268,8 +1568,13 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
-                                                    [ Elm.val <| getPattern 0 replacePatternsArray
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ Maybe.withDefault (Elm.val "error") (Array.get 0 expReplacePatternsArray) -- Elm.val <| getPattern 0 replacePatternsArray
                                                     , arg2
                                                     ]
                                                 )
@@ -1281,9 +1586,14 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
-                                                    , Elm.val <| getPattern 1 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 1 expReplacePatternsArray)
                                                     ]
                                                 )
                                                 ((Elm.val <| "arg2")
@@ -1306,8 +1616,13 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
-                                                    [ Elm.val <| getPattern 0 replacePatternsArray
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ Maybe.withDefault (Elm.val "error") (Array.get 0 expReplacePatternsArray)
                                                     , arg2
                                                     , arg3
                                                     ]
@@ -1320,9 +1635,14 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
-                                                    , Elm.val <| getPattern 1 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 1 expReplacePatternsArray)
                                                     , arg3
                                                     ]
                                                 )
@@ -1334,10 +1654,15 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
                                                     , arg2
-                                                    , Elm.val <| getPattern 2 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 2 expReplacePatternsArray)
                                                     ]
                                                 )
                                                 ((Elm.val <| "arg3")
@@ -1361,8 +1686,13 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
-                                                    [ Elm.val <| getPattern 0 replacePatternsArray
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ Maybe.withDefault (Elm.val "error") (Array.get 0 expReplacePatternsArray)
                                                     , arg2
                                                     , arg3
                                                     , arg4
@@ -1376,9 +1706,14 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
-                                                    , Elm.val <| getPattern 1 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 1 expReplacePatternsArray)
                                                     , arg3
                                                     , arg4
                                                     ]
@@ -1391,10 +1726,15 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
                                                     , arg2
-                                                    , Elm.val <| getPattern 2 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 2 expReplacePatternsArray)
                                                     , arg4
                                                     ]
                                                 )
@@ -1406,11 +1746,16 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
                                                     , arg2
                                                     , arg3
-                                                    , Elm.val <| getPattern 3 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 3 expReplacePatternsArray)
                                                     ]
                                                 )
                                                 ((Elm.val <| "arg4")
@@ -1435,8 +1780,13 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
-                                                    [ Elm.val <| getPattern 0 replacePatternsArray
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ Maybe.withDefault (Elm.val "error") (Array.get 0 expReplacePatternsArray)
                                                     , arg2
                                                     , arg3
                                                     , arg4
@@ -1451,9 +1801,14 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
-                                                    , Elm.val <| getPattern 1 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 1 expReplacePatternsArray)
                                                     , arg3
                                                     , arg4
                                                     , arg5
@@ -1467,10 +1822,15 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
                                                     , arg2
-                                                    , Elm.val <| getPattern 2 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 2 expReplacePatternsArray)
                                                     , arg4
                                                     , arg5
                                                     ]
@@ -1483,11 +1843,16 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
                                                     , arg2
                                                     , arg3
-                                                    , Elm.val <| getPattern 3 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 3 expReplacePatternsArray)
                                                     , arg5
                                                     ]
                                                 )
@@ -1499,12 +1864,17 @@ moveCCtxParentCases cctx cctxSyntax =
                                         Elm.just <|
                                             Elm.tuple
                                                 (Elm.apply
-                                                    (Elm.val <| firstCharToUpper cctxop.name)
+                                                    (Elm.value
+                                                        { importFrom = [ "Syntax", "CCtx" ]
+                                                        , name = firstCharToUpper cctxop.name
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
                                                     [ arg1
                                                     , arg2
                                                     , arg3
                                                     , arg4
-                                                    , Elm.val <| getPattern 4 replacePatternsArray
+                                                    , Maybe.withDefault (Elm.val "error") (Array.get 4 expReplacePatternsArray)
                                                     ]
                                                 )
                                                 ((Elm.val <| "arg5")

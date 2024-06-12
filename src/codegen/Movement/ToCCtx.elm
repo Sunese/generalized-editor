@@ -1,4 +1,4 @@
-module ToCCtx exposing (..)
+module Movement.ToCCtx exposing (..)
 
 import Array
 import Elm
@@ -13,8 +13,8 @@ import Gen.Dict exposing (remove)
 import Gen.Substitutable exposing (..)
 import Html exposing (a)
 import Parser exposing (..)
-import RawSyntaxP exposing (..)
-import Syntax exposing (..)
+import Syntax.RawSyntaxP exposing (..)
+import Syntax.Syntax exposing (..)
 
 
 
@@ -32,8 +32,8 @@ createToCCtxFuns syntax =
         ++ [ Elm.declaration "toCCtx" <|
                 Elm.withType
                     (Type.function
-                        [ Type.named [] "Base", Type.list Type.int ]
-                        (Type.tuple (Type.named [] "Cctx") (Type.named [] "Base"))
+                        [ Type.named [ "Syntax", "Base" ] "Base", Type.list Type.int ]
+                        (Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Base" ] "Base"))
                     )
                 <|
                     Elm.fn2
@@ -41,7 +41,7 @@ createToCCtxFuns syntax =
                         ( "path", Nothing )
                         (\base path ->
                             Elm.Case.custom base
-                                (Type.named [] "Base")
+                                (Type.named [ "Syntax", "Base" ] "Base")
                                 (List.map
                                     (\synCatOp ->
                                         Elm.Case.branchWith
@@ -62,10 +62,10 @@ createToCCtxFun synCatOp =
     Elm.declaration ("toCCtx_" ++ synCatOp.synCat) <|
         Elm.withType
             (Type.function
-                [ Type.named [] synCatOp.synCat
+                [ Type.named [ "Syntax", "Base" ] synCatOp.synCat
                 , Type.list Type.int
                 ]
-                (Type.tuple (Type.named [] "Cctx") (Type.named [] "Base"))
+                (Type.tuple (Type.named [ "Syntax", "CCtx" ] "Cctx") (Type.named [ "Syntax", "Base" ] "Base"))
             )
         <|
             Elm.fn2
@@ -76,8 +76,21 @@ createToCCtxFun synCatOp =
                         (Type.list Type.int)
                         [ Branch.variant0 "[]"
                             (Elm.tuple
-                                (Elm.val "Cctx_hole")
-                                (Elm.apply (Elm.val <| firstCharToUpper synCatOp.synCat) [ op ])
+                                (Elm.value
+                                    { importFrom = [ "Syntax", "CCtx" ]
+                                    , name = "Cctx_hole"
+                                    , annotation = Nothing
+                                    }
+                                )
+                                (Elm.apply
+                                    (Elm.value
+                                        { importFrom = [ "Syntax", "Base" ]
+                                        , name = firstCharToUpper synCatOp.synCat
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ op ]
+                                )
                             )
                         , Branch.listWithRemaining
                             { patterns =
@@ -88,7 +101,7 @@ createToCCtxFun synCatOp =
                             , finally =
                                 \i rest ->
                                     custom op
-                                        (Type.named [] synCatOp.synCat)
+                                        (Type.named [ "Syntax", "Base" ] synCatOp.synCat)
                                         (getBranchListSynCatOp synCatOp)
                             }
                         ]
@@ -185,7 +198,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx1"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCctxTransformation_ 1 arg1
                                                 ]
                                             )
@@ -234,7 +252,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx1"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCctxTransformation_ 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 ]
@@ -255,7 +278,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx2")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx2"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCctxTransformation_ 2 arg2
                                                 ]
@@ -309,7 +337,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx1"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCctxTransformation_ 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -331,7 +364,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx2")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx2"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCctxTransformation_ 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -355,7 +393,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx3")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx3"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCctxTransformation_ 3 arg3
@@ -414,7 +457,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx1"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCctxTransformation_ 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -437,7 +485,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx2")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx2"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCctxTransformation_ 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -460,7 +513,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx3")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx3"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCctxTransformation_ 3 arg3
@@ -483,7 +541,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx4")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx4"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -547,7 +610,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx1")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx1"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCctxTransformation_ 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -571,7 +639,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx2")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx2"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCctxTransformation_ 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -595,7 +668,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx3")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx3"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCctxTransformation_ 3 arg3
@@ -619,7 +697,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx4")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx4"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCLessTransformation 3 arg3
@@ -643,7 +726,12 @@ getBranchFromOp op =
                                     (\( cctxChild, restTree ) ->
                                         Elm.tuple
                                             (Elm.apply
-                                                (Elm.val <| firstCharToUpper <| op.name ++ "_CLess_cctx5")
+                                                (Elm.value
+                                                    { importFrom = [ "Syntax", "CCtx" ]
+                                                    , name = firstCharToUpper <| op.name ++ "_CLess_cctx5"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
                                                 [ argToCLessTransformation 1 arg1
                                                 , argToCLessTransformation 2 arg2
                                                 , argToCLessTransformation 3 arg3
