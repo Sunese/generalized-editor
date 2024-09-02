@@ -1,0 +1,11 @@
+This thesis investigates the development and implementation of a type-safe, generalized syntax-directed editor. The goal is to create an editor capable of supporting any language, including but not limited to programming languages. The foundation of this work is a proposed generalized editor calculus, which has been encoded in an extended lambda calculus to theoretically establish the capability of building such an editor. This project realizes this calculus in practice by implementing it in the functional programming language Elm, which has already
+been proven capable of supporting a non-generic structure editor.
+
+The report details the implementation process, encompassing the representation of abstract syntax, source code generation, and the handling of editor expressions. The implementation, written in Elm, features a language specification parser and a source code generator. Currently, the generated editor for a given language can perform basic edits on the abstract syntax tree, such as cursor movement and substitution.
+
+Practical examples are provided for subsets of different languages, including C, SQL, and \LaTeX, demonstrating the editor's generality.
+
+The thesis concludes with proposals for future work, including the implementation of missing editor expressions, handling of context-sensitive syntax and views of the program being edited.
+
+
+The source code of this project is available at following public GitHub repository: \url{https://github.com/Sunese/generalized-editor}

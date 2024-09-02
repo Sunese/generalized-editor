@@ -1,0 +1,220 @@
+\ProvidesPackage{preamble}
+
+\usepackage[utf8]{inputenc}
+\usepackage[toc,page]{appendix}
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{float}
+\usepackage[ddmmyyyy,hhmmss]{datetime}
+\usepackage{listings}% http://ctan.org/pkg/listings
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage[backend=bibtex]{biblatex}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{parskip}
+\usepackage[most]{tcolorbox}
+\usepackage{lineno}
+\usepackage[capitalise]{cleveref}
+\usepackage{amssymb,graphicx}
+\usepackage{stmaryrd}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{lstautogobble}  % Fix relative indenting
+\usepackage{color}          % Code coloring
+\usepackage{zi4}            % Nice font
+
+
+
+\usepackage{import}
+
+\colorlet{myfigurecolor}{teal!90!blue}
+\colorlet{myfigurecolorback}{myfigurecolor!10!white}
+
+\colorlet{myexamplecolor}{cyan!40!green}
+\colorlet{myexamplecolorback}{myexamplecolor!10!white}
+
+\colorlet{defcolor}{pink!90!black}
+\colorlet{defcolorback}{defcolor!10!white}
+
+\colorlet{myinlinecolorback}{pink!20!white}
+
+\definecolor{bluekeywords}{rgb}{0.13, 0.13, 1}
+\definecolor{greencomments}{rgb}{0, 0.5, 0}
+\definecolor{redstrings}{rgb}{0.9, 0, 0}
+\definecolor{graynumbers}{rgb}{0.5, 0.5, 0.5}
+
+\tcbset{
+    enhanced,
+    colback=myfigurecolor!5!white,
+    boxrule=0.1pt,
+    colframe=myfigurecolor,
+    fonttitle=\small\bfseries,
+    fontupper=\small,
+    center title
+}
+
+\newtcolorbox[blend into=figures]{myfigure}[3][]{
+    colback=myfigurecolorback,
+    colframe=myfigurecolor,
+    title={#2},
+    label={#3},
+    center,
+    #1
+}
+
+\newtcolorbox[auto counter]{example}[3][]{
+    colback=myexamplecolorback,
+    colframe=myexamplecolor,
+    title=Example \thetcbcounter: #2,
+    label={#3},
+    center,
+    #1
+}
+
+\newtcolorbox[auto counter]{definition}[3][]{
+    colback=defcolorback,
+    colframe=defcolor,
+    title=Definition \thetcbcounter: #2,
+    label={#3},
+    center,
+    #1
+}
+
+\crefname{tcb@cnt@example}{Example}{Example}
+\Crefname{tcb@cnt@example}{Example}{Example}
+
+\crefname{tcb@cnt@myfigure}{MyFigure}{MyFigure}
+\Crefname{tcb@cnt@myfigure}{MyFigure}{MyFigure}
+
+\crefname{tcb@cnt@definition}{Definition}{Definition}
+\Crefname{tcb@cnt@definition}{Definition}{Definition}
+
+\addbibresource{references/ref.bib}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    citecolor=cyan,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen
+}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinelanguage{elm}
+{
+    % List of keywords
+    morekeywords={
+            alias,
+            as,
+            case,
+            else,
+            exposing,
+            if,
+            import,
+            in,
+            let,
+            module,
+            of,
+            port,
+            then,
+            type,
+            where
+        },
+    sensitive=true, % Keywords are case-sensitive
+    morecomment=[s]{\{-}{-\}}, % s is for start and end delimiter
+    morecomment=[l]{--},
+    morestring=[b]" % Defines that strings are enclosed in double quotes
+}
+
+
+\lstdefinestyle{inline}{
+    autogobble,
+    columns=fullflexible,
+    showspaces=false,
+    showtabs=false,
+    breaklines=true,
+    showstringspaces=false,
+    breakatwhitespace=true,
+    escapeinside={(*@}{@*)},
+    commentstyle=\color{greencomments},
+    keywordstyle=\color{bluekeywords},
+    stringstyle=\color{redstrings},
+    numberstyle=\color{graynumbers},
+    numberstyle=\tiny\color{codegray},
+    backgroundcolor=\color{myinlinecolorback},
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    frameround=tttt,
+    tabsize=2,
+    captionpos=b,
+    numbers=left,
+    % xleftmargin=2em,
+}
+
+\lstdefinestyle{figurestyle}{
+    basicstyle=\ttfamily\footnotesize,
+    captionpos=b, % Position of the Caption (t for top, b for bottom)
+    extendedchars=true, % Allows 256 instead of 128 ASCII characters
+    tabsize=2, % Number of spaces indented when discovering a tab 
+    columns=fixed, % Make all characters equal width
+    keepspaces=true, % Does not ignore spaces to fit width, convert tabs to spaces
+    breaklines=true, % Wrap lines if they don't fit
+    showstringspaces=false, % Lets spaces in strings appear as real spaces
+    mathescape=true, % Enable math escape
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    stringstyle=\color{codepurple},
+    backgroundcolor=\color{myfigurecolorback},
+    numberstyle=\tiny\color{codegray},
+    frame=single,
+    numbers=left,
+    % xleftmargin=2em,
+    frameround=tttt,
+    % framexleftmargin=1.5em
+}
+
+\lstdefinestyle{examplestyle}{
+    backgroundcolor=\color{myexamplecolorback},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    tabsize=2,
+    frame=single,
+    numbers=left,
+    % xleftmargin=2em,
+    frameround=tttt,
+    % framexleftmargin=1.5em
+}
+
+\newcommand{\mybox}[3]{\begin{center}
+        \begin{myfigure}{#1}{#2}
+            \begin{varwidth}{\textwidth}#3\end{varwidth}
+        \end{myfigure}
+    \end{center}}
+
+\newcommand{\cleftsemicirc}{\put(3.5,2.5){\oval(5,10)[l]}\put(3.5,-2.5){\line(0,0){10}}\phantom{\circ}}
+\newcommand{\crightsemicirc}{\put(1.5,2.5){\oval(5,10)[r]}\put(1.5,-2.5){\line(0,0){10}}\phantom{\circ}}
+\newcommand{\hole}{\cleftsemicirc \crightsemicirc}
+\newcommand{\enc}[1]{\llbracket #1 \rrbracket}
+\newcommand{\conf}[2]{\langle #1,#2 \rangle}
+
+\newcommand{\bs}{\textbackslash}
+
+\lstset{style=inline}
+
+\setlength{\parindent}{0pt} % No indentation
+

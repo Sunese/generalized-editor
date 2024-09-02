@@ -1,0 +1,755 @@
+\section{C}
+
+The syntax for the C language is given in \cref{ex:c-spec}.
+The same syntax, but in the parseable format (\cref{lst:spec-lang-bnf}) is given in \cref{lst:c-bnf}.
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, caption={Parseable format of C language syntax}, label={lst:c-bnf}]
+p in Prog
+s in Stmt
+vd in VariableDecl
+fd in FunDecl
+t in Type
+id in Id
+e in Exp
+b in Block
+bi in BlockItem
+fa in Funarg
+cond in Conditional
+
+p ::= fd # (fd)p # program
+b ::= bi # (bi)b # block
+bi ::= vd # (vd)bi # blockdecls 
+    | s # (s)bi # blockstmts 
+    | epsilon # ()bi # blockdone
+vd ::= t id \"=\" e; bi # (t,e,id.bi)vd # vardecl
+fd ::= t_1 id_1 \"(\" t_2 id_2 \")\" \"{\" b \"}\" 
+            # (t,id.fd,t,id.b)fd 
+            # fundecl1 
+    | t_1 id_1 \"(\" t_2 id_2, t_3 id_3 \")\" \"{\" b \"}\" 
+            # (t,id.fd,t,t,id.id.b)fd 
+            # fundecl2 
+    | epsilon # ()fd # fundecldone
+s ::= id \"=\" e \";\" # (id,e)s # assignment 
+    | id \"(\" fa \")\";\" # (id,fa)s # stmtfuncall 
+    | \"return \" e \";\" # (e)s # return 
+    | cond # (cond)s # conditional 
+    | s_1 s_2 # (s,s)s # compstmt
+fa ::= t id # (t,id)fa # funarg 
+    | t id, fa # (t,id,fa)fa # funargs
+cond ::= \"if (\" e \")\" \"{\" b_1 \"} else {\" b_2 \"}\" 
+            # (e,b,b)cond 
+            # ifelse
+t ::= \"int\" # ()t # tint 
+    | \"char\" # ()t # tchar 
+    | \"bool\" # ()t # tbool
+e ::= %int # ()e # int[Int] | %char # ()e # char[Char] 
+    | %bool # ()e # bool[Bool] 
+    | e_1 \"+\" e_2 # (e,e)e # plus 
+    | e_1 \"==\" e_2 # (e,e)e # equals 
+    | id \"(\" fa \")\" # (id,fa)e # expfuncall 
+    | id # (id)e # expident
+id ::= %string # ()id # ident[String]
+\end{lstlisting}
+\end{minipage}
+
+When passed the parseable format, the parser will produce the algebraic data types
+given in \cref{lst:c-adts}, alongside relevant functions for cursor movement (\cref{lst:c-movement})
+and substitution (\cref{lst:c-sub}).
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Generated ADT for the C language}, label={lst:c-adts}]
+type P
+    = Program Fd
+    | Hole_p
+    | Cursor_p P
+
+type S
+    = Assignment Id E
+    | Stmtfuncall Id Fa
+    | Return E
+    | Conditional Cond
+    | Compstmt S S
+    | Hole_s
+    | Cursor_s S
+...
+type P_CLess
+    = Program_CLess Fd_CLess
+    | Hole_p_CLess
+
+
+type S_CLess
+    = Assignment_CLess Id_CLess E_CLess
+    | Stmtfuncall_CLess Id_CLess Fa_CLess
+    | Return_CLess E_CLess
+    | Conditional_CLess Cond_CLess
+    | Compstmt_CLess S_CLess S_CLess
+    | Hole_s_CLess
+...
+type Cctx
+    = Cctx_hole
+    | Program_CLess_cctx1 Cctx
+    ...
+    | Vardecl_CLess_cctx1 Cctx E_CLess (Bind Id_CLess Bi_CLess)
+    | Vardecl_CLess_cctx2 T_CLess Cctx (Bind Id_CLess Bi_CLess)
+    | Vardecl_CLess_cctx3 T_CLess E_CLess (Bind Id_CLess Cctx)
+    ...
+
+type Wellformed
+    = Root_p_CLess P_CLess
+    | Root_s_CLess S_CLess
+    | Root_vd_CLess Vd_CLess
+    | Root_fd_CLess Fd_CLess
+    | Root_t_CLess T_CLess
+    ...
+\end{lstlisting}
+\end{minipage}
+
+\begin{lstlisting}[style=inline, language=elm, caption={Generated functions for cursor movement for the C language}, label={lst:c-movement}]
+getCursorPath : List Int -> Base -> List Int
+getCursorPath path base =
+    case base of
+        P p ->
+            case p of
+                Program arg1 ->
+                    getCursorPath (path ++ [ 1 ]) (Fd arg1)
+
+                Hole_p ->
+                    []
+
+                Cursor_p _ ->
+                    path
+
+        B b ->
+            case b of
+                Block arg1 ->
+                    getCursorPath (path ++ [ 1 ]) (Bi arg1)
+
+                Hole_b ->
+                    []
+
+                Cursor_b _ ->
+                    path
+...
+
+
+parent : ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
+parent decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case moveCCtxHoleUp cctx (getCctxPath cctx []) of
+        Nothing ->
+            Nothing
+
+        Just ( newCctx, removedCctx ) ->
+            case addParent removedCctx wellformed of
+                Nothing ->
+                    Nothing
+
+                Just newWellformed ->
+                    Just ( newCctx, newWellformed )
+    ...
+
+child : Int -> ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
+child i decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_p_CLess underCursor ->
+            case underCursor of
+                Program_CLess arg1 ->
+                    case i of
+                        1 ->
+                            Just
+                                ( replaceCctxHole i cctx (P_CLess underCursor)
+                                , Root_fd_CLess arg1
+                                )
+
+                        _ ->
+                            Nothing
+
+                Hole_p_CLess ->
+                    Nothing
+
+        Root_s_CLess underCursor ->
+            case underCursor of
+                Assignment_CLess arg1 arg2 ->
+                    case i of
+                        1 ->
+                            Just
+                                ( replaceCctxHole i cctx (S_CLess underCursor)
+                                , Root_id_CLess arg1
+                                )
+
+                        2 ->
+                            Just
+                                ( replaceCctxHole i cctx (S_CLess underCursor)
+                                , Root_e_CLess arg2
+                                )
+
+                        _ ->
+                            Nothing
+
+        ...
+\end{lstlisting}
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Generated functions for cursor substitution for the C language}, label={lst:c-sub}]
+substitute : ( Cctx, Wellformed ) -> CursorLess -> Maybe ( Cctx, Wellformed )
+substitute decomposed sub =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_p_CLess _ ->
+            case sub of
+                P_CLess sub0 ->
+                    Just ( cctx, Root_p_CLess sub0 )
+
+                _ ->
+                    Nothing
+
+        Root_s_CLess _ ->
+            case sub of
+                S_CLess sub0 ->
+                    Just ( cctx, Root_s_CLess sub0 )
+
+                _ ->
+                    Nothing
+    ...
+\end{lstlisting}
+\end{minipage}
+
+An editing session of a sample program within the C language in the Elm
+REPL can be seen in \cref{lst:c-repl}. The sample program consists of a function
+declaration for a function called \texttt{main} which has an input
+parameter called "x". The body of the function consists of two statements,
+an assignment to "x" and a return statement, returning "x".
+The cursor is located at the second child of the \texttt{Assignment} operator, encapsulating a hole.
+
+Decomposition results in a cursor context of the whole tree, except
+the second child of the \texttt{Assignment\_CLess\_cctx2} operator, which
+contains a cursor context hole. The well-formed tree consists only
+of the hole at the second child of the assignment operator.
+
+Applying the \texttt{parent} function to the decomposed tree results in a
+new cursor context and well-formed tree pair, where the cursor has been moved
+to the assignment operator itself, as expected.
+
+Ultimately, the substitution function is demonstrated, where the cursor is
+located at the hole of the assignment operator, which is replaced with
+an \texttt{Int\_CLess} operator containing the value 2.
+
+\begin{lstlisting}[style=inline, language=elm, caption={Elm REPL demonstration of C language editor}, label={lst:c-repl}]
+> example = P <|
+|           Program <|
+|               Fundecl1
+|                   Tint
+|                   ( [ Ident "main" ], Fundecldone )
+|                   Tint
+|                   ( [ Ident "x" ]
+|                   , Block
+|                       (Blockstmts
+|                           (Compstmt
+|                               (Assignment (Ident "x") (Cursor_e Hole_e))
+|                               (Return (Expident (Ident "x")))
+|                           )
+|                       )
+|                   )
+|
+P (Program (Fundecl1 Tint ([Ident "main"],Fundecldone) Tint ([Ident "x"],Block (Blockstmts (Compstmt (Assignment (Ident "x") (Cursor_e Hole_e)) (Return (Expident (Ident "x"))))))))
+    : Base
+
+> decomposed = decompose example
+(Program_CLess_cctx1 (Fundecl1_CLess_cctx4 Tint_CLess ([Ident_CLess "main"],Fundecldone_CLess) Tint_CLess ([Ident_CLess "x"],Block_CLess_cctx1 (Blockstmts_CLess_cctx1 (Compstmt_CLess_cctx1 (Assignment_CLess_cctx2 (Ident_CLess "x") Cctx_hole) (Return_CLess (Expident_CLess (Ident_CLess "x"))))))),Root_e_CLess Hole_e_CLess)
+    : ( Cctx, Wellformed )
+
+> new = parent decomposed
+Just (Program_CLess_cctx1 (Fundecl1_CLess_cctx4 Tint_CLess ([Ident_CLess "main"],Fundecldone_CLess) Tint_CLess ([Ident_CLess "x"],Block_CLess_cctx1 (Blockstmts_CLess_cctx1 (Compstmt_CLess_cctx1 Cctx_hole (Return_CLess (Expident_CLess (Ident_CLess "x"))))))),Root_s_CLess (Assignment_CLess (Ident_CLess "x") Hole_e_CLess))
+    : Maybe ( Cctx, Wellformed )
+
+> child 1 (Maybe.withDefault (Cctx_hole, Root_p_CLess Hole_p_CLess) new)
+Just (Program_CLess_cctx1 (Fundecl1_CLess_cctx4 Tint_CLess ([Ident_CLess "main"],Fundecldone_CLess) Tint_CLess ([Ident_CLess "x"],Block_CLess_cctx1 (Blockstmts_CLess_cctx1 (Compstmt_CLess_cctx1 (Assignment_CLess_cctx1 Cctx_hole Hole_e_CLess) (Return_CLess (Expident_CLess (Ident_CLess "x"))))))),Root_id_CLess (Ident_CLess "x"))
+    : Maybe ( Cctx, Wellformed )
+
+> substitute decomposed (E_CLess (Int_CLess 2))
+Just (Program_CLess_cctx1 (Fundecl1_CLess_cctx4 Tint_CLess ([Ident_CLess "main"],Fundecldone_CLess) Tint_CLess ([Ident_CLess "x"],Block_CLess_cctx1 (Blockstmts_CLess_cctx1 (Compstmt_CLess_cctx1 (Assignment_CLess_cctx2 (Ident_CLess "x") Cctx_hole) (Return_CLess (Expident_CLess (Ident_CLess "x"))))))),Root_e_CLess (Int_CLess 2))
+    : Maybe ( Cctx, Wellformed )
+\end{lstlisting}
+
+
+\section{SQL}
+
+The syntax for the SQL language is given in \cref{ex:as-sql-lang}.
+
+Parseable format for the SQL language is given in \cref{lst:latex-bnf}.
+
+\begin{lstlisting}[style=inline, caption={Parseable format of the SQL language syntax}, label={lst:SQL-bnf}]
+q in Query
+cmd in Command
+id in Id
+const in Const
+clause in Clause
+cond in Condition
+exp in Expression
+
+q ::= \" SELECT \" id_1 \" FROM \" id_2 clause # (id,id,clause)q # select
+cmd ::= \" INSERT INTO \" id_1 \" AS \" id_2 q # (id,id.q)cmd # insert
+id ::= %string # ()id # ident[String]
+const ::= %number # ()const # num[Int] 
+        | \"'\" %string \"'\" # ()const # str[String]
+clause ::= \" WHERE \" cond # (cond)clause # where 
+        | \" HAVING \" cond # (cond)clause # having
+cond ::= exp_1 \">\" exp_2 # (exp,exp)cond # greater 
+        | exp_1 \"=\" exp_2 # (exp,exp)cond # equals
+exp ::= const # (const)exp # econst | id # (id)exp # eident
+\end{lstlisting}
+
+When passed the parseable format, the parser will produce the algebraic data types
+given in \cref{lst:SQL-adts}, alongside relevant functions for cursor movement (\cref{lst:SQL-movement})
+and substitution (\cref{lst:SQL-sub}).
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Generated ADT for the SQL language}, label={lst:SQL-adts}]
+type Q
+    = Select Id Id Clause
+    | Hole_q
+    | Cursor_q Q
+
+type Cmd
+    = Insert Id (Bind Id Q)
+    | Hole_cmd
+    | Cursor_cmd Cmd
+...
+
+type Base
+    = Q Q
+    | Cmd Cmd
+    | Id Id
+    | Const Const
+    | Clause Clause
+    | Cond Cond
+    | Exp Exp
+
+type Q_CLess
+    = Select_CLess Id_CLess Id_CLess Clause_CLess
+    | Hole_q_CLess
+
+type Cmd_CLess
+    = Insert_CLess Id_CLess (Bind Id_CLess Q_CLess)
+    | Hole_cmd_CLess
+...
+
+type Cctx
+    = Cctx_hole
+    | Select_CLess_cctx1 Cctx Id_CLess Clause_CLess
+    | Select_CLess_cctx2 Id_CLess Cctx Clause_CLess
+    | Select_CLess_cctx3 Id_CLess Id_CLess Cctx
+    | Insert_CLess_cctx1 Cctx (Bind Id_CLess Q_CLess)
+    ...
+
+type Wellformed
+    = Root_q_CLess Q_CLess
+    | Root_cmd_CLess Cmd_CLess
+    | Root_id_CLess Id_CLess
+    | Root_const_CLess Const_CLess
+    | Root_clause_CLess Clause_CLess
+    | Root_cond_CLess Cond_CLess
+    | Root_exp_CLess Exp_CLess
+\end{lstlisting}
+\end{minipage}
+
+\newpage
+
+\begin{lstlisting}[style=inline, language=elm, caption={Generated functions for cursor movement for the SLQ language}, label={lst:SQL-movement}]
+getCursorPath : List Int -> Base -> List Int
+getCursorPath path base =
+    case base of
+        Q q ->
+            case q of
+                Select arg1 arg2 arg3 ->
+                    (getCursorPath (path ++ [ 1 ]) (Id arg1)
+                        ++ getCursorPath
+                            (path ++ [ 2 ])
+                            (Id arg2)
+                    )
+                        ++ getCursorPath (path ++ [ 3 ]) (Clause arg3)
+
+                Hole_q ->
+                    []
+
+                Cursor_q _ ->
+                    path
+        ...
+parent : ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
+parent decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case moveCCtxHoleUp cctx (getCctxPath cctx []) of
+        Nothing ->
+            Nothing
+
+        Just ( newCctx, removedCctx ) ->
+            case addParent removedCctx wellformed of
+                Nothing ->
+                    Nothing
+
+                Just newWellformed ->
+                    Just ( newCctx, newWellformed )
+
+addParent : Cctx -> Wellformed -> Maybe Wellformed
+addParent cctx wellformed =
+    case cctx of
+        Cctx_hole ->
+            Nothing
+
+        Select_CLess_cctx1 arg1 arg2 arg3 ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just (Root_q_CLess (Select_CLess underCursor arg2 arg3))
+
+                _ ->
+                    Nothing
+        ...
+
+
+moveCCtxHoleUp : Cctx -> List Int -> Maybe ( Cctx, Cctx )
+moveCCtxHoleUp cctx path =
+    case path of
+        [ _, _ ] ->
+            case cctx of
+                Cctx_hole ->
+                    Nothing
+
+                Select_CLess_cctx1 arg1 arg2 arg3 ->
+                    Just ( Select_CLess_cctx1 Cctx_hole arg2 arg3, arg1 )
+                ...
+
+substitute : ( Cctx, Wellformed ) -> CursorLess -> Maybe ( Cctx, Wellformed )
+substitute decomposed sub =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_q_CLess _ ->
+            case sub of
+                Q_CLess sub0 ->
+                    Just ( cctx, Root_q_CLess sub0 )
+
+                _ ->
+                    Nothing
+        ...
+\end{lstlisting}
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Generated functions for cursor substitution for the SQL language}, label={lst:SQL-sub}]
+substitute : ( Cctx, Wellformed ) -> CursorLess -> Maybe ( Cctx, Wellformed )
+substitute decomposed sub =
+let
+    ( cctx, wellformed ) =
+        decomposed
+in
+case wellformed of
+    Root_q_CLess _ ->
+        case sub of
+            Q_CLess sub0 ->
+                Just ( cctx, Root_q_CLess sub0 )
+
+            _ ->
+                Nothing
+
+    Root_cmd_CLess _ ->
+        case sub of
+            Cmd_CLess sub0 ->
+                Just ( cctx, Root_cmd_CLess sub0 )
+
+            _ ->
+                Nothing
+    ...
+\end{lstlisting}
+\end{minipage}
+
+Sample editing session in the Elm REPL for the generated SQL editor is
+shown in \cref{lst:SQL-repl}. The sample tree consists of a SQL query
+selecting every column from a table called "table-b" where the the value in
+"col-a" is greater than 2. For the purpose of demonstration, this sample
+has no cursor, showing that the decomposition of the tree will result in a
+cursor context containing only the context hole and a well-formed tree
+with the cursor at the root of the tree. Attempting to move the cursor to the
+parent will result in \texttt{Nothing}, as the cursor is already at the root
+of the tree. Moving the cursor to child 1 moves the cursor to the first child
+of the \texttt{Select} operator, as expected. Finally, simple substitution
+is shown where the cursor is encapsulating the root of tree, resulting
+in the substitute being the only element under the updated cursor.
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Elm REPL demonstration of the SQL editor}, label={lst:SQL-repl}]
+> example = Q (Select (Ident "col-a") (Ident "table-b") (Where (Greater (Eident (Ident "col-a")) (Econst (Num 2)))))
+Q (Select (Ident "col-a") (Ident "table-b") (Where (Greater (Eident (Ident "col-a")) (Econst (Num 2)))))
+    : Base
+
+> decomposed = decompose example
+(Cctx_hole,Root_q_CLess (Select_CLess (Ident_CLess "col-a") (Ident_CLess "table-b") (Where_CLess (Greater_CLess (Eident_CLess (Ident_CLess "col-a")) (Econst_CLess (Num_CLess 2))))))
+    : ( Cctx, Wellformed )
+
+> new = parent decomposed
+Nothing : Maybe ( Cctx, Wellformed )
+
+> child 1 decomposed
+Just (Select_CLess_cctx1 Cctx_hole (Ident_CLess "table-b") (Where_CLess (Greater_CLess (Eident_CLess (Ident_CLess "col-a")) (Econst_CLess (Num_CLess 2)))),Root_id_CLess (Ident_CLess "col-a"))
+    : Maybe ( Cctx, Wellformed )
+
+> substitute decomposed (Q_CLess Hole_q_CLess)
+Just (Cctx_hole,Root_q_CLess Hole_q_CLess)
+    : Maybe ( Cctx, Wellformed )
+\end{lstlisting}
+\end{minipage}
+
+\newpage
+
+\section{\LaTeX}
+
+The syntax for the \LaTeX \ language is given in \cref{ex:as-latex-lang}.
+
+Parseable format for the \LaTeX \ language is given in \cref{lst:latex-bnf}.
+
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, caption={Parseable format of \LaTeX \ language syntax}, label={lst:latex-bnf}]
+d in LatexDocument
+e in Environment
+cmd in Command
+a in Argument
+id in Identifier
+c in Content
+
+d ::= \"\\documentclass{\" id_1 \"}
+        \\newenvironment{\" id_2 \"}\" a_1 a_2 
+        \"\\begin{document} \" c \"\\end{document}\" 
+        # (id,a,a,id.b)d 
+        # latexdoc
+id ::= %string # ()id # ident[String]
+e ::= \"\\begin{\" id \"}\" c 
+        \"\\end{\" id \"}\" 
+        # (id,c,id)e 
+        # environment
+cmd ::= \"\\\" id a # (id,a)cmd # command
+a ::= \"{\" c \"}\" # (c)a # argument
+c ::= %string # ()c # textContent[String] 
+    | cmd # (cmd)c # cmdContent 
+    | e # (e)c # envContent 
+    | c c # (c,c)c # seqContent
+    
+    
+\end{lstlisting}
+\end{minipage}
+
+When passed the parseable format, the parser will produce the algebraic data types
+given in \cref{lst:latex-adts}, alongside relevant functions for cursor movement and substitution (\cref{lst:latex-movement}).
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Generated ADT for the \LaTeX \ language}, label={lst:latex-adts}]
+type D
+    = Latexdoc Id E A A (Bind Id B)
+    | Hole_d
+    | Cursor_d D
+
+
+type E
+    = Environment Id C Id
+    | Hole_e
+    | Cursor_e E
+
+...
+
+type D_CLess
+    = Latexdoc_CLess Id_CLess E_CLess A_CLess A_CLess (Bind Id_CLess C_CLess)
+    | Hole_d_CLess
+
+
+type E_CLess
+    = Environment_CLess Id_CLess C_CLess Id_CLess
+    | Hole_e_CLess
+
+...
+
+type Cctx
+    = Cctx_hole
+    | Latexdoc_CLess_cctx1 Cctx E_CLess A_CLess A_CLess (Bind Id_CLess B_CLess)
+    | Latexdoc_CLess_cctx2 Id_CLess Cctx A_CLess A_CLess (Bind Id_CLess B_CLess)
+    ...
+
+type Wellformed
+    = Root_d_CLess D_CLess
+    | Root_e_CLess E_CLess
+    | Root_cmd_CLess Cmd_CLess
+    | Root_a_CLess A_CLess
+    | Root_id_CLess Id_CLess
+    | Root_c_CLess C_CLess
+
+\end{lstlisting}
+\end{minipage}
+
+\newpage
+
+\begin{lstlisting}[style=inline, language=elm, caption={Generated functions for cursor movement for the \LaTeX language}, label={lst:latex-movement}]
+getCursorPath : List Int -> Base -> List Int
+getCursorPath path base =
+    case base of
+        D d ->
+            case d of
+                Latexdoc arg1 arg2 arg3 arg4 ( boundVars5, arg5 ) ->
+                    (((getCursorPath (path ++ [ 1 ]) Id arg1
+                        ++ getCursorPath (path ++ [ 2 ]) (E arg2)
+                        )
+                        ++ getCursorPath (path ++ [ 3 ]) (A arg3)
+                        )
+                        ++ getCursorPath (path ++ [ 4 ]) (A arg4)
+                    )
+                        ++ getCursorPath (path ++ [ 5 ]) (B arg5)
+
+                Hole_d ->
+                    []
+
+                Cursor_d _ ->
+                    path
+        ...
+parent : ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
+parent decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case moveCCtxHoleUp cctx (getCctxPath cctx []) of
+        Nothing ->
+            Nothing
+
+        Just ( newCctx, removedCctx ) ->
+            case addParent removedCctx wellformed of
+                Nothing ->
+                    Nothing
+
+                Just newWellformed ->
+                    Just ( newCctx, newWellformed )
+    ...
+
+moveCCtxHoleUp : Cctx -> List Int -> Maybe ( Cctx, Cctx )
+moveCCtxHoleUp cctx path =
+    case path of
+        [ _, _ ] ->
+            case cctx of
+                Cctx_hole ->
+                    Nothing
+
+                Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 ( boundVars5, arg5 ) ->
+                    Just
+                        ( Latexdoc_CLess_cctx1
+                            Cctx_hole
+                            arg2
+                            arg3
+                            arg4
+                            ( boundVars5, arg5 )
+                        , arg1
+                        )
+                ...
+
+addParent : Cctx -> Wellformed -> Maybe Wellformed
+addParent cctx wellformed =
+    case cctx of
+        Cctx_hole ->
+            Nothing
+
+        Latexdoc_CLess_cctx1 arg1 arg2 arg3 arg4 ( boundVars5, arg5 ) ->
+            case wellformed of
+                Root_id_CLess underCursor ->
+                    Just
+                        (Root_d_CLess
+                            (Latexdoc_CLess
+                                underCursor
+                                arg2
+                                arg3
+                                arg4
+                                ( boundVars5, arg5 )
+                            )
+                        )
+
+                _ ->
+                    Nothing
+        ...
+
+child : Int -> ( Cctx, Wellformed ) -> Maybe ( Cctx, Wellformed )
+child i decomposed =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_d_CLess underCursor ->
+            case underCursor of
+                Latexdoc_CLess arg1 arg2 arg3 arg4 ( boundVars5, arg5 ) ->
+                    case i of
+                        1 ->
+                            Just
+                                ( replaceCctxHole i cctx (D_CLess underCursor)
+                                , Root_id_CLess arg1
+                                )
+                        ...
+
+substitute : ( Cctx, Wellformed ) -> CursorLess -> Maybe ( Cctx, Wellformed )
+substitute decomposed sub =
+    let
+        ( cctx, wellformed ) =
+            decomposed
+    in
+    case wellformed of
+        Root_d_CLess _ ->
+            case sub of
+                D_CLess sub0 ->
+                    Just ( cctx, Root_d_CLess sub0 )
+
+                _ ->
+                    Nothing
+\end{lstlisting}
+
+Sample editing session in the Elm REPL for the generated \LaTeX \ editor is
+shown in \cref{lst:latex-repl}. The example tree represents a \LaTeX \ document of type "article" with an environment called "myenv", where the
+definition of this environment contains holes. The body of the document
+contains the text "Hello World!". The cursor is located at the text of the
+document body. Decomposing the tree results in a cursor context containing
+the whole tree, except for the text content of the document body, which
+is under the root of the well-formed tree. Moving the cursor to the parent
+results in the cursor being moved to the root of the sample tree. Simple
+substitution is shown where if the cursor is at the text content, we can
+replace it with another text content operator with an updated string value.
+
+\begin{minipage}{\textwidth}
+    \begin{lstlisting}[style=inline, language=elm, caption={Editing sessions with the \LaTeX \ editor in the Elm REPl}, label={lst:latex-repl}]
+> example = D (Latexdoc (Ident "article") Hole_a Hole_a ( [ Ident "myenv" ], Cursor_c (TextContent "Hello World!") ))
+D (Latexdoc (Ident "article") Hole_a Hole_a ([Ident "myenv"],Cursor_c (TextContent ("Hello World!"))))
+    : Base
+
+> decomposed = decompose example
+(Latexdoc_CLess_cctx4 (Ident_CLess "article") Hole_a_CLess Hole_a_CLess ([Ident_CLess "myenv"],Cctx_hole),Root_c_CLess (TextContent_CLess ("Hello World!")))
+    : ( Cctx, Wellformed )
+
+> new = parent decomposed
+Just (Cctx_hole,Root_d_CLess (Latexdoc_CLess (Ident_CLess "article") Hole_a_CLess Hole_a_CLess ([Ident_CLess "myenv"],TextContent_CLess ("Hello World!"))))
+    : Maybe ( Cctx, Wellformed )
+
+> child 1 (Maybe.withDefault (Cctx_hole, Root_d_CLess Hole_d_CLess) new)
+Just (Latexdoc_CLess_cctx1 Cctx_hole Hole_a_CLess Hole_a_CLess ([Ident_CLess "myenv"],TextContent_CLess ("Hello World!")),Root_id_CLess (Ident_CLess "article"))
+    : Maybe ( Cctx, Wellformed )
+
+> substitute decomposed (C_CLess (TextContent_CLess "Updated content"))
+Just (Latexdoc_CLess_cctx4 (Ident_CLess "article") Hole_a_CLess Hole_a_CLess ([Ident_CLess "myenv"],Cctx_hole),Root_c_CLess (TextContent_CLess ("Updated content")))
+    : Maybe ( Cctx, Wellformed )
+\end{lstlisting}
+\end{minipage}

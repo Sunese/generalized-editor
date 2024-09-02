@@ -1,0 +1,40 @@
+\documentclass[12pt, a4paper]{report}
+\usepackage{preamble}
+\usepackage[english, science]{utils/ku-frontpage}
+
+\assignment{Master's thesis}
+\author{Sune Skaanning Engtorp}
+\advisor{Advisor: Hans Hüttel}
+\title{Implementation of a type-safe \\ generalized syntax-directed editor}
+\subtitle{}
+\date{Submitted: 31/05/2024}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+\thispagestyle{empty}
+\begin{abstract}
+    \input{sections/abstract.tex}
+\end{abstract}
+\newpage
+
+\small\tableofcontents
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\input{chapters/Introduction.tex}
+
+\input{chapters/Background.tex}
+
+\input{chapters/Implementation.tex}
+
+\input{chapters/Examples.tex}
+
+\input{chapters/Conclusion.tex}
+
+\printbibliography
+
+\end{document}

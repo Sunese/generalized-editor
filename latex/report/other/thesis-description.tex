@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage[toc,page]{appendix}
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{float}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage[a4paper, total={5in, 8in}]{geometry}
+\usepackage{hyperref}
+\usepackage{biblatex}
+\usepackage[dvipsnames]{xcolor}
+\addbibresource{references/ref.bib}
+\usepackage{luacolor} % Required to use the lua-ul \highLight command 
+\usepackage{lua-ul} 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen
+}
+
+\LuaULSetHighLightColor{yellow}
+
+\setlength{\parindent}{0pt} % No indentation
+\title{Thesis description}
+
+\author{Sune Skaanning Engtorp \\ fpm268@alumni.ku.dk}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Background}
+
+Structure editors provide a way to manipulate some program's abstract syntax structure directly, in contrast to writing and editing the source code of a program in plain-text, which also requires a parser to produce an abstract syntax tree. An early example of a proposed structure editor is the Cornell Program Synthesizer\cite{cornell} from 1981.
+
+However structure editors like the Cornell Program Synthesizer\cite{cornell} allow programmers to create syntactically ill-formed programs. This includes introducing use-before-declaration statements, as the editor cannot manage context-sensitive constraints within the syntax.
+
+In 2017 Omar et al. introduced Hazel\cite{omar}, a programming environment for an Elm-like functional language with typed holes, which allows for evaluation to continue past holes which might be empty or ill-formed. The Hazel environment is based on the Hazelnut structure editor calculus that allows for finite edit expressions and inserts holes automatically to guarantee that every editor state has some type.
+
+With inspiration from Hazel, Godiksen et. al \cite{godiksen} presented a type-safe structure editor calculus which manipulates a simply-typed lambda calculus. The editor calculus ensures that if an edit action is well-typed, then the resulting program is also well-typed. The editor calculus and programming language has later been used to implement a type-safe structure editor in Elm\cite{PAINT2023-missing ref}.
+
+A common property of the editor calculi and editors mentioned until now is that they are built to work with only one programming language. The calculi are strongly dependent on the language they can manipulate, and if the language were to change, it could require re-writing the complete editor calculus.
+
+To tackle this problem, one can draw inspiration from the Centaur system\cite{centaur} that is able to take a language syntax described in the Metal language as input and generate a structure-oriented editor. However the system lacks a dedicated type-safe editor calculus. Such a type-safe generalized editor calculus has been proposed by \cite{missing ref}.
+
+\section{Problem statement}
+There is currently no implementation of a type-safe generalized structure editor, based on the proposed type-safe generalized structure editor calculus.
+\\
+
+This project will investigate the gap between type-safe structure editors and type-safe generalized structure editors, by implementing the latter. A generalized editor is generalized in the sense that it is able to manipulate any language, not limited to programming languages, given the syntax as input. The editor should be supported by a meta-language that can describe any instance of the editor. This meta-language could be a typed lambda-calculus, which is also used by the authors of the proposed editor calculus.
+\\
+
+This project also has the intention of narrowing down the problem and become more specific towards what needs to be implemented in order to have a minimal viable product, as the topic is studied further.
+
+\section{Learning objectives}
+\begin{itemize}
+    \item Analyze current structure editors
+    \item Determine the criteria for implementing a type-safe structure editor
+    \item Design a type-safe generalized structure editor
+    \item Implement a type-safe generalized structure editor in a functional programming language
+    \item Evaluate the type-safe generalized structure editor
+\end{itemize}
+
+\section{Requirements for a successful implementation}
+\begin{itemize}
+    \item A generic solution that is able to take the syntax of any language, not limited to programming languages
+    \item A solution with a structure editor that is able to display programs with some view, with the ability to add more views
+    \item A solution that is able to manipulate the structure of any program while ensuring that it remains syntactically well-formed
+\end{itemize}
+
+\printbibliography
+
+\end{document}

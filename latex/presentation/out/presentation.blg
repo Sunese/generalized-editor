@@ -1,0 +1,18 @@
+[0] Config.pm:307> INFO - This is Biber 2.19
+[0] Config.pm:310> INFO - Logfile is 'out/presentation.blg'
+[102] biber-darwin:340> INFO - === Tue Jun 18, 2024, 12:20:38
+[132] Biber.pm:419> INFO - Reading 'out/presentation.bcf'
+[253] Biber.pm:979> INFO - Found 11 citekeys in bib section 0
+[268] Biber.pm:4419> INFO - Processing section 0
+[283] Biber.pm:4610> INFO - Looking for bibtex file '../report/references/ref.bib' for section 0
+[287] bibtex.pm:1713> INFO - LaTeX decoding ...
+[334] bibtex.pm:1519> INFO - Found BibTeX data source '../report/references/ref.bib'
+[494] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[494] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[494] Biber.pm:4239> INFO - Sorting list 'nty/global//global/global' of type 'entry' with template 'nty' and locale 'en-US'
+[494] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
+[520] bbl.pm:660> INFO - Writing 'out/presentation.bbl' with encoding 'UTF-8'
+[531] bbl.pm:763> INFO - Output to out/presentation.bbl
+[531] Biber.pm:131> WARN - BibTeX subsystem: /var/folders/y4/ptns5hr120z0rdxt13nk96cc0000gn/T/biber_tmp_WY1f/e800e2552f53b910154f366d4c3730d7_96126.utf8, line 74, warning: undefined macro "pub-ISO"
+[531] Biber.pm:131> WARN - BibTeX subsystem: /var/folders/y4/ptns5hr120z0rdxt13nk96cc0000gn/T/biber_tmp_WY1f/e800e2552f53b910154f366d4c3730d7_96126.utf8, line 75, warning: undefined macro "pub-ISO:adr"
+[531] Biber.pm:133> INFO - WARNINGS: 2

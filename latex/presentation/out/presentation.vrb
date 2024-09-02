@@ -1,0 +1,17 @@
+\frametitle{Picking good language examples (Continued)}
+
+    \begin{multicols*}{2}
+        \begin{itemize}
+            \item A \LaTeX \ document with syntax errors
+        \end{itemize}
+
+        \columnbreak
+
+        \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+...
+\begin{equation}
+    \|\vect{v}\| = \sqrt{\sum_{i=1}^n v_i^2<@\textcolor{green}{\}}@>
+\end{equation}
+...
+        \end{lstlisting}
+    \end{multicols*}

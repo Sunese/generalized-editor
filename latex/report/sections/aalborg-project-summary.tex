@@ -1,0 +1,606 @@
+\section{Generalized editor calculus}
+The generalized editor calculus\cite{aalborg} is a generalization of the type-safe structure editor calculus proposed by Godiksen et al.\cite{godiksen}, where the editor calculus is able to account for any language given its abstract syntax, in contrast to the calculus in Godiksen\cite{godiksen} et al. which is tailored towards an applied $\lambda$-calculus.
+
+\subsection{Abstract syntax}
+It is assumed that the abstract syntax is given by a set of sorts $\mathcal{S}$, an arity-indexed family of operators $\mathcal{O}$ and a sort-indexed family of variables $\mathcal{X}$, as described by Harper\cite{harper}.
+
+Cursors and holes are important concepts in syntax-directed editors, where the cursor represents the current selection in the syntax tree, and holes are missing or empty subtrees.
+
+The calculus proposed by Godiksen et al. \cite{godiksen} has a single term for the cursor and hole in the abstract syntax. For a generalized calculus, it is necessary to add a hole and cursor for every sort in $\mathcal{S}$.
+
+\begin{definition}{Abstract syntax of a language}{def:base-as}
+    The abstract syntax of a language is given by the following:
+
+    \begin{enumerate}
+        \item A set of sorts $\mathcal{S}$
+        \item An arity-indexed family of operators $\mathcal{O}$
+        \item A sort-indexed family of variables $\mathcal{X}$
+    \end{enumerate}
+
+    Then, for every sort $s \in \mathcal{S}$, the following operators are added to $\mathcal{O}$
+
+    \begin{enumerate}
+        \item A $hole_s$ operator with arity $()s$
+        \item A $cursor_s$ operator with arity $(s)s$
+    \end{enumerate}
+\end{definition}
+
+
+
+\begin{example}{Abstract syntax of a simple language}{ex:as-simple-language}
+    Below is a simple language consisting of arithmetic expressions and local declarations:
+    \[
+        \begin{aligned}
+             & \text{Sort} &  & \text{Term}                        &  & \text{Operator} &  & \text{Arity} &  & \\
+             & s ::=       &  & \text{let} \ x = e \ \text{in} \ s &  & let             &  & (e,e.s)s     &  & \\
+             & \quad |     &  & e                                  &  & exp             &  & (e)s         &  & \\
+             & e ::=       &  & e_1 + e_2                          &  & plus            &  & (e,e)e       &  & \\
+             & \quad |     &  & n                                  &  & num[n]          &  & ()e          &  & \\
+             & \quad |     &  & x                                  &  & var[x]          &  & ()e
+        \end{aligned}
+    \]
+
+    In other words, we have sorts: $$\mathcal{S} = \{ s, e \}$$ and we have operators: $$\mathcal{O} = \{
+        \mathcal{O}_{(e,e.s)s}, \mathcal{O}_{(e)s}, \mathcal{O}_{(e,e)e}, \mathcal{O}_{()e}\}$$ where $$\mathcal{O}_{(e,e.s)s} = \{ let \}$$ $$\mathcal{O}_{(e)s} = \{ exp \}$$ $$\mathcal{O}_{(e,e)e} = \{ plus \}$$ $$\mathcal{O}_{()e} = \{ num[n], var[x] \}$$
+
+\end{example}
+
+\begin{example}{Introduction of cursors and holes}{ex:as-extended-cursors-holes}
+    Given the abstract syntax of a simple language consisting of arithmetic expressions and local declarations (\cref{ex:as-simple-language}), it would be extended with following cursor and hole operators:
+    \[
+        \begin{aligned}
+             & \text{Sort} &  & \text{Term} &  & \text{Operator} &  & \text{Arity} &  & \\
+             & s ::=       &  & [s]         &  & cursor_s        &  & (s)s         &  & \\
+             & \quad |     &  & \hole_s     &  & hole_s          &  & ()s          &  & \\
+             & e ::=       &  & [e]         &  & cursor_e        &  & (e)e         &  & \\
+             & \quad |     &  & \hole_e     &  & hole_e          &  & ()e
+        \end{aligned}
+    \]
+\end{example}
+
+\subsubsection{Editor calculus}
+The abstract syntax of the general editor calculus (\cref{fig:as-editor}) resembles the one from Godiksen et al., the only difference being the lack of an $eval$ construct, since the generalized editor only considers the static and structural properties of abstract syntax. The key components of the calculus include:
+
+\begin{itemize}
+    \item Atomic prefix commands ($pi$): These commands facilitate the traversal and modification of the abstract syntax tree. They include operations for moving the cursor to a child or parent and operator substitution.
+    \item Conditions ($\phi$): These are logical expressions used to control the flow of the editor actions based on the structure and properties of the syntax tree. Conditions can involve logical negation, conjunction, disjunction, and modal operators that answer questions about the
+          presence of operators in the syntax tree.
+    \item Editor expressions ($E$): These are the core constructs of the
+          calculus, representing the actions that can be performed on the syntax tree, including conditional execution and sequence of actions.
+\end{itemize}
+
+\begin{myfigure}{Abstract syntax of general editor calculus}{fig:as-editor}
+    \[
+        \begin{aligned}
+            E    & ::= \quad \pi.E \ | \ \phi \Rightarrow E_1|E_2 \ | \ E_1 \ggg E_2 \ | \ rec \ x.E \ | \ x \ | \ nil      &  & \\
+            \pi  & ::= \quad child \ n \ | \ parent \ | \ \{ o \}                                                           &  & \\
+            \phi & ::= \quad \neg \phi \ | \ \phi \land \phi \ | \ \phi \lor \phi \ | \ @o \ | \ \Diamond o \ | \ \square o
+        \end{aligned}
+    \]
+\end{myfigure}
+
+\subsubsection{Cursorless trees}
+The notion of cursorless trees is introduced to support a single cursor only being able to encapsulate a single node, hence the rest of the tree being considered cursorless.
+
+The abstract syntax of cursorless trees formalizes this notion by introducing new sorts and operators that represent the tree without an active cursor. These sorts and operators accommodate the requirement that the cursor can only be at one location at a time.
+
+\begin{definition}{Abstract syntax of cursorless trees}{def:cursorless-trees}
+    The abstract syntax of cursorless trees is given by:
+    \begin{enumerate}
+        \item The sorts $\hat{\mathcal{S}} = \{ \hat{s} \}_{s \in \mathcal{S}}$
+        \item The family of cursorless operators $\hat{\mathcal{O}}$ is made by adding
+              the operator $\hat{o}$ of arity
+              $(\vec{\hat{s}}_1.\hat{s}_1,...,\vec{\hat{s}}_n.\hat{s}_n)\hat{s}$
+              for every $o \in \mathcal{O}$ of arity $(\vec{s}_1.s_1,...,\vec{s}_n.s_n)s$
+        \item The family of variables $\hat{\mathcal{X}}$
+    \end{enumerate}
+\end{definition}
+
+\subsubsection{Cursor Context}
+\label{subsubsec:cursor-context}
+A cursor context $C$ holds information about the current tree, up until
+a context hole, which is filled out by a well-formed tree including the cursor.
+In other words, the actual cursor is located somewhere in the well-formed tree but is not part of the cursor context.
+The cursor context acts as a template that outlines the structure of the tree around the cursor, which is inspired by the zipper data structure by Huet\cite{zipper}, as a way to locate the cursor in a tree.
+
+\begin{definition}{Abstract syntax of cursor contexts}{def:cursor-context}
+    The abstract syntax of cursor contexts is given by:
+    \begin{enumerate}
+        \item The sorts $\mathcal{S}^C = \hat{\mathcal{S}} \cup \{C\}$
+        \item The family of operators $\mathcal{O}^C = \hat{\mathcal{O}}$ extended with the $[\cdot]$ operator with arity $()C$
+        \item For every operator $\hat{o} \in \hat{\mathcal{O}}$ of arity $(\vec{\hat{s}}_1.\hat{s}_1,...,\vec{\hat{s}}_n.\hat{s}_n)\hat{s}$ and for every $1 \leq i \leq n$ the operator $o_i^C$ of arity $(\vec{\hat{s}}_1.\hat{s}_1,...,\vec{\hat{s}}_i.C,...,\vec{\hat{s}}_n.\hat{s}_n)C$ to $\mathcal{O}^C$
+        \item The family of variables $\mathcal{X}^C = \hat{\mathcal{X}}$
+    \end{enumerate}
+\end{definition}
+
+\subsubsection{Well-formed trees}
+\label{subsubsec:well-formed-trees}
+Well-formed trees are characterized by having a single cursor, which is either at the root or one of the immediate children, with the rest of the tree being cursorless. This structure ensures the tree is considered well-formed because it contains only one cursor. The concept of well-formed trees is fundamental to the generalized editor calculus. Edit actions are restricted to well-formed trees, which guarantees that the cursor is in a valid position and that there is only one cursor present in the tree.
+
+\begin{definition}{Abstract syntax of well-formed trees}{def:well-formed-trees}
+    The abstract syntax of well-formed trees is given by:
+    \begin{enumerate}
+        \item The sorts $\dot{\mathcal{S}} = \hat{\mathcal{S}} \cup \{ \dot{s} \}_{s \in \mathcal{S}}$
+        \item The family of operators $\dot{\mathcal{O}} = \hat{\mathcal{O}}$ extended with an operator of arity $(\hat{s})\dot{s}$ for every $\hat{s} \in \hat{\mathcal{S}}$
+        \item For every operator $\hat{o} \in \hat{\mathcal{O}}$ of arity $(\vec{\hat{s}}_1.\hat{s}_1,...,\vec{\hat{s}}_n.\hat{s}_n)\hat{s}$ and for every $1 \leq i \leq n$ the operator $\dot{o}_i$ of arity $(\vec{\hat{s}}_1.\hat{s}_1,...,\vec{\hat{s}}_i.\hat{s}_i,...,\vec{\hat{s}}_n.\hat{s}_n)\dot{s}$ is added to $\dot{\mathcal{O}}$
+        \item The family of variables $\dot{\mathcal{X}} = \hat{\mathcal{X}}$
+    \end{enumerate}
+\end{definition}
+
+Given this, a well-formed abt $a \in \mathcal{B[\mathcal{X}]}$ is any abt that
+can be interpreted as $C[\dot{a}]$, where $C$ is a cursor context and $\dot{a}$ is a well-formed tree.
+
+\subsection{Semantics}
+The semantics of the editor calculus are defined through reduction rules that describe how editor expressions are evaluated and how the cursor is manipulated within the syntax tree.
+
+Reduction rules for editor expressions are presented in \cref{fig:red-rules-editor-exp}, substitution in \cref{fig:red-rules-sub} and cursor movement in \cref{fig:red-rules-movement}.
+
+\begin{myfigure}{Reduction rules for editor expressions}{fig:red-rules-editor-exp}
+    \[
+        \text{(Cond-1)} \ \frac{a \models \phi}{\langle \phi \Rightarrow E_1|E_2, C[a] \rangle \stackrel{\epsilon}{\Rightarrow} \langle E_1, C[a] \rangle}
+    \]
+
+    \[
+        \text{(Cond-2)} \ \frac{a \not\models \phi}{\langle \phi \Rightarrow E_1|E_2, C[a] \rangle \stackrel{\epsilon}{\Rightarrow} \langle E_2, C[a] \rangle}
+    \]
+
+    \[
+        \text{(Seq)} \ \frac{\langle E_1,a \rangle \stackrel{\alpha}{\Rightarrow} \langle E_1',a' \rangle}{\langle E_1 \ggg E_2,a \rangle \stackrel{\alpha}{\Rightarrow} \langle E_1' \ggg E_2,a' \rangle}
+    \]
+
+    \[
+        \text{(Seq-Trivial)} \ \frac{}{\langle nil \ggg E_2,a \rangle \stackrel{\epsilon}{\Rightarrow} \langle E_2, a \rangle}
+    \]
+
+    \[
+        \text{(Recursion)} \ \frac{}{\langle \text{rec} x.E,a \rangle \stackrel{\epsilon}{\Rightarrow} \langle E[x:= rec \ x.E],a \rangle}
+    \]
+
+    \[
+        \text{(Context)} \ \frac{a \stackrel{\pi}{\Rightarrow} a'}{\langle \pi.E,C[a] \rangle \stackrel{\pi}{\Rightarrow} \langle E,C[a'] \rangle}
+    \]
+\end{myfigure}
+
+\begin{myfigure}{Reduction rules for substitution}{fig:red-rules-sub}
+    \[
+        \text{(Insert-op)} \ \frac{}{[\hat{a}] \stackrel{\{ o \}}{\Rightarrow} [o(\vec{x}_1.\hole_{s_1};...;\vec{x}_n.\hole_{s_n})]} \hat{a} \in \mathcal{B}[\mathcal{X}]_s \text{where } s \text{ is the sort of } o
+    \]
+\end{myfigure}
+
+\begin{myfigure}{Reduction rules for cursor movement}{fig:red-rules-movement}
+
+    \[
+        \text{(Child-i)} \ \frac{}{[\hat{o}(\vec{x}_1.\hat{a}_1;...;\vec{x}_n.\hat{a}_n)] \stackrel{child \ i}{\Rightarrow} o(\vec{x}_1.\hat{a}_1;...;\vec{x}_i.[\hat{a}_i];...;\vec{x}_n.\hat{a}_n)}
+    \]
+
+    \[
+        \text{(Parent)} \ \frac{}{o(\vec{x}_1.\hat{a}_1;...;\vec{x}_i.[\hat{a}_i];...;\vec{x}_n.\hat{a}_n) \stackrel{parent}{\Rightarrow} [\hat{o}(\vec{x}_1.\hat{a}_1;...;\vec{x}_n.\hat{a}_n)]}
+    \]
+\end{myfigure}
+
+Satisfaction rules for the propositional connectives and modalities define the conditions under which logical expressions hold true for a given
+cursorless tree encapsulated by the cursor (i.e. a well-formed tree).
+
+The satisfaction rules for propositional connectives specify how logical negation, conjunction, and disjunction are evaluated, while the satisfaction rules for modalities describe how modal operators, which express following:
+
+\begin{itemize}
+    \item $@o$ holds if the operator $o$ is at the cursor
+    \item $\Diamond o$ holds if the operator $o$ is in one of the subtrees of the operator at the cursor
+    \item $\square o$ holds if the operator $o$ is in all subtrees of the operator at the cursor
+\end{itemize}
+
+The rules are given in \cref{fig:sat-rel-prop-connectives} and \cref{fig:sat-rel-modal-ops}.
+
+\begin{myfigure}{Satisfaction rules for propositional connectives}{fig:sat-rel-prop-connectives}
+    \[
+        \text{(Negation)} \ \frac{[\hat{a}] \not\models \phi}{[\hat{a}] \models \neg \phi}
+    \]
+
+    \[
+        \text{(Conjunction)} \ \frac{[\hat{a}] \models \phi_1 \quad [\hat{a}] \models \phi_2}{[\hat{a}] \models \phi_1 \land \phi_2}
+    \]
+
+    \[
+        \text{(Disjunction-1)} \ \frac{[\hat{a}] \models \phi_1}{[\hat{a}] \models \phi_1 \lor \phi_2}
+    \]
+    \\
+    \[
+        \text{(Disjunction-2)} \ \frac{[\hat{a}] \models \phi_2}{[\hat{a}] \models \phi_1 \lor \phi_2}
+    \]
+\end{myfigure}
+
+\begin{myfigure}{Satisfaction rules for modalities}{fig:sat-rel-modal-ops}
+    \[
+        \text{(At-op)} \ \frac{}{[o(\vec{x}_1.\hat{a}_1;...;\vec{x}_n.\hat{a}_n)] \models @o}
+    \]
+
+    \[
+        \text{(Necessity)} \ \frac{[\hat{a}_1] \models \Diamond ... [\hat{a}_n] \models \Diamond o}{[o(\vec{x}_1.\hat{a}_1;...;\vec{x}_n.\hat{a}_n)] \models \square o}
+    \]
+
+    \[
+        \text{(Possibly-i)} \ \frac{[\hat{a}_i] \models \Diamond o}{[o(\vec{x}_1.\hat{a}_1;...;\Vec{x}_i.\hat{a}_i;...;\vec{x}_n.\hat{a}_n)] \models \Diamond o}
+    \]
+
+    \[
+        \text{(Possibly-trivial)} \ \frac{[\hat{a}] \models @o}{[\hat{a}] \models \Diamond o}
+    \]
+\end{myfigure}
+
+\subsection{Encoding the generalized editor calculus in an extended $\lambda$-calculus}
+The following sections will show how to encode the generalized editor calculus in a simply typed $\lambda$-calculus, extended with pairs, pattern matching and recursion. The notation $\llbracket a \rrbracket$ will be used to describe the encoding of an abt $a$.
+
+The simply typed $\lambda$-calculus is first extended with term constants $o$ for every $o \in \mathcal{O}$ excluding cursors and base type $s$ for every sort $s \in \mathcal{S}$. The abstract syntax of this can be seen in \cref{fig:as-lambda-calc-ext-1}.
+
+\begin{myfigure}{Abstract syntax of extended $\lambda$-calculus}{fig:as-lambda-calc-ext-1}
+    \begin{center}
+        Terms
+    \end{center}
+    \[
+        \begin{aligned}
+            M \quad & ::= \lambda x : \tau.M & (abstraction) &  & \\
+                    & \quad | \quad M_1 M_2  & (application) &  & \\
+                    & \quad | \quad x        & (variable)    &  & \\
+                    & \quad | \quad o        & (operator)
+        \end{aligned}
+    \]
+
+    \begin{center}
+        Types
+    \end{center}
+    \[
+        \begin{aligned}
+            \tau \quad & ::= \tau_1 \rightarrow \tau_2 & (function) &  & \\
+                       & \quad | \quad s               & (sort)
+        \end{aligned}
+    \]
+\end{myfigure}
+
+\subsubsection{Abstract binding trees}
+
+The types of operators in the $\lambda$-calculus can be inferred by their arity. The typing rules for this is provided in \cref{fig:typing-ops}.
+
+\begin{myfigure}{Typing rules for $\lambda$-calculus operators}{fig:typing-ops}
+    \[
+        (\text{T-Operator}) \ \frac{o \in \mathcal{O} \text{ and has arity } (\Vec{s}_1.s_1,...,\Vec{s}_n.s_n)s}{\Gamma \vdash o : (\Vec{s}_1 \rightarrow s_1) \rightarrow ... (\Vec{s}_n \rightarrow s_n) \rightarrow s}
+    \]
+\end{myfigure}
+
+Then, any abt can be encoded in the extended simply typed $\lambda$-calculus by the encoding in \cref{fig:encoding-abt}.
+
+\begin{myfigure}{Encoding of abts}{fig:encoding-abt}
+    \[
+        \llbracket o(\Vec{x}_1.a_1,...,\Vec{x}_n.a_n) \rrbracket = o(\lambda \Vec{x}_1:\Vec{s}_1.\llbracket a_1 \rrbracket)...(\lambda \Vec{x}_n : \Vec{s}_n.\llbracket a_n \rrbracket)
+    \]
+\end{myfigure}
+
+\subsubsection{Cursor Contexts}
+Cursor contexts will be represented in the $\lambda$-calculus as pairs, hence it is extended to support this notion. The abstract syntax is given in \cref{fig:as-lc-pairs}.
+
+\begin{myfigure}{Abstract syntax of extended $\lambda$-calculus}{fig:as-lc-pairs}
+    \begin{center}
+        Terms
+    \end{center}
+    \[
+        \begin{aligned}
+            M \quad & ::= (M_1,M_2)     & \text{(pair)}              &  & \\
+                    & \quad | \quad M.1 & \text{(first projection)}  &  & \\
+                    & \quad | \quad M.2 & \text{(second projection)} &  & \\
+        \end{aligned}
+    \]
+    \\
+    \begin{center}
+        Types
+    \end{center}
+    \[
+        \begin{aligned}
+            \tau \quad & ::= \tau_1 \times \tau_2 & \text{(product type)}
+        \end{aligned}
+    \]
+\end{myfigure}
+
+Reduction rules for projecting the first and second value in a pair are given in \cref{fig:red-pairs}.
+
+\begin{myfigure}{Reduction rules for pairs}{fig:red-pairs}
+    \[
+        \text{(E-Proj1)} \ \frac{}{(M_1,M_2).1 \rightarrow M_1}
+    \]
+
+    \[
+        \text{(E-Proj2)} \ \frac{}{(M_1,M_2).2 \rightarrow M_2}
+    \]
+\end{myfigure}
+
+Typing rules for pairs in the $\lambda$-calculus are given in \cref{fig:typing-pairs}.
+
+\begin{myfigure}{Typing rules for pairs}{fig:typing-pairs}
+    \[
+        \text{(T-Proj1)} \ \frac{\Gamma \vdash M : \tau_1 \times \tau_2}{\Gamma \vdash M.1 : \tau_1}
+    \]
+
+    \[
+        \text{(T-Proj2)} \ \frac{\Gamma \vdash M : \tau_1 \times \tau_2}{\Gamma \vdash M.2 : \tau_2}
+    \]
+
+    \[
+        \text{(T-Pair)} \ \frac{\Gamma \vdash M : \tau_1 \quad \Gamma \vdash M_2 : \tau_2}{\Gamma \vdash (M_1,M_2) : \tau_1 \times \tau_2}
+    \]
+\end{myfigure}
+
+The actual encoding of cursor contexts can be seen in \cref{fig:encoding-cursor-ctx}. For short, in the following encodings, the cursor context is also given a type alias $Ctx = s \times s$.
+
+\begin{myfigure}{Encoding of cursor contexts}{fig:encoding-cursor-ctx}
+    \[
+        \llbracket C[a] \rrbracket = (\llbracket a \rrbracket, \llbracket C \rrbracket)
+    \]
+
+    \[
+        \llbracket [\cdot] \rrbracket = [\cdot]
+    \]
+\end{myfigure}
+
+\subsubsection{Atomic Prefix Commands}
+To encode the atomic prefix commands $\pi \in Apc$, it is necessary to extend the $\lambda$-calculus with pattern matching. The abstract syntax of this extension is given in \cref{fig:as-lc-pattern}.
+
+\begin{myfigure}{Abstract syntax of extended $\lambda$-calculus}{fig:as-lc-pattern}
+    \[
+        \begin{aligned}
+            M,N \quad & ::= match \ M \ \overrightarrow{p \rightarrow N} & \text{(match construct)} &  & \\
+            p \quad   & ::= x                                            & \text{(variable)}        &  & \\
+                      & \quad | \quad \_                                 & \text{(wildcard)}        &  & \\
+                      & \quad | \quad o \ \Vec{p}                        & \text{(operator)}        &  & \\
+                      & \quad | \quad (p_1,p_2)                          & \text{(pair)}            &  & \\
+                      & \quad | \quad .p                                 & \text{(binding)}         &  & \\
+        \end{aligned}
+    \]
+\end{myfigure}
+
+The reduction rules for the match construct are given in \cref{fig:red-match}, which uses an auxiliary function $binds$ which takes a term $M$ and a pattern $p$ and returns a function of variable bindings, e.g. $[x \rightarrow M]$ if a term $M$ can be bound to pattern $x$, or $fail$ if the term cannot be bound to the pattern.
+
+\begin{myfigure}{Reduction rules for pattern matching}{fig:red-match}
+    \[
+        (E-Match) \ \frac{
+            \begin{gathered}
+                \quad \sigma_i = binds(M,p_i) \neq fail\\
+                \forall j < i.binds(M,p_j) = fail
+            \end{gathered}
+        }
+        {match \ M \ \overrightarrow{p \rightarrow N} \rightarrow N_i \sigma_i }
+    \]
+    \\
+    \begin{center}
+        $binds : M \times p \rightarrow (Var \rightarrow M) \cup \{ fail \}$
+    \end{center}
+    \begin{alignat*}{3}
+         & binds(M,x)                                        &  & = [x \rightarrow M]                              &  & \\
+         & binds(M,\_)                                       &  & = []                                             &  & \\
+         & binds(o \ a_1 \ ... \ a_n, \ o \ p_1 \ ... \ p_n) &  & = binds(a_1,p_1) \circ ... \circ binds(a_n, p_n) &  & \\
+         & binds((M,N),(p_1,p_2))                            &  & = binds(m,p_1) \circ binds(N,p_2)                &  & \\
+         & binds(M,.p)                                       &  & = binds(M,p)                                     &  & \\
+         & binds(\lambda x.M,.p)                             &  & = binds(M,.p)                                    &  & \\
+    \end{alignat*}
+    \begin{center}
+        for remaining values in the domain of $binds$ the result is defined as $fail$.\\
+        $fail$ is defined as the function that always returns $fail$.
+    \end{center}
+\end{myfigure}
+
+The typing rules for the match construct are given in \cref{fig:typing-match}.
+
+\begin{myfigure}{Typing rules for pattern matching}{fig:typing-match}
+    \[
+        (\text{T-Match}) \ \frac{
+            \begin{gathered}
+                \text{for all } i \text{ satisfying } \sigma_i = binds(M,p_i) \neq fail\\
+                \Gamma \vdash N_i\sigma_i:T
+            \end{gathered}
+        }
+        {\Gamma \vdash match \ M \ \overrightarrow{p \rightarrow N} : T}
+    \]
+\end{myfigure}
+
+With the $match$ construct, auxiliary functions for cursor movement (\cref{fig:fun-cursor-movement}) can be defined in terms of matching an abt $x$ against a pattern with some cursor, resulting in a new term. The shorthand $[a]$ is used to represent an abt $a$ being encapsulated with a cursor.
+
+\begin{myfigure}{Auxiliary functions for cursor movement}{fig:fun-cursor-movement}
+    \[
+        \begin{aligned}
+            down \quad \stackrel{def}{=}  &
+            \lambda x : s.\text{match } x                                                                           \\
+                                          & [o (.a_1)...(.a_n)] \rightarrow o(.[a_1])...(.a_n)                      \\
+            right \quad \stackrel{def}{=} &
+            \lambda x : s.\text{match } x                                                                           \\
+                                          & o (.a_1)...(.[a_i])...(.a_n) \rightarrow o(.a_1)...([a_{i+1}])...(.a_n) \\
+            up \quad \stackrel{def}{=}    &
+            \lambda x : s.\text{match } x                                                                           \\
+                                          & o (.a_1)...(.[a_i])...(.a_n) \rightarrow [o(.a_1)...(.a_n)]             \\
+            set \quad \stackrel{def}{=}   &
+            \lambda a : s.\lambda x : s.\text{match } x                                                             \\
+                                          & [a'] \rightarrow [a]                                                    \\
+        \end{aligned}
+    \]
+\end{myfigure}
+
+The encoding of atomic prefix commands $\pi \in Apc$ is done in terms of the cursor movement functions in \cref{fig:encoding-cursor-movement}. The $child \ n$ is a recursive encoding, where the $right$ function is applied on $child \ n - 1$, until $n$ becomes 1, where it will be encoded as $down$.
+
+\begin{myfigure}{Encoding of cursor movement}{fig:encoding-cursor-movement}
+    \[
+        \begin{aligned}
+            \llbracket child \ 1 \rrbracket  & = down                                        \\
+            \llbracket child \ n \rrbracket  & = right \ \llbracket child \ n - 1 \rrbracket \\
+            \llbracket parent \rrbracket     & = up                                          \\
+            \llbracket insert \ a \rrbracket & = set \ \llbracket a \rrbracket
+        \end{aligned}
+    \]
+\end{myfigure}
+
+\subsubsection{Editor expressions}
+To encode editor expressions $E \in Edt$, it is necessary to introduce recursion and a boolean base type to the extended $\lambda$-calculus.
+
+A $fix$ operator (\cref{fig:red-fix}) is introduced to support recursion, where E-FixBeta substitutes the term $x$ in $M$ with another $fix$ operator, hence introducing a layer of recursion.
+
+\begin{myfigure}{$fix$ operator}{fig:red-fix}
+    \[
+        \text{(E-FixBeta)} \quad \frac{}{fix(\lambda x : T.M) \rightarrow M[x := fix(\lambda x : T.M)]}
+    \]
+
+    \[
+        \text{(E-Fix)} \quad \frac{M \rightarrow M'}{fix \ M \rightarrow fix \ M'}
+    \]
+\end{myfigure}
+
+
+The boolean term constants and base types are defined directly in the abstract syntax of the $\lambda$-calculus (\cref{fig:as-fix-bool}). The patterns $p$ terms have also been extended with the boolean constants, in order to support pattern matching for booleans. For this, the $binds$ function has also been extended (\cref{fig:fun-binds-bool-extension}).
+
+\begin{myfigure}{Abstract syntax of extended $\lambda$-calculus}{fig:as-fix-bool}
+    \begin{center}
+        Terms
+    \end{center}
+    \[
+        \begin{aligned}
+            M \quad & ::= fix \ M          & \text{(fixed point of M)} &  & \\
+                    & \quad | \quad \top   & \text{(true)}             &  & \\
+                    & \quad | \quad \bot   & \text{(false)}            &  & \\
+            \\
+            p \quad & ::= \quad \top       & \text{(match true)}       &  & \\
+                    & \quad | \quad \ \bot & \text{(match false)}      &  & \\
+        \end{aligned}
+    \]
+    \\
+    \begin{center}
+        Types
+    \end{center}
+    \[
+        \begin{aligned}
+            \tau \quad & ::= Bool \quad \text{(boolean)}
+        \end{aligned}
+    \]
+\end{myfigure}
+
+\begin{myfigure}{$binds$ extended with boolean constructs}{fig:fun-binds-bool-extension}
+    \[
+        \begin{aligned}
+            binds(\top,\top) = [] \\
+            binds(\bot,\bot) = []
+        \end{aligned}
+    \]
+\end{myfigure}
+
+Typing rules for $fix$ and booleans can be seen in \cref{fig:typing-fix-boolean}.
+
+\begin{myfigure}{Typing rules for $fix$ and booleans}{fig:typing-fix-boolean}
+    \[
+        (\text{T-Fix}) \quad \frac{\Gamma \vdash M : T \rightarrow T}{\Gamma \vdash fix \ M : T}
+    \]
+
+    \[
+        (\text{T-False}) \quad \frac{}{\bot : Bool}
+    \]
+
+    \[
+        (\text{T-True}) \quad \frac{}{\top : Bool}
+    \]
+\end{myfigure}
+
+With prior definitions, encoding of editor expressions and context configuration is given in \cref{fig:encoding-edt-exps}.
+
+\begin{myfigure}{Encoding of editor expressions and context configuration}{fig:encoding-edt-exps}
+    \[
+        \llbracket \pi.E \rrbracket = \lambda CC : Ctx.\llbracket E \rrbracket ((\llbracket \pi \rrbracket C.1), C.2)
+    \]
+
+    \[
+        \llbracket nil \rrbracket = \lambda C : Ctx.C
+    \]
+
+    \[
+        \llbracket E_1 \ggg E_2 \rrbracket = \lambda C : Ctx.\llbracket E_2 \rrbracket(\llbracket E_1 \rrbracket C)
+    \]
+
+    \[
+        \enc{\text{Rec } x.E} = fix(\lambda x : (Ctx \rightarrow Ctx).\enc{E})
+    \]
+
+    \[
+        \begin{aligned}
+            \enc{\phi \Rightarrow E_1|E_2} & = \lambda C : Ctx.\text{match} (\enc{\phi}C.1) \\
+                                           & \ | \ \top \rightarrow \enc{E_1} \ C           \\
+                                           & \ | \ \bot \rightarrow \enc{E_2} \ C
+        \end{aligned}
+    \]
+
+    \[
+        \enc{\conf{E}{C[a']}} = \enc{E} \ (\enc{a}, \enc{C})
+    \]
+\end{myfigure}
+
+\subsubsection{Conditional expressions}
+To encode conditional expressions $\phi \in Eec$, auxiliary functions $checkboth$, $checkone$, $or$, $and$ and $neg$ are defined in \cref{fig:fun-conditionals}.
+
+\begin{myfigure}{Auxiliary functions for conditionals}{fig:fun-conditionals}
+    \begin{flalign*}
+        checkboth \quad \stackrel{def}{=} \quad & \lambda f : (Bool \rightarrow Bool \rightarrow Bool).         & \\
+                                                & \lambda g : (s \rightarrow Bool).                             & \\
+                                                & \lambda h : (s \rightarrow Bool).                             & \\
+                                                & \lambda a : s.                                                & \\
+                                                & f(ga)(ha)                                                     & \\
+        \\
+        checkone \quad \stackrel{def}{=} \quad  & \lambda f : (Bool \rightarrow Bool).                          & \\
+                                                & \lambda g : (s \rightarrow Bool).                             & \\
+                                                & \lambda a : s.                                                & \\
+                                                & f(ga)                                                         & \\
+        \\
+        or \quad \stackrel{def}{=} \quad        & \lambda b_1 : Bool.\lambda b_2 : Bool.\text{match }(b_1,b_2). & \\
+                                                & (\bot, \bot) \rightarrow \bot                                 & \\
+                                                & (\_, \_) \rightarrow \top                                     & \\
+        \\
+        and \quad \stackrel{def}{=} \quad       & \lambda b_1 : Bool.\lambda b_2 : Bool.\text{match }(b_1,b_2). & \\
+                                                & (\top, \top) \rightarrow \top                                 & \\
+                                                & (\_, \_) \rightarrow \bot                                     & \\
+        \\
+        neg \quad \stackrel{def}{=} \quad       & \lambda b : Bool.\text{match } b.                             & \\
+                                                & \top \rightarrow \bot                                         & \\
+                                                & \bot \rightarrow \top                                         & \\
+    \end{flalign*}
+\end{myfigure}
+
+With the auxiliary functions, the encoding of propositional connectives is given in \cref{fig:encoding-prop-conn} and the encoding of modal logic is given in \cref{fig:encoding-modal-logic}, which also make use of the $fix$ and $match$ functions.
+
+\begin{myfigure}{Encoding of propositional connectives}{fig:encoding-prop-conn}
+    \[
+        \enc{\phi_1 \land \phi_2} = checkboth \ and \ \enc{\phi_1} \enc{\phi_2}
+    \]
+
+    \[
+        \enc{\phi_1 \lor \phi_2} = checkboth \ or \ \enc{\phi_1} \enc{\phi_2}
+    \]
+
+    \[
+        \enc{\neg \phi} = checkone \ neg \ \enc{\phi}
+    \]
+\end{myfigure}
+
+\begin{myfigure}{Encoding of modal logic}{fig:encoding-modal-logic}
+    \begin{flalign*}
+        \enc{@o} & = \lambda x : s\text{match } x             &  & \\
+                 & \ | \ [o \ \_ \ ... \ \_] \rightarrow \top &  & \\
+                 & \ | \ \_ \rightarrow \bot
+    \end{flalign*}
+
+    \begin{flalign*}
+        \enc{\Diamond o} & = fix (\lambda f : (s \rightarrow Bool).\lambda x : s.\text{match} \ x                         &  & \\
+                         & \ | \ [o \ \_ ... \ \_] \rightarrow \top                                                       &  & \\
+                         & \ | \ [\_(\_.a_1,...,\_.a_n)] \rightarrow or(...(or (f \ [a_1]) (f \ [a_2])) \ ...)(f \ [a_n]) &  & \\
+                         & \ | \ \_ \rightarrow \bot )
+    \end{flalign*}
+
+    \begin{flalign*}
+        \enc{\square o} & = \lambda x : s.\text{match }x                                                                                                   &  & \\
+                        & \ | \ \_(\_.a_1,...,\_.a_n) \rightarrow and(...(and(\enc{\Diamond o} \ a_1)(\enc{\Diamond o} \ a_2))...)(\enc{\Diamond o} \ a_n) &  & \\
+                        & \ | \ \_ \rightarrow \top
+    \end{flalign*}
+\end{myfigure}
+
+The Aalborg project\cite{aalborg} also includes a proof of the soundness of the encoding, which is omitted here.
+
+Given the encoding of the generalized editor calculus in the extended $\lambda$-calculus, the same encoding can be followed to encode the generalized editor calculus in a language like Elm or Haskell, since they are based on the principles of the $\lambda$-calculus and support pattern matching, pairs and
+recursion.

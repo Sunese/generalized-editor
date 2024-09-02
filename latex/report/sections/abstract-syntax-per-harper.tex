@@ -1,0 +1,55 @@
+\section{Abstract Syntax}
+Following is an overview of abstract syntax trees and abstract binding trees, as described by Harper\cite{harper}. This has served as the foundation for the work presented in
+the generalized editor calculus project\cite{aalborg}, which inherently 
+also plays an important role in the implementation of this project.
+
+
+\subsection{Abstract Syntax Trees}
+An abstract syntax tree (ast for short) is an ordered tree describing the syntactical structure of a program.
+
+Harper introduces the notion of sorts $s \in \mathcal{S}$, arity-indexed families $\mathcal{O}$ of disjoint sets of operators $\mathcal{O}_\alpha$ of arity $\alpha$ and sort-indexed families $\mathcal{X}$ of disjoint finite sets $\mathcal{X}_s$ of variables $x$ of sort $s$.
+
+Sorts are syntactical categories which form a distinction between asts.
+
+The internal nodes in an ast are operators $o$ with arity $(s_1,...,s_n)s$, describing the sort of the operator itself and its arguments.
+
+Leaves of an ast are variables $x$ of sort $s$, which enforce that variables can only be substituted by asts of the same sort.
+
+Formally,  $\mathcal{S}$ is a finite set of sorts. An arity has the form $(s_1,...,s_n)s$ specifying the sort $s \in \mathcal{S}$ of an operator taking $n \geq 0$ arguments of sort $s_i \in \mathcal{S}$. Let $\mathcal{O} = \{ \mathcal{O}_\alpha \}$ be an arity-indexed family of disjoint sets of operators $\mathcal{O}_\alpha$ of arity $\alpha$. When $o$ is an operator with arity $(s_1,...,s_n)s$, we say $o$ is an operator of sort $s$ with $n$ arguments, each of sort $s_1,...,s_n$.
+
+\begin{example}{Operators}{ops}
+    Let us define a set of sorts $\mathcal{S} = \{ exp \}$ and an operator $plus \in \mathcal{O}_\alpha$ with arity $\alpha = (exp_1,exp_2)exp$. Then we say that the operator $plus$ is an operator of sort $exp$ with 2 arguments of sort $exp$.
+\end{example}
+
+Having a fixed set of sorts $\mathcal{S}$ and an arity-indexed family $\mathcal{O}$ of sets of operators of each arity, $\mathcal{X} = \{ \mathcal{X}_s \}_{s \in \mathcal{S}}$ is defined as a sort-indexed family of disjoint finite sets $\mathcal{X}_s$ of variables $x$ of sort $s$.
+
+The family $\mathcal{A}[\mathcal{X}] = \{ \mathcal{A}[\mathcal{X}]_s \}_{s \in \mathcal{S}}$ of asts of sort $s$ is the smallest family satisfying following conditions:
+
+\begin{enumerate}
+    \item A variable of sort $s$ is an ast of sort $s$: if $x \in \mathcal{X}_s$, then $x \in \mathcal{A}[ \mathcal{X}]_s$
+    \item Operators combine asts: if $o$ is an operator of arity $(s_1,...,s_n)s$, and if $a_1 \in \mathcal{A}[\mathcal{X}]_{s_1},...,a_n \in \mathcal{A}[\mathcal{X}]_{s_n}$, then $o(a_1;...;a_n) \in \mathcal{A}[\mathcal{X}]_s$
+\end{enumerate}
+
+\subsection{Abstract Binding Trees}
+An abstract binding tree (abt for short) is an enriched ast with bindings, allowing identifiers to be bound within a scope.
+
+Operators in an abt can bind any finite number (possibly zero) of variables in each argument with form $x_1,...,x_k.a$ where variables $x_1,...,x_k$ are bound within the abt $a$. A finite sequence of bound variables $x_1,...,x_k$ is represented as $\vec{x}$ for short.
+
+Operators are assigned a generalized arity of the form $(v_1,...,v_n)s$ where a valence $v$ has the form $s_1,...,s_k.s$, or $\Vec{s}.s$ for short.
+
+\begin{example}{Operators with binders}{ops-binders}
+    Let us define a set of sorts $\mathcal{S} = \{ exp, stmt \}$ and an operator $let \in \mathcal{O}_\alpha$ with arity $\alpha = (exp_1,exp_2.stmt)stmt$. Then we say that the operator $let$ is an operator of sort $stmt$ with 2 arguments of sort $exp$, where the second binds a variable of sort $stmt$ within the scope of $exp_2$.
+\end{example}
+
+If $\mathcal{X}$ is clear from context, a variable $x$ is of sort $s$ if $x \in \mathcal{X}_s$, and $x$ is fresh for $\mathcal{X}$ if $x \notin \mathcal{X}_s$ for any sort $s$. If $x$ is fresh for $\mathcal{X}$ and $s$ is a sort, then $\mathcal{X},x$ represents the notion of adding $x$ to $\mathcal{X}_s$.
+
+A fresh renaming of a finite sequence of variables $\vec{x}$ is a bijection $\rho: \vec{x} \leftrightarrow \vec{x}'$, where $\vec{x}'$ is fresh for $\mathcal{X}$. The result of replacing all occurrences of $x_i$ in $a$ by its fresh counterpart $\rho(x_i)$, is written as $\hat{\rho}(a)$.
+
+Having a fixed set of sorts $\mathcal{S}$ and a family $\mathcal{O}$ of disjoint sets of operators indexed by their generalized arities and given a family of disjoint sets of variables $\mathcal{X}$, the family of abts $\mathcal{B}[\mathcal{X}]$ is the smallest family satisfying following:
+
+\begin{enumerate}
+    \item If $x \in \mathcal{X}_s$, then $x \in \mathcal{B}[\mathcal{X}]_s$
+    \item For each operator $o$ of arity $(\vec{s}_1.s_1,...,\vec{s}_n.s_n)s$, if for each $1 \leq i \leq n$ and for each fresh renaming $\rho_i$ : $\vec{x}_i \leftrightarrow \vec{x}_i'$, we have $\hat{\rho_i}(a_i) \in \mathcal{B}[\mathcal{X}, \vec{x}_i']$, then $o(\vec{x}_1.a_1;...;\vec{x}_n.a_n) \in \mathcal{B}[\mathcal{X}]_s$
+\end{enumerate}
+
+For short, arity-indexed families $\mathcal{O}$ of disjoint sets of operators $\mathcal{O}_\alpha$ and sort-indexed families $\mathcal{X}$ of disjoint finite sets $\mathcal{X}_s$ might be referred to as sets. For example, $o \in \mathcal{O}$ is a shorthand for operator $o$ being part of one of the disjoint sets in the family $\mathcal{O}$.

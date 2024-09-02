@@ -1,0 +1,77 @@
+\documentclass{article}
+\usepackage[toc,page]{appendix}
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{float}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 10in}]{geometry}
+\usepackage{hyperref}
+\usepackage{biblatex}
+\usepackage[dvipsnames]{xcolor}
+\addbibresource{ref.bib}
+\usepackage{luacolor} % Required to use the lua-ul \highLight command 
+\usepackage{lua-ul} 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen
+}
+
+\LuaULSetHighLightColor{yellow}
+
+\setlength{\parindent}{0pt} % No indentation
+\title{Samarbejdsaftale}
+
+\author{Hans (vejleder) \and Sune (studerende)}
+\date{7. december 2023}
+
+\begin{document}
+
+\maketitle
+
+\section{Forventninger til den studerende}
+
+\begin{itemize}
+    \item Den studerende bruger i løbet af projektperioden arbejdsblade til at fastholde sine tanker, så han kan kommunikere dem med vejlederen. Arbejdsblade er tekst skrevet i \LaTeX
+    \item Arbejdsblade skal sendes til vejlederen senest to døgn inden mødet, medmindre andet er aftalt. Omfangsrige arbejdsblade med meget nyt indhold skal sendes senest tre døgn inden mødet, medmindre andet er aftalt.
+    \item Sammen med arbejdsbladene skal der være en kort læsevejledning, der forklarer hvad vejlederen skal lægge vægt på når han læser arbejdsbladene.
+    \item Hvis vejlederen har skriftlige kommentarer til arbejdsblade, skal den studerende læse og tænke over dem inden næste vejledningsmøde.
+\end{itemize}
+
+\section{Forventninger til vejlederen}
+\begin{itemize}
+    \item Vejlederen giver kommentarer til alle arbejdsblade ud fra den studerendes læsevejledning og sender dem, når der er tale om skriftlige kommentarer, til den studerende senest et døgn inden mødet, medmindre andet er aftalt.
+
+    \item Vejlederen giver konstruktive kommentarer som kan hjælpe projektarbejdet videre.
+
+    \item Vejlederen kan altid kontaktes på mail inden for normal arbejdstid (med forbehold for ferie og sygdom).
+
+    \item Vejlederen vejleder både i projektets produkt (arbejdsblade) og proces (tidsplanlægning mm.) og hjælper med at tilvejebringe eksterne kontakter og litteratur.
+
+    \item Det er vejlederens ansvar at sætte vejledningsmøderne i kalenderen og at invitere den studerende.
+\end{itemize}
+
+\section{Forventninger til begge parter}
+
+\begin{itemize}
+    \item Vejledningsmøderne finder normalt sted på vejleders kontor på HCØ.
+    \item Hvis et møde skal aflyses, skal det ske i god tid pr. mail, medmindre der sker noget uforudset (sygdom o.lign.).
+    \item Vejledningsmøderne følger normalt denne dagsorden:
+    \begin{enumerate}
+        \item Mødets formål
+        \item Projektets status
+        \item Aktuelle spørgsmål
+        \item Arbejdsblade
+        \item Videre arbejde
+        \item Arbejds- og tidsplan
+        \item Eventuelt
+        \item Evaluering af mødet - blev formålet opflyldt?
+    \end{enumerate}
+\end{itemize}
+
+\end{document}

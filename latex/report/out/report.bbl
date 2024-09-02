@@ -1,0 +1,896 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\datalist[entry]{nty/global//global/global}
+  \entry{centaur}{inproceedings}{}
+    \name{author}{7}{}{%
+      {{hash=BP}{%
+         family={Borras},
+         familyi={B\bibinitperiod},
+         given={Patrick},
+         giveni={P\bibinitperiod},
+      }}%
+      {{hash=CD}{%
+         family={Cl{\'{e}}ment},
+         familyi={C\bibinitperiod},
+         given={Dominique},
+         giveni={D\bibinitperiod},
+      }}%
+      {{hash=DT}{%
+         family={Despeyroux},
+         familyi={D\bibinitperiod},
+         given={Th.},
+         giveni={T\bibinitperiod},
+      }}%
+      {{hash=IJ}{%
+         family={Incerpi},
+         familyi={I\bibinitperiod},
+         given={Janet},
+         giveni={J\bibinitperiod},
+      }}%
+      {{hash=KG}{%
+         family={Kahn},
+         familyi={K\bibinitperiod},
+         given={Gilles},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=LB}{%
+         family={Lang},
+         familyi={L\bibinitperiod},
+         given={Bernard},
+         giveni={B\bibinitperiod},
+      }}%
+      {{hash=PV}{%
+         family={Pascual},
+         familyi={P\bibinitperiod},
+         given={V.},
+         giveni={V\bibinitperiod},
+      }}%
+    }
+    \name{editor}{1}{}{%
+      {{hash=HPB}{%
+         family={Henderson},
+         familyi={H\bibinitperiod},
+         given={Peter\bibnamedelima B.},
+         giveni={P\bibinitperiod\bibinitdelim B\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {{ACM}}%
+    }
+    \strng{namehash}{BP+1}
+    \strng{fullhash}{BPCDDTIJKGLBPV1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{B}
+    \field{sortinithash}{B}
+    \field{booktitle}{Proceedings of the {ACM} {SIGSOFT/SIGPLAN} Software Engineering Symposium on Practical Software Development Environments, Boston, Massachusetts, USA, November 28-30, 1988}
+    \verb{doi}
+    \verb 10.1145/64135.65005
+    \endverb
+    \field{pages}{14\bibrangedash 24}
+    \field{title}{{CENTAUR:} The System}
+    \verb{url}
+    \verb https://doi.org/10.1145/64135.65005
+    \endverb
+    \field{year}{1988}
+  \endentry
+
+  \entry{TYPOL}{inproceedings}{}
+    \name{author}{1}{}{%
+      {{hash=DT}{%
+         family={Despeyroux},
+         familyi={D\bibinitperiod},
+         given={Thierry},
+         giveni={T\bibinitperiod},
+      }}%
+    }
+    \name{editor}{3}{}{%
+      {{hash=KG}{%
+         family={Kahn},
+         familyi={K\bibinitperiod},
+         given={Gilles},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=MDB}{%
+         family={MacQueen},
+         familyi={M\bibinitperiod},
+         given={David\bibnamedelima B.},
+         giveni={D\bibinitperiod\bibinitdelim B\bibinitperiod},
+      }}%
+      {{hash=PGD}{%
+         family={Plotkin},
+         familyi={P\bibinitperiod},
+         given={Gordon\bibnamedelima D.},
+         giveni={G\bibinitperiod\bibinitdelim D\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Springer}%
+    }
+    \strng{namehash}{DT1}
+    \strng{fullhash}{DT1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{D}
+    \field{sortinithash}{D}
+    \field{booktitle}{Semantics of Data Types, International Symposium, Sophia-Antipolis, France, June 27-29, 1984, Proceedings}
+    \verb{doi}
+    \verb 10.1007/3-540-13346-1\_11
+    \endverb
+    \field{pages}{215\bibrangedash 233}
+    \field{series}{Lecture Notes in Computer Science}
+    \field{title}{Executable Specification of Static Semantics}
+    \verb{url}
+    \verb https://doi.org/10.1007/3-540-13346-1\_11
+    \endverb
+    \field{volume}{173}
+    \field{year}{1984}
+  \endentry
+
+  \entry{mentor-applications}{inproceedings}{}
+    \name{author}{3}{}{%
+      {{hash=DV}{%
+         family={Donzeau{-}Gouge},
+         familyi={D\bibinitperiod},
+         given={V{\'{e}}ronique},
+         giveni={V\bibinitperiod},
+      }}%
+      {{hash=LB}{%
+         family={Lang},
+         familyi={L\bibinitperiod},
+         given={Bernard},
+         giveni={B\bibinitperiod},
+      }}%
+      {{hash=MB}{%
+         family={Melese},
+         familyi={M\bibinitperiod},
+         given={Bertrand},
+         giveni={B\bibinitperiod},
+      }}%
+    }
+    \name{editor}{3}{}{%
+      {{hash=STA}{%
+         family={Straeter},
+         familyi={S\bibinitperiod},
+         given={Terry\bibnamedelima A.},
+         giveni={T\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+      {{hash=HWE}{%
+         family={Howden},
+         familyi={H\bibinitperiod},
+         given={William\bibnamedelima E.},
+         giveni={W\bibinitperiod\bibinitdelim E\bibinitperiod},
+      }}%
+      {{hash=RJ}{%
+         family={Rault},
+         familyi={R\bibinitperiod},
+         given={Jean{-}Claude},
+         giveni={J\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {{IEEE} Computer Society}%
+    }
+    \strng{namehash}{DVLBMB1}
+    \strng{fullhash}{DVLBMB1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{D}
+    \field{sortinithash}{D}
+    \field{booktitle}{Proceedings, 7th International Conference on Software Engineering, Orlando, Florida, USA, March 26-29, 1984}
+    \field{pages}{346\bibrangedash 357}
+    \field{title}{Practical Applications of a Syntax Directed Program Manipulation Environment}
+    \verb{url}
+    \verb http://dl.acm.org/citation.cfm?id=801990
+    \endverb
+    \field{year}{1984}
+  \endentry
+
+  \entry{godiksen}{inproceedings}{}
+    \name{author}{5}{}{%
+      {{hash=GC}{%
+         family={Godiksen},
+         familyi={G\bibinitperiod},
+         given={Christian},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=HT}{%
+         family={Herrmann},
+         familyi={H\bibinitperiod},
+         given={Thomas},
+         giveni={T\bibinitperiod},
+      }}%
+      {{hash=HH}{%
+         family={H{\"{u}}ttel},
+         familyi={H\bibinitperiod},
+         given={Hans},
+         giveni={H\bibinitperiod},
+      }}%
+      {{hash=LMK}{%
+         family={Lauridsen},
+         familyi={L\bibinitperiod},
+         given={Mikkel\bibnamedelima Korup},
+         giveni={M\bibinitperiod\bibinitdelim K\bibinitperiod},
+      }}%
+      {{hash=OI}{%
+         family={Owliaie},
+         familyi={O\bibinitperiod},
+         given={Iman},
+         giveni={I\bibinitperiod},
+      }}%
+    }
+    \name{editor}{2}{}{%
+      {{hash=LS}{%
+         family={Lindley},
+         familyi={L\bibinitperiod},
+         given={Sam},
+         giveni={S\bibinitperiod},
+      }}%
+      {{hash=MTAE}{%
+         family={Mogensen},
+         familyi={M\bibinitperiod},
+         given={Torben\bibnamedelima {\AE}.},
+         giveni={T\bibinitperiod\bibinitdelim {\AE}\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {{ACM}}%
+    }
+    \strng{namehash}{GC+1}
+    \strng{fullhash}{GCHTHHLMKOI1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{booktitle}{Proceedings of the 2021 {ACM} {SIGPLAN} Workshop on Partial Evaluation and Program Manipulation, PEPM@POPL 2021, Virtual Event, Denmark, January 18-19, 2021}
+    \verb{doi}
+    \verb 10.1145/3441296.3441393
+    \endverb
+    \field{pages}{1\bibrangedash 13}
+    \field{title}{A type-safe structure editor calculus}
+    \verb{url}
+    \verb https://doi.org/10.1145/3441296.3441393
+    \endverb
+    \field{year}{2021}
+  \endentry
+
+  \entry{postgresql-about}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=GTPGD}{%
+         family={Group},
+         familyi={G\bibinitperiod},
+         given={The PostgreSQL Global\bibnamedelima Development},
+         giveni={T\bibinitperiod\bibinitdelim P\bibinitperiod\bibinitdelim G\bibinitperiod\bibinitdelim D\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{GTPGD1}
+    \strng{fullhash}{GTPGD1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{howpublished}{\url{https://www.postgresql.org/about/}}
+    \field{note}{Accessed: 11/03/2024}
+    \field{title}{About PostgreSQL}
+  \endentry
+
+  \entry{harper}{book}{}
+    \name{author}{1}{}{%
+      {{hash=HR}{%
+         family={Harper},
+         familyi={H\bibinitperiod},
+         given={Robert},
+         giveni={R\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Cambridge University Press}%
+    }
+    \strng{namehash}{HR1}
+    \strng{fullhash}{HR1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{H}
+    \field{sortinithash}{H}
+    \field{isbn}{9781107150300}
+    \field{title}{Practical Foundations for Programming Languages (2nd. Ed.)}
+    \verb{url}
+    \verb https://www.cs.cmu.edu/~rwh/pfpl.html
+    \endverb
+    \field{year}{2016}
+  \endentry
+
+  \entry{haskell-records-named-fields}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=HW}{%
+         family={Haskell},
+         familyi={H\bibinitperiod},
+         given={WikiBooks:},
+         giveni={W\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{HW1}
+    \strng{fullhash}{HW1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{H}
+    \field{sortinithash}{H}
+    \field{howpublished}{\url{https://en.wikibooks.org/wiki/Haskell/More_on_datatypes}}
+    \field{note}{Accessed: 13/03/2024}
+    \field{title}{Named Fields (Record Syntax)}
+  \endentry
+
+  \entry{zipper}{article}{}
+    \name{author}{1}{}{%
+      {{hash=HGP}{%
+         family={Huet},
+         familyi={H\bibinitperiod},
+         given={G{\'{e}}rard\bibnamedelima P.},
+         giveni={G\bibinitperiod\bibinitdelim P\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{HGP1}
+    \strng{fullhash}{HGP1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{H}
+    \field{sortinithash}{H}
+    \verb{doi}
+    \verb 10.1017/S0956796897002864
+    \endverb
+    \field{number}{5}
+    \field{pages}{549\bibrangedash 554}
+    \field{title}{The Zipper}
+    \verb{url}
+    \verb https://doi.org/10.1017/s0956796897002864
+    \endverb
+    \field{volume}{7}
+    \field{journaltitle}{J. Funct. Program.}
+    \field{year}{1997}
+  \endentry
+
+  \entry{prog-lang-metrics}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=IG}{%
+         family={Inc.},
+         familyi={I\bibinitperiod},
+         given={GitHub},
+         giveni={G\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{IG1}
+    \strng{fullhash}{IG1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{I}
+    \field{sortinithash}{I}
+    \field{howpublished}{\url{https://innovationgraph.github.com/global-metrics/programming-languages}}
+    \field{note}{Accessed: 27/02/2024}
+    \field{title}{Programming languages}
+  \endentry
+
+  \entry{c-iso-standard}{book}{}
+    \name{author}{1}{}{%
+      {{hash=I}{%
+         family={{ISO}},
+         familyi={I\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{I1}
+    \strng{fullhash}{I1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{I}
+    \field{sortinithash}{I}
+    \field{edition}{Fourth}
+    \field{pages}{520}
+    \field{title}{{ISO\slash IEC 9899:2018 Information technology --- Programming languages --- C}}
+    \verb{url}
+    \verb https://www.iso.org/standard/74528.html
+    \endverb
+    \field{month}{06}
+  \endentry
+
+  \entry{yacc}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=JSC}{%
+         family={Johnson},
+         familyi={J\bibinitperiod},
+         given={Stephen\bibnamedelima C.},
+         giveni={S\bibinitperiod\bibinitdelim C\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{JSC1}
+    \strng{fullhash}{JSC1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{J}
+    \field{sortinithash}{J}
+    \field{howpublished}{\url{https://www.cs.utexas.edu/users/novak/yaccpaper.htm}}
+    \field{note}{Accessed: 26/03/2024}
+    \field{title}{Yacc: Yet Another Compiler-Compiler}
+  \endentry
+
+  \entry{jones96}{article}{}
+    \name{author}{1}{}{%
+      {{hash=JND}{%
+         family={Jones},
+         familyi={J\bibinitperiod},
+         given={Neil\bibnamedelima D.},
+         giveni={N\bibinitperiod\bibinitdelim D\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{JND1}
+    \strng{fullhash}{JND1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{J}
+    \field{sortinithash}{J}
+    \verb{doi}
+    \verb 10.1145/243439.243447
+    \endverb
+    \field{number}{3}
+    \field{pages}{480\bibrangedash 503}
+    \field{title}{An Introduction to Partial Evaluation}
+    \verb{url}
+    \verb https://doi.org/10.1145/243439.243447
+    \endverb
+    \field{volume}{28}
+    \field{journaltitle}{{ACM} Comput. Surv.}
+    \field{year}{1996}
+  \endentry
+
+  \entry{jones-partial-evaluation}{book}{}
+    \name{author}{3}{}{%
+      {{hash=JND}{%
+         family={Jones},
+         familyi={J\bibinitperiod},
+         given={Neil\bibnamedelima D.},
+         giveni={N\bibinitperiod\bibinitdelim D\bibinitperiod},
+      }}%
+      {{hash=GCK}{%
+         family={Gomard},
+         familyi={G\bibinitperiod},
+         given={Carsten\bibnamedelima K.},
+         giveni={C\bibinitperiod\bibinitdelim K\bibinitperiod},
+      }}%
+      {{hash=SP}{%
+         family={Sestoft},
+         familyi={S\bibinitperiod},
+         given={Peter},
+         giveni={P\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Prentice Hall}%
+    }
+    \strng{namehash}{JNDGCKSP1}
+    \strng{fullhash}{JNDGCKSP1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{J}
+    \field{sortinithash}{J}
+    \field{isbn}{978-0-13-020249-9}
+    \field{series}{Prentice Hall international series in computer science}
+    \field{title}{Partial evaluation and automatic program generation}
+    \field{year}{1993}
+  \endentry
+
+  \entry{metal}{article}{}
+    \name{author}{4}{}{%
+      {{hash=KG}{%
+         family={Kahn},
+         familyi={K\bibinitperiod},
+         given={Gilles},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=LB}{%
+         family={Lang},
+         familyi={L\bibinitperiod},
+         given={Bernard},
+         giveni={B\bibinitperiod},
+      }}%
+      {{hash=MB}{%
+         family={Melese},
+         familyi={M\bibinitperiod},
+         given={Bertrand},
+         giveni={B\bibinitperiod},
+      }}%
+      {{hash=ME}{%
+         family={Morcos},
+         familyi={M\bibinitperiod},
+         given={Elham},
+         giveni={E\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{KG+1}
+    \strng{fullhash}{KGLBMBME1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{K}
+    \field{sortinithash}{K}
+    \verb{doi}
+    \verb 10.1016/0167-6423(83)90009-6
+    \endverb
+    \field{number}{2}
+    \field{pages}{151\bibrangedash 188}
+    \field{title}{Metal: {A} Formalism to Specify Formalisms}
+    \verb{url}
+    \verb https://doi.org/10.1016/0167-6423(83)90009-6
+    \endverb
+    \field{volume}{3}
+    \field{journaltitle}{Sci. Comput. Program.}
+    \field{year}{1983}
+  \endentry
+
+  \entry{asn1}{incollection}{}
+    \name{editor}{2}{}{%
+      {{hash=LSZ}{%
+         family={Li},
+         familyi={L\bibinitperiod},
+         given={Stan\bibnamedelima Z.},
+         giveni={S\bibinitperiod\bibinitdelim Z\bibinitperiod},
+      }}%
+      {{hash=JAK}{%
+         family={Jain},
+         familyi={J\bibinitperiod},
+         given={Anil\bibnamedelima K.},
+         giveni={A\bibinitperiod\bibinitdelim K\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Springer {US}}%
+    }
+    \strng{namehash}{LSZJAK1}
+    \strng{fullhash}{LSZJAK1}
+    \field{labelnamesource}{editor}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{L}
+    \field{sortinithash}{L}
+    \field{booktitle}{Encyclopedia of Biometrics}
+    \verb{doi}
+    \verb 10.1007/978-0-387-73003-5\_670
+    \endverb
+    \field{pages}{1}
+    \field{title}{Abstract Syntax Notation One}
+    \verb{url}
+    \verb https://doi.org/10.1007/978-0-387-73003-5_670
+    \endverb
+    \field{year}{2009}
+  \endentry
+
+  \entry{aalborg}{inproceedings}{}
+    \name{author}{4}{}{%
+      {{hash=MAT}{%
+         family={Mortensen},
+         familyi={M\bibinitperiod},
+         given={Andreas\bibnamedelima Tor},
+         giveni={A\bibinitperiod\bibinitdelim T\bibinitperiod},
+      }}%
+      {{hash=BB}{%
+         family={Bennetzen},
+         familyi={B\bibinitperiod},
+         given={Benjamin},
+         giveni={B\bibinitperiod},
+      }}%
+      {{hash=KNR}{%
+         family={Kristensen},
+         familyi={K\bibinitperiod},
+         given={Nikolaj\bibnamedelima Rossander},
+         giveni={N\bibinitperiod\bibinitdelim R\bibinitperiod},
+      }}%
+      {{hash=SPB}{%
+         family={Steffensen},
+         familyi={S\bibinitperiod},
+         given={Peter\bibnamedelima Buus},
+         giveni={P\bibinitperiod\bibinitdelim B\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {{ACM}}%
+    }
+    \strng{namehash}{MAT+1}
+    \strng{fullhash}{MATBBKNRSPB1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{M}
+    \field{sortinithash}{M}
+    \field{pages}{1\bibrangedash 7}
+    \field{title}{A type-safe generalized editor calculus (Short Paper)}
+    \field{year}{2023}
+  \endentry
+
+  \entry{omar}{article}{}
+    \name{author}{4}{}{%
+      {{hash=OC}{%
+         family={Omar},
+         familyi={O\bibinitperiod},
+         given={Cyrus},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=VI}{%
+         family={Voysey},
+         familyi={V\bibinitperiod},
+         given={Ian},
+         giveni={I\bibinitperiod},
+      }}%
+      {{hash=CR}{%
+         family={Chugh},
+         familyi={C\bibinitperiod},
+         given={Ravi},
+         giveni={R\bibinitperiod},
+      }}%
+      {{hash=HMA}{%
+         family={Hammer},
+         familyi={H\bibinitperiod},
+         given={Matthew\bibnamedelima A.},
+         giveni={M\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{OC+1}
+    \strng{fullhash}{OCVICRHMA1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{O}
+    \field{sortinithash}{O}
+    \verb{doi}
+    \verb 10.1145/3290327
+    \endverb
+    \field{number}{{POPL}}
+    \field{pages}{14:1\bibrangedash 14:32}
+    \field{title}{Live functional programming with typed holes}
+    \verb{url}
+    \verb https://doi.org/10.1145/3290327
+    \endverb
+    \field{volume}{3}
+    \field{journaltitle}{Proc. {ACM} Program. Lang.}
+    \field{year}{2019}
+  \endentry
+
+  \entry{elm-codegen-package}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=pE}{%
+         family={packages},
+         familyi={p\bibinitperiod},
+         given={Elm},
+         giveni={E\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{pE1}
+    \strng{fullhash}{pE1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{P}
+    \field{sortinithash}{P}
+    \field{howpublished}{\url{https://package.elm-lang.org/packages/mdgriffith/elm-codegen/latest/}}
+    \field{note}{Accessed: 18/03/2024}
+    \field{title}{Elm CodeGen}
+  \endentry
+
+  \entry{elm-typeclass-package}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=pE}{%
+         family={packages},
+         familyi={p\bibinitperiod},
+         given={Elm},
+         giveni={E\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{pE1}
+    \strng{fullhash}{pE1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{P}
+    \field{sortinithash}{P}
+    \field{howpublished}{\url{https://package.elm-lang.org/packages/nikita-volkov/typeclasses/latest/}}
+    \field{note}{Accessed: 17/04/2024}
+    \field{title}{Elm Typeclasses}
+  \endentry
+
+  \entry{timtom84}{inproceedings}{}
+    \name{author}{2}{}{%
+      {{hash=RTW}{%
+         family={Reps},
+         familyi={R\bibinitperiod},
+         given={Thomas\bibnamedelima W.},
+         giveni={T\bibinitperiod\bibinitdelim W\bibinitperiod},
+      }}%
+      {{hash=TT}{%
+         family={Teitelbaum},
+         familyi={T\bibinitperiod},
+         given={Tim},
+         giveni={T\bibinitperiod},
+      }}%
+    }
+    \name{editor}{2}{}{%
+      {{hash=RWE}{%
+         family={Riddle},
+         familyi={R\bibinitperiod},
+         given={William\bibnamedelima E.},
+         giveni={W\bibinitperiod\bibinitdelim E\bibinitperiod},
+      }}%
+      {{hash=HPB}{%
+         family={Henderson},
+         familyi={H\bibinitperiod},
+         given={Peter\bibnamedelima B.},
+         giveni={P\bibinitperiod\bibinitdelim B\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {{ACM}}%
+    }
+    \strng{namehash}{RTWTT1}
+    \strng{fullhash}{RTWTT1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{R}
+    \field{sortinithash}{R}
+    \field{booktitle}{Proceedings of the {ACM} {SIGSOFT/SIGPLAN} Software Engineering Symposium on Practical Software Development Environments, Pittsburgh, Pennsylvania, USA, April 23-25, 1984}
+    \verb{doi}
+    \verb 10.1145/800020.808247
+    \endverb
+    \field{pages}{42\bibrangedash 48}
+    \field{title}{The Synthesizer Generator}
+    \verb{url}
+    \verb https://doi.org/10.1145/800020.808247
+    \endverb
+    \field{year}{1984}
+  \endentry
+
+  \entry{KU-bach}{inproceedings}{}
+    \name{author}{3}{}{%
+      {{hash=RJN}{%
+         family={Richs-Jensen},
+         familyi={R\bibinithyphendelim J\bibinitperiod},
+         given={Nicolaj},
+         giveni={N\bibinitperiod},
+      }}%
+      {{hash=BTB}{%
+         family={Bringgaard},
+         familyi={B\bibinitperiod},
+         given={Thorbjørn\bibnamedelima Bülow},
+         giveni={T\bibinitperiod\bibinitdelim B\bibinitperiod},
+      }}%
+      {{hash=ZTF}{%
+         family={Zachariasen},
+         familyi={Z\bibinitperiod},
+         given={Tórur\bibnamedelima Feilberg},
+         giveni={T\bibinitperiod\bibinitdelim F\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{RJNBTBZTF1}
+    \strng{fullhash}{RJNBTBZTF1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{R}
+    \field{sortinithash}{R}
+    \field{title}{Implementation of a Type-Safe Structure Editor}
+    \field{year}{2023}
+  \endentry
+
+  \entry{latex-about}{misc}{}
+    \name{author}{1}{}{%
+      {{hash=TLP}{%
+         family={Team},
+         familyi={T\bibinitperiod},
+         given={LaTeX\bibnamedelima Project},
+         giveni={L\bibinitperiod\bibinitdelim P\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{TLP1}
+    \strng{fullhash}{TLP1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{T}
+    \field{sortinithash}{T}
+    \field{howpublished}{\url{https://www.latex-project.org/about/}}
+    \field{note}{Accessed: 11/03/2024}
+    \field{title}{Introduction to LaTeX}
+  \endentry
+
+  \entry{timtom81}{article}{}
+    \name{author}{2}{}{%
+      {{hash=TT}{%
+         family={Teitelbaum},
+         familyi={T\bibinitperiod},
+         given={Tim},
+         giveni={T\bibinitperiod},
+      }}%
+      {{hash=RTW}{%
+         family={Reps},
+         familyi={R\bibinitperiod},
+         given={Thomas\bibnamedelima W.},
+         giveni={T\bibinitperiod\bibinitdelim W\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{TTRTW1}
+    \strng{fullhash}{TTRTW1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{T}
+    \field{sortinithash}{T}
+    \verb{doi}
+    \verb 10.1145/358746.358755
+    \endverb
+    \field{number}{9}
+    \field{pages}{563\bibrangedash 573}
+    \field{title}{The Cornell Program Synthesizer: {A} Syntax-Directed Programming Environment}
+    \verb{url}
+    \verb https://doi.org/10.1145/358746.358755
+    \endverb
+    \field{volume}{24}
+    \field{journaltitle}{Commun. {ACM}}
+    \field{year}{1981}
+  \endentry
+
+  \entry{zephyr}{inproceedings}{}
+    \name{author}{4}{}{%
+      {{hash=WDC}{%
+         family={Wang},
+         familyi={W\bibinitperiod},
+         given={Daniel\bibnamedelima C.},
+         giveni={D\bibinitperiod\bibinitdelim C\bibinitperiod},
+      }}%
+      {{hash=AAW}{%
+         family={Appel},
+         familyi={A\bibinitperiod},
+         given={Andrew\bibnamedelima W.},
+         giveni={A\bibinitperiod\bibinitdelim W\bibinitperiod},
+      }}%
+      {{hash=KJL}{%
+         family={Korn},
+         familyi={K\bibinitperiod},
+         given={Jeffrey\bibnamedelima L.},
+         giveni={J\bibinitperiod\bibinitdelim L\bibinitperiod},
+      }}%
+      {{hash=SCS}{%
+         family={Serra},
+         familyi={S\bibinitperiod},
+         given={Christopher\bibnamedelima S.},
+         giveni={C\bibinitperiod\bibinitdelim S\bibinitperiod},
+      }}%
+    }
+    \name{editor}{1}{}{%
+      {{hash=RC}{%
+         family={Ramming},
+         familyi={R\bibinitperiod},
+         given={Chris},
+         giveni={C\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {{USENIX}}%
+    }
+    \strng{namehash}{WDC+1}
+    \strng{fullhash}{WDCAAWKJLSCS1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{W}
+    \field{sortinithash}{W}
+    \field{booktitle}{Proceedings of the Conference on Domain-Specific Languages, DSL'97, Santa Barbara, California, USA, October 15-17, 1997}
+    \field{pages}{213\bibrangedash 228}
+    \field{title}{The Zephyr Abstract Syntax Description Language}
+    \verb{url}
+    \verb http://www.usenix.org/publications/library/proceedings/dsl97/wang.htm
+    \verb l
+    \endverb
+    \field{year}{1997}
+  \endentry
+\enddatalist
+\endinput

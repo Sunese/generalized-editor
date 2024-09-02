@@ -1,0 +1,513 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{godiksen}{inproceedings}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=2f317b2d3416dcffd8795a76ec849964}{%
+           family={Godiksen},
+           familyi={G\bibinitperiod},
+           given={Christian},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ea43b28f09f40ce5e085d96127ece107}{%
+           family={Herrmann},
+           familyi={H\bibinitperiod},
+           given={Thomas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=1996912776d3b490231db9d35ebb3335}{%
+           family={Hüttel},
+           familyi={H\bibinitperiod},
+           given={Hans},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=05b02fa14c482047cc0e580a0e081c8c}{%
+           family={Lauridsen},
+           familyi={L\bibinitperiod},
+           given={Mikkel\bibnamedelima Korup},
+           giveni={M\bibinitperiod\bibinitdelim K\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=7c7ffbd4be1430401d1fcc6451abf72a}{%
+           family={Owliaie},
+           familyi={O\bibinitperiod},
+           given={Iman},
+           giveni={I\bibinitperiod},
+           givenun=0}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=57b68e7d9ae666f817c2c0ec08bec7c9}{%
+           family={Lindley},
+           familyi={L\bibinitperiod},
+           given={Sam},
+           giveni={S\bibinitperiod}}}%
+        {{hash=211dc046ce4477c69a1af3615434c37a}{%
+           family={Mogensen},
+           familyi={M\bibinitperiod},
+           given={Torben\bibnamedelima {Æ}.},
+           giveni={T\bibinitperiod\bibinitdelim Æ\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{54dbf1d5ba46618f466749bb2731dab6}
+      \strng{fullhash}{f83565a336fa8d003c8a24cc599c4859}
+      \strng{bibnamehash}{54dbf1d5ba46618f466749bb2731dab6}
+      \strng{authorbibnamehash}{54dbf1d5ba46618f466749bb2731dab6}
+      \strng{authornamehash}{54dbf1d5ba46618f466749bb2731dab6}
+      \strng{authorfullhash}{f83565a336fa8d003c8a24cc599c4859}
+      \strng{editorbibnamehash}{c2f632b676e6f571d1eb16e865aea37e}
+      \strng{editornamehash}{c2f632b676e6f571d1eb16e865aea37e}
+      \strng{editorfullhash}{c2f632b676e6f571d1eb16e865aea37e}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 2021 {ACM} {SIGPLAN} Workshop on Partial Evaluation and Program Manipulation, PEPM@POPL 2021, Virtual Event, Denmark, January 18-19, 2021}
+      \field{title}{A type-safe structure editor calculus}
+      \field{year}{2021}
+      \field{pages}{1\bibrangedash 13}
+      \range{pages}{13}
+      \verb{doi}
+      \verb 10.1145/3441296.3441393
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3441296.3441393
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3441296.3441393
+      \endverb
+    \endentry
+    \entry{harper}{book}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=73259fe928ce8add0f265e234f8de3a6}{%
+           family={Harper},
+           familyi={H\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{73259fe928ce8add0f265e234f8de3a6}
+      \strng{fullhash}{73259fe928ce8add0f265e234f8de3a6}
+      \strng{bibnamehash}{73259fe928ce8add0f265e234f8de3a6}
+      \strng{authorbibnamehash}{73259fe928ce8add0f265e234f8de3a6}
+      \strng{authornamehash}{73259fe928ce8add0f265e234f8de3a6}
+      \strng{authorfullhash}{73259fe928ce8add0f265e234f8de3a6}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{9781107150300}
+      \field{title}{Practical Foundations for Programming Languages (2nd. Ed.)}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://www.cs.cmu.edu/~rwh/pfpl.html
+      \endverb
+      \verb{url}
+      \verb https://www.cs.cmu.edu/~rwh/pfpl.html
+      \endverb
+    \endentry
+    \entry{prog-lang-metrics}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=320883bcf7b761d1913ed4ecfab9a09b}{%
+           family={Inc.},
+           familyi={I\bibinitperiod},
+           given={GitHub},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{320883bcf7b761d1913ed4ecfab9a09b}
+      \strng{fullhash}{320883bcf7b761d1913ed4ecfab9a09b}
+      \strng{bibnamehash}{320883bcf7b761d1913ed4ecfab9a09b}
+      \strng{authorbibnamehash}{320883bcf7b761d1913ed4ecfab9a09b}
+      \strng{authornamehash}{320883bcf7b761d1913ed4ecfab9a09b}
+      \strng{authorfullhash}{320883bcf7b761d1913ed4ecfab9a09b}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://innovationgraph.github.com/global-metrics/programming-languages}}
+      \field{note}{Accessed: 27/02/2024}
+      \field{title}{Programming languages}
+    \endentry
+    \entry{metal}{article}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=f5fe6f6f001fe756e1256ef796f7832c}{%
+           family={Kahn},
+           familyi={K\bibinitperiod},
+           given={Gilles},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=db573e3425979fff6d10fea2f5467272}{%
+           family={Lang},
+           familyi={L\bibinitperiod},
+           given={Bernard},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=6f86dd99f48422d8770650dbb1280a52}{%
+           family={Melese},
+           familyi={M\bibinitperiod},
+           given={Bertrand},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=605be152e571e539d2797f5e219e1dd6}{%
+           family={Morcos},
+           familyi={M\bibinitperiod},
+           given={Elham},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{de3ff04dbd9500f77d627dbfd1cfe868}
+      \strng{fullhash}{d24b3ba9110e771d17508aca264f00c5}
+      \strng{bibnamehash}{de3ff04dbd9500f77d627dbfd1cfe868}
+      \strng{authorbibnamehash}{de3ff04dbd9500f77d627dbfd1cfe868}
+      \strng{authornamehash}{de3ff04dbd9500f77d627dbfd1cfe868}
+      \strng{authorfullhash}{d24b3ba9110e771d17508aca264f00c5}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Sci. Comput. Program.}
+      \field{number}{2}
+      \field{title}{Metal: {A} Formalism to Specify Formalisms}
+      \field{volume}{3}
+      \field{year}{1983}
+      \field{pages}{151\bibrangedash 188}
+      \range{pages}{38}
+      \verb{doi}
+      \verb 10.1016/0167-6423(83)90009-6
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1016/0167-6423(83)90009-6
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1016/0167-6423(83)90009-6
+      \endverb
+    \endentry
+    \entry{asn1}{incollection}{}
+      \name{editor}{2}{}{%
+        {{un=0,uniquepart=base,hash=bdcfe781c06e01fe86f42230e738c1b4}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Stan\bibnamedelima Z.},
+           giveni={S\bibinitperiod\bibinitdelim Z\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=cd01587a47d1084d2adebe55a57d1c5c}{%
+           family={Jain},
+           familyi={J\bibinitperiod},
+           given={Anil\bibnamedelima K.},
+           giveni={A\bibinitperiod\bibinitdelim K\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Springer {US}}%
+      }
+      \strng{namehash}{315e28518d0ab7d1c974a6e454cbb68b}
+      \strng{fullhash}{315e28518d0ab7d1c974a6e454cbb68b}
+      \strng{bibnamehash}{315e28518d0ab7d1c974a6e454cbb68b}
+      \strng{editorbibnamehash}{315e28518d0ab7d1c974a6e454cbb68b}
+      \strng{editornamehash}{315e28518d0ab7d1c974a6e454cbb68b}
+      \strng{editorfullhash}{315e28518d0ab7d1c974a6e454cbb68b}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{editor}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Encyclopedia of Biometrics}
+      \field{title}{Abstract Syntax Notation One}
+      \field{year}{2009}
+      \field{pages}{1}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1007/978-0-387-73003-5\_670
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1007/978-0-387-73003-5_670
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1007/978-0-387-73003-5_670
+      \endverb
+    \endentry
+    \entry{aalborg}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=8651d946c602d67ec445f753b194d06b}{%
+           family={Mortensen},
+           familyi={M\bibinitperiod},
+           given={Andreas\bibnamedelima Tor},
+           giveni={A\bibinitperiod\bibinitdelim T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5bc9dc08846d786af57c550edc313872}{%
+           family={Bennetzen},
+           familyi={B\bibinitperiod},
+           given={Benjamin},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=05b5906aacc2263f0a7c4b226f48017d}{%
+           family={Kristensen},
+           familyi={K\bibinitperiod},
+           given={Nikolaj\bibnamedelima Rossander},
+           giveni={N\bibinitperiod\bibinitdelim R\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=55e04c992bed1fe0e50657e42b432dda}{%
+           family={Steffensen},
+           familyi={S\bibinitperiod},
+           given={Peter\bibnamedelima Buus},
+           giveni={P\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{196918f5e2011e4987ec6d6ecb4fbda2}
+      \strng{fullhash}{057688abccd450a598426813a91ba72d}
+      \strng{bibnamehash}{196918f5e2011e4987ec6d6ecb4fbda2}
+      \strng{authorbibnamehash}{196918f5e2011e4987ec6d6ecb4fbda2}
+      \strng{authornamehash}{196918f5e2011e4987ec6d6ecb4fbda2}
+      \strng{authorfullhash}{057688abccd450a598426813a91ba72d}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A type-safe generalized editor calculus (Short Paper)}
+      \field{year}{2023}
+      \field{pages}{1\bibrangedash 7}
+      \range{pages}{7}
+    \endentry
+    \entry{omar}{article}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=83b4d56c5fda0ce16a6d6debf620be68}{%
+           family={Omar},
+           familyi={O\bibinitperiod},
+           given={Cyrus},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=2ec024823e77e673d02195afce764e90}{%
+           family={Voysey},
+           familyi={V\bibinitperiod},
+           given={Ian},
+           giveni={I\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=547b75d5f2912a0a8a06db4498cd31a1}{%
+           family={Chugh},
+           familyi={C\bibinitperiod},
+           given={Ravi},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=727239ef3a9f91f164ae92d7b52172e0}{%
+           family={Hammer},
+           familyi={H\bibinitperiod},
+           given={Matthew\bibnamedelima A.},
+           giveni={M\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{947c8bb276f334bdf240e4eaf0274afe}
+      \strng{fullhash}{9ea1908c86fbac0653e6bf8eda895910}
+      \strng{bibnamehash}{947c8bb276f334bdf240e4eaf0274afe}
+      \strng{authorbibnamehash}{947c8bb276f334bdf240e4eaf0274afe}
+      \strng{authornamehash}{947c8bb276f334bdf240e4eaf0274afe}
+      \strng{authorfullhash}{9ea1908c86fbac0653e6bf8eda895910}
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proc. {ACM} Program. Lang.}
+      \field{number}{{POPL}}
+      \field{title}{Live functional programming with typed holes}
+      \field{volume}{3}
+      \field{year}{2019}
+      \field{pages}{14:1\bibrangedash 14:32}
+      \range{pages}{-1}
+      \verb{doi}
+      \verb 10.1145/3290327
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3290327
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3290327
+      \endverb
+    \endentry
+    \entry{elm-codegen-package}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=a11a8a9b86a359c1037b9dd338bc57fd}{%
+           family={packages},
+           familyi={p\bibinitperiod},
+           given={Elm},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{a11a8a9b86a359c1037b9dd338bc57fd}
+      \strng{fullhash}{a11a8a9b86a359c1037b9dd338bc57fd}
+      \strng{bibnamehash}{a11a8a9b86a359c1037b9dd338bc57fd}
+      \strng{authorbibnamehash}{a11a8a9b86a359c1037b9dd338bc57fd}
+      \strng{authornamehash}{a11a8a9b86a359c1037b9dd338bc57fd}
+      \strng{authorfullhash}{a11a8a9b86a359c1037b9dd338bc57fd}
+      \field{sortinit}{p}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://package.elm-lang.org/packages/mdgriffith/elm-codegen/latest/}}
+      \field{note}{Accessed: 18/03/2024}
+      \field{title}{Elm CodeGen}
+    \endentry
+    \entry{KU-bach}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=fc98df730f3ae84402eaa70dddc38b75}{%
+           family={Richs-Jensen},
+           familyi={R\bibinithyphendelim J\bibinitperiod},
+           given={Nicolaj},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=84e825409ad849dda6f83834f999aca4}{%
+           family={Bringgaard},
+           familyi={B\bibinitperiod},
+           given={Thorbjørn\bibnamedelima Bülow},
+           giveni={T\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=399bf344502ac9be39cbc0bf004cbde8}{%
+           family={Zachariasen},
+           familyi={Z\bibinitperiod},
+           given={Tórur\bibnamedelima Feilberg},
+           giveni={T\bibinitperiod\bibinitdelim F\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{1a825f08742997e59cad4167b649d659}
+      \strng{fullhash}{1a825f08742997e59cad4167b649d659}
+      \strng{bibnamehash}{1a825f08742997e59cad4167b649d659}
+      \strng{authorbibnamehash}{1a825f08742997e59cad4167b649d659}
+      \strng{authornamehash}{1a825f08742997e59cad4167b649d659}
+      \strng{authorfullhash}{1a825f08742997e59cad4167b649d659}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Implementation of a Type-Safe Structure Editor}
+      \field{year}{2023}
+    \endentry
+    \entry{timtom81}{article}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=f031c78641b5f0e46825cac22adc5155}{%
+           family={Teitelbaum},
+           familyi={T\bibinitperiod},
+           given={Tim},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=07b2f419e575233a4b5690a2981f6276}{%
+           family={Reps},
+           familyi={R\bibinitperiod},
+           given={Thomas\bibnamedelima W.},
+           giveni={T\bibinitperiod\bibinitdelim W\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{4b9f2689f39c88c399346866165be213}
+      \strng{fullhash}{4b9f2689f39c88c399346866165be213}
+      \strng{bibnamehash}{4b9f2689f39c88c399346866165be213}
+      \strng{authorbibnamehash}{4b9f2689f39c88c399346866165be213}
+      \strng{authornamehash}{4b9f2689f39c88c399346866165be213}
+      \strng{authorfullhash}{4b9f2689f39c88c399346866165be213}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Commun. {ACM}}
+      \field{number}{9}
+      \field{title}{The Cornell Program Synthesizer: {A} Syntax-Directed Programming Environment}
+      \field{volume}{24}
+      \field{year}{1981}
+      \field{pages}{563\bibrangedash 573}
+      \range{pages}{11}
+      \verb{doi}
+      \verb 10.1145/358746.358755
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/358746.358755
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/358746.358755
+      \endverb
+    \endentry
+    \entry{zephyr}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=039ce109c4f2cc271e2382580c2d02f9}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Daniel\bibnamedelima C.},
+           giveni={D\bibinitperiod\bibinitdelim C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=d6edf223804f6636786fa6eb19a383d9}{%
+           family={Appel},
+           familyi={A\bibinitperiod},
+           given={Andrew\bibnamedelima W.},
+           giveni={A\bibinitperiod\bibinitdelim W\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=2ed075c40eb15ad4ab9b0ff311ba0d31}{%
+           family={Korn},
+           familyi={K\bibinitperiod},
+           given={Jeffrey\bibnamedelima L.},
+           giveni={J\bibinitperiod\bibinitdelim L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=bb1ca215cf8c69dd6d5fec1c176a2cd8}{%
+           family={Serra},
+           familyi={S\bibinitperiod},
+           given={Christopher\bibnamedelima S.},
+           giveni={C\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=a5f695944b2bb3cd76fc5da55970e3bb}{%
+           family={Ramming},
+           familyi={R\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {USENIX}%
+      }
+      \strng{namehash}{51f89e5788408f6ec73eb2347b349e17}
+      \strng{fullhash}{3b8b87a350c78b37b53389b964127223}
+      \strng{bibnamehash}{51f89e5788408f6ec73eb2347b349e17}
+      \strng{authorbibnamehash}{51f89e5788408f6ec73eb2347b349e17}
+      \strng{authornamehash}{51f89e5788408f6ec73eb2347b349e17}
+      \strng{authorfullhash}{3b8b87a350c78b37b53389b964127223}
+      \strng{editorbibnamehash}{a5f695944b2bb3cd76fc5da55970e3bb}
+      \strng{editornamehash}{a5f695944b2bb3cd76fc5da55970e3bb}
+      \strng{editorfullhash}{a5f695944b2bb3cd76fc5da55970e3bb}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Conference on Domain-Specific Languages, DSL'97, Santa Barbara, California, USA, October 15-17, 1997}
+      \field{title}{The Zephyr Abstract Syntax Description Language}
+      \field{year}{1997}
+      \field{pages}{213\bibrangedash 228}
+      \range{pages}{16}
+      \verb{urlraw}
+      \verb http://www.usenix.org/publications/library/proceedings/dsl97/wang.html
+      \endverb
+      \verb{url}
+      \verb http://www.usenix.org/publications/library/proceedings/dsl97/wang.html
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

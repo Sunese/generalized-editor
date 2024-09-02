@@ -1,0 +1,16 @@
+- Introduktion / tidligere arbejde
+    - Indledning med begrundelse for afsnit/struktur ud fra problemformulering
+- Abstrakt syntaks (Harper)
+- Generel editor kalkyle (Aalborg)
+- Implementation
+    - Representing Syntax
+    - Code generation vs. generic model
+    - Generating source code
+    - Decomposing trees (herreløst afsnit)
+        - Cursor path
+        - Cursor context
+        - Well formed tree 
+- Eksempler på editorer (fra start til slut) 
+- Konklusion
+    - Svar på problemformulering (og idéer til viderearbejde)
+- (ZIP appendix)

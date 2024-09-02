@@ -1,0 +1,19 @@
+\chapter{Editor Examples}
+\label{ch:examples}
+
+The following will show from start to finish, how the implementation
+can be used to instantiate a syntax-directed editor for the C language (\cref{ex:c-spec}),
+SQL (\cref{ex:as-sql-lang}) and \LaTeX \ (\cref{ex:as-latex-lang}).
+
+Each section will first show what the computer-friendly and parseable syntax
+for each language looks like, followed by an excerpt of the generated
+source code for the editor instance. Only an excerpt is shown, as the
+generated source code can be quite large, and over 4000 lines for the C language
+syntax specifically, with the current implementation. The complete generated
+editors can be found in the "examples" directory of the source code repository.
+
+Finally, a demonstration of the editor
+in action will be shown using the Elm REPL, where a sample tree built
+from the generated algebraic data types is manipulated with the generated functions.
+
+\input{sections/editor-examples.tex}
